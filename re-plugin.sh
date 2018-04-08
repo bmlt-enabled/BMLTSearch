@@ -25,5 +25,5 @@ ionic cordova plugin add cordova-plugin-geolocation --variable GEOLOCATION_USAGE
 
 ionic cordova prepare
 
-ionic cordova resources ios 
-ionic cordova resources android 
+ionic cordova resources ios
+ionic cordova resources android

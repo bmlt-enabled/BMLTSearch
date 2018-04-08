@@ -22,9 +22,9 @@
          <ion-icon name="locate">&nbsp;Locate</ion-icon>
     </button>
 
-    <ion-range id="RadiusRange" min="1" max="100" [(ngModel)]="radius" (ionBlur)="circleRadiusChange()"  color="danger" pin="true">
+    <ion-range id="RadiusRange" min="1" max="50" [(ngModel)]="radius" (ionBlur)="circleRadiusChange()"  color="danger" pin="true">
       <ion-label range-left>1 km</ion-label>
-      <ion-label range-right>100 km</ion-label>
+      <ion-label range-right>50 km</ion-label>
     </ion-range>
 
       <agm-marker-cluster [maxZoom]="18" imagePath="https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclustererplus/images/m">

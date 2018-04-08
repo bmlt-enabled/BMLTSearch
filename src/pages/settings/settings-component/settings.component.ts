@@ -32,7 +32,7 @@ export class SettingsComponent {
 	        if(value) {
 	        	this.searchRange = value;
 	        } else {
-	        	this.searchRange = 25;
+	        	this.searchRange = 10;
 	        }
 	    });
 

@@ -22,9 +22,9 @@
 
     <ion-item>
       <ion-label>{{'MAPRANGE' | translate}}    {{searchRange}} kms</ion-label>
-      <ion-range id="SearchRange" min="1" max="100" [(ngModel)]="searchRange" (ionBlur)="searchRangeChange()"  color="danger" pin="true">
+      <ion-range id="SearchRange" min="1" max="50" [(ngModel)]="searchRange" (ionBlur)="searchRangeChange()"  color="danger" pin="true">
         <ion-label range-left>1 km</ion-label>
-        <ion-label range-right>100 km</ion-label>
+        <ion-label range-right>50 km</ion-label>
       </ion-range>
     </ion-item>
 

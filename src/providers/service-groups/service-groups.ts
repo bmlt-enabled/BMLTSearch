@@ -14,7 +14,7 @@ export class ServiceGroupsProvider {
     console.log('Hello ServiceGroupsProvider Provider');
   }
 
-  getApiUrlServiceGroups : string = "https://na-italia.info/main_server/client_interface/json/?switcher=GetServiceBodies";
+  getApiUrlServiceGroups : string = "https://tomato.na-bmlt.org/main_server/client_interface/json/?switcher=GetServiceBodies&callingApp=ionic-android";
 
   getAllServiceGroups() {
     return this.http.get(this.getApiUrlServiceGroups);
