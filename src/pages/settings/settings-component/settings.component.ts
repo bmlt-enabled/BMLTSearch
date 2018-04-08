@@ -27,15 +27,6 @@ export class SettingsComponent {
 	        }
 	    });
 
-      this.storage.get('searchRange')
-	    .then(value => {
-	        if(value) {
-	        	this.searchRange = value;
-	        } else {
-	        	this.searchRange = 10;
-	        }
-	    });
-
 	}
 
 	selectLanguage() {
@@ -44,7 +35,4 @@ export class SettingsComponent {
     this.translate.use(this.language);
 	}
 
-  searchRangeChange() {
-    this.storage.set('searchRange', this.searchRange);
-  }
 }

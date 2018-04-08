@@ -1,12 +1,11 @@
 ﻿{
     "MENU"              : "Menu",
     "HOME"              : "Home",
-    "MEETINGLIST"       : "Meetings List",
+    "MEETINGLIST"       : "Current Location Search",
     "TAGS"              : "Tags",
     "CATEGORY"          : "Category",
     "MENUS"             : "Menus",
-    "GOOGLE_MAPS"       : "Spotlight Map",
-    "FULLMAP"           : "Full Map?",
+    "GOOGLE_MAPS"       : "Map Search",
     "SETTINGS"          : "Settings",
     "HOME_TITLE"        : "BMLT Meeting Search",
     "HOME_MESSAGE"      : "Drug problem? We can help",
@@ -14,7 +13,7 @@
     "LANGUAGE"          : "Language",
     "ENGLISH"           : "English",
     "ITALIAN"           : "Italian",
-    "ADDRESSSEARCH"     : "Address Search",
+    "ADDRESSSEARCH"     : "Enter Address Search",
     "DOIHAVETHEBMLT"    : "Do I have the BMLT?",
     "MAPRANGE"          : "Default Search Range"
 }

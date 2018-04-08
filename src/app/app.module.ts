@@ -12,7 +12,6 @@ import { SharedModule }          from './shared/shared.module'
 import { HomeModule }            from '../pages/home/home.module';
 import { TabsModule }            from '../pages/tabs/tabs.module';
 import { GoogleMapsModule }      from '../pages/google-maps/google-maps.module';
-import { FullMapModule }         from '../pages/fullmap/fullmap.module';
 import { SettingsModule }        from '../pages/settings/settings.module';
 import { ContactModule }         from '../pages/contact/contact.module';
 import { MeetinglistModule }     from '../pages/meetinglist/meetinglist.module';
@@ -33,7 +32,6 @@ import { GeolocateProvider }     from '../providers/geolocate/geolocate';
     HomeModule,
     TabsModule,
     GoogleMapsModule,
-    FullMapModule,
     SettingsModule,
     ContactModule,
     AddressSearchModule,
