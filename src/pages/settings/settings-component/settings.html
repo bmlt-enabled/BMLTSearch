@@ -9,9 +9,7 @@
 
 <ion-content class="grid-basic-page">
   <ion-list>
-    <ion-list-header>
-    {{'LANGUAGE' | translate}}
-    </ion-list-header>
+
     <ion-item>
     <ion-label>{{'LANGUAGE' | translate}}</ion-label>
     <ion-select [(ngModel)]="language" (ionChange)=selectLanguage()>
@@ -19,5 +17,17 @@
       <ion-option value="it">{{'ITALIAN' | translate}}</ion-option>
     </ion-select>
     </ion-item>
+
+
+
+    <ion-item>
+      <ion-label>{{'MAPRANGE' | translate}}    {{searchRange}} kms</ion-label>
+      <ion-range id="SearchRange" min="1" max="100" [(ngModel)]="searchRange" (ionBlur)="searchRangeChange()"  color="danger" pin="true">
+        <ion-label range-left>1 km</ion-label>
+        <ion-label range-right>100 km</ion-label>
+      </ion-range>
+    </ion-item>
+
+
   </ion-list>
 </ion-content>

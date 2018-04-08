@@ -15,5 +15,6 @@
     "ENGLISH": "English",
     "ITALIAN": "Italian",
     "ADDRESSSEARCH": "Address Search",
-    "DOIHAVETHEBMLT": "Do I have the BMLT?"
+    "DOIHAVETHEBMLT": "Do I have the BMLT?",
+    "MAPRANGE": "Default Search Range"
 }

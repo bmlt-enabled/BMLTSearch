@@ -1,6 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
 import { LoadingController } from 'ionic-angular';
 import { Platform } from 'ionic-angular';
+
+import { Storage } from '@ionic/storage';
 import { ToastController } from 'ionic-angular';
 import { Geolocation } from '@ionic-native/geolocation';
 import { MouseEvent, LatLngLiteral, LatLngBounds, AgmCircle , AgmMap } from '@agm/core';
@@ -18,7 +20,7 @@ export class GoogleMapsComponent {
   zoom         : number = 8;
   latitude     : any    = 43.7782364;
   longitude    : any    = 11.2609586;
-  radius       : any    ;
+  radius       : number = 0;
   radiusMeters : any    = 0;
   map          : any;
   @ViewChild('circle', {read: AgmCircle}) circle: AgmCircle;
@@ -28,12 +30,30 @@ export class GoogleMapsComponent {
               public  loadingCtrl         : LoadingController,
               public  plt                 : Platform,
               private geolocation         : Geolocation,
-              private toastCtrl: ToastController ) {}
+              private toastCtrl           : ToastController,
+              private storage             : Storage ) {
+
+  }
+
+  getSearchRadius() {
+    this.storage.get('searchRange')
+    .then(value => {
+        if(value) {
+          this.radius = value;
+          this.radiusMeters = this.radius * 1000;
+          console.log("getSearchRadius:- this.radius : found from storage", this.radius);
+        } else {
+          this.radius = 50;
+          this.radiusMeters = this.radius * 1000;
+          console.log("this.radius not found in storage: default to 50", this.radius);
+        }
+    });
+  }
 
   mapReady(event: any) {
     this.map = event;
-    this.radius = 50;
-    this.radiusMeters = this.radius * 1000;
+    this.getSearchRadius();
+    console.log("MapReady: after getSearchRadius Radius: ", this.radius , " radiusMeters : ", this.radiusMeters);
     this.map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(document.getElementById('LocationButton'));
     this.map.controls[google.maps.ControlPosition.TOP_CENTER].push(document.getElementById('RadiusRange'));
   }
