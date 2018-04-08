@@ -11,6 +11,8 @@ import { SettingsComponent } from '../pages/settings/settings-component/settings
 import { GoogleMapsComponent } from '../pages/google-maps/google-maps-component/google-maps.component';
 import { FullMapComponent } from '../pages/fullmap/fullmap-component/fullmap.component';
 import { MeetinglistComponent } from '../pages/meetinglist/meetinglist-component/meetinglist.component';
+import { AddressSearchComponent} from '../pages/address-search/address-search-component/address-search.component';
+import { DoIHaveTheBmltComponent } from '../pages/do-i-have-the-bmlt/do-i-have-the-bmlt-component/do-i-have-the-bmlt.component';
 import { ContactComponent } from '../pages/contact/contact-component/contact.component';
 
 @Component({
@@ -50,6 +52,8 @@ export class MyApp {
 			{ title: 'GOOGLE_MAPS', component: GoogleMapsComponent, icon: 'map'},
 			{ title: 'FULLMAP', component: FullMapComponent, icon: 'map'},
 			{ title: 'MEETINGLIST', component: MeetinglistComponent, icon: 'logo-buffer' },
+			{ title: 'ADDRESSSEARCH', component: AddressSearchComponent, icon: 'logo-buffer' },
+			{ title: 'DOIHAVETHEBMLT', component: DoIHaveTheBmltComponent, icon: 'logo-buffer' },
 			{ title: 'CONTACT', component: ContactComponent, icon: 'contact'}
 		];
 	}
