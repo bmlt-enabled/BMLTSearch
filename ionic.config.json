@@ -1,0 +1,8 @@
+{
+  "name": "BMLTSearch",
+  "app_id": "c3ea5742",
+  "type": "ionic-angular",
+  "integrations": {
+    "cordova": {}
+  }
+}
