@@ -9,9 +9,7 @@
 
 <ion-content class="grid-basic-page">
   <ion-list>
-    <ion-list-header>
-    {{'LANGUAGE' | translate}}
-    </ion-list-header>
+
     <ion-item>
     <ion-label>{{'LANGUAGE' | translate}}</ion-label>
     <ion-select [(ngModel)]="language" (ionChange)=selectLanguage()>
@@ -19,5 +17,6 @@
       <ion-option value="it">{{'ITALIAN' | translate}}</ion-option>
     </ion-select>
     </ion-item>
+
   </ion-list>
 </ion-content>

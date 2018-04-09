@@ -12,7 +12,7 @@ export class MeetingListProvider {
     console.log('Hello MeetingListProvider Provider');
   }
 
-  getApiUrlMap : string = this.italiaBMLT + "?switcher=GetSearchResults&sort_keys=longitude,latitude";
+  getApiUrlMap : string = this.italiaBMLT + "?switcher=GetSearchResults&sort_keys=longitude,latitude,weekday_tinyint,start_time";
   getApiUrlDay : string = this.italiaBMLT + "?switcher=GetSearchResults&sort_keys=weekday_tinyint";
 
   getMeetings() {

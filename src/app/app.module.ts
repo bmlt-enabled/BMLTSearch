@@ -1,20 +1,26 @@
-import { NgModule, ErrorHandler } from '@angular/core';
-import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { NgModule,
+         ErrorHandler }          from '@angular/core';
+import { IonicApp,
+         IonicModule,
+         IonicErrorHandler }     from 'ionic-angular';
 import 'rxjs/add/operator/map';
-import { InAppBrowser } from '@ionic-native/in-app-browser';
-import { Geolocation } from '@ionic-native/geolocation';
-import { SharedModule } from './shared/shared.module'
-import { HomeModule } from '../pages/home/home.module';
-import { TabsModule } from '../pages/tabs/tabs.module';
-import { GoogleMapsModule } from '../pages/google-maps/google-maps.module';
-import { FullMapModule } from '../pages/fullmap/fullmap.module';
-import { SettingsModule } from '../pages/settings/settings.module';
-import { ContactModule } from '../pages/contact/contact.module';
-import { MeetinglistModule }  from '../pages/meetinglist/meetinglist.module';
-import { ToastController } from 'ionic-angular';
-import { MyApp } from './app.component';
-import { MeetingListProvider } from '../providers/meeting-list/meeting-list';
+import { ToastController }       from 'ionic-angular';
+import { MyApp }                 from './app.component';
+import { InAppBrowser }          from '@ionic-native/in-app-browser';
+import { Geolocation }           from '@ionic-native/geolocation';
+import { SharedModule }          from './shared/shared.module'
+import { HomeModule }            from '../pages/home/home.module';
+import { TabsModule }            from '../pages/tabs/tabs.module';
+import { GoogleMapsModule }      from '../pages/google-maps/google-maps.module';
+import { SettingsModule }        from '../pages/settings/settings.module';
+import { ContactModule }         from '../pages/contact/contact.module';
+import { MeetinglistModule }     from '../pages/meetinglist/meetinglist.module';
+import { AddressSearchModule }   from '../pages/address-search/address-search.module';
+import { DoIHaveTheBmltModule }  from '../pages/do-i-have-the-bmlt/do-i-have-the-bmlt.module';
+import { MeetingListProvider }   from '../providers/meeting-list/meeting-list';
 import { ServiceGroupsProvider } from '../providers/service-groups/service-groups';
+import { GeolocateProvider }     from '../providers/geolocate/geolocate';
+
 
 @NgModule({
   declarations: [
@@ -26,10 +32,10 @@ import { ServiceGroupsProvider } from '../providers/service-groups/service-group
     HomeModule,
     TabsModule,
     GoogleMapsModule,
-    FullMapModule,
     SettingsModule,
     ContactModule,
-
+    AddressSearchModule,
+    DoIHaveTheBmltModule,
     MeetinglistModule
   ],
   bootstrap: [IonicApp],
@@ -42,7 +48,8 @@ import { ServiceGroupsProvider } from '../providers/service-groups/service-group
     Geolocation,
     ToastController,
     MeetingListProvider,
-    ServiceGroupsProvider
+    ServiceGroupsProvider,
+    GeolocateProvider
     ]
 })
 export class AppModule {}

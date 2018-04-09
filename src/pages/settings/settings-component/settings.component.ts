@@ -8,11 +8,14 @@ import { TranslateService } from '@ngx-translate/core';
 export class SettingsComponent {
 
 	language: string;
+  searchRange: number;
 
 	constructor(
 		private storage: Storage ,
 		private translate: TranslateService
-		){}
+		){
+
+    }
 
 	ngOnInit() {
 	    this.storage.get('language')
@@ -20,15 +23,16 @@ export class SettingsComponent {
 	        if(value) {
 	        	this.language = value;
 	        } else {
-	        	this.language = 'it';
+	        	this.language = 'en';
 	        }
 	    });
+
 	}
 
 	selectLanguage() {
 		this.storage.set('language', this.language);
-        this.translate.setDefaultLang(this.language);
-        this.translate.use(this.language);
+    this.translate.setDefaultLang(this.language);
+    this.translate.use(this.language);
 	}
 
 }

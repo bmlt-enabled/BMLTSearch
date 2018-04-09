@@ -86,6 +86,7 @@
     </feature>
     <preference name="SplashShowOnlyFirstTime" value="false" />
     <preference name="loadUrlTimeoutValue" value="100000" />
+    <plugin name="cordova-plugin-app-preferences" spec="https://github.com/vash15/me.apla.cordova.app-preferences" />
     <plugin name="cordova-plugin-inappbrowser" spec="^2.0.2" />
     <plugin name="cordova-plugin-splashscreen" spec="^5.0.2" />
     <plugin name="cordova-plugin-statusbar" spec="^2.4.1" />
@@ -95,4 +96,5 @@
     </plugin>
     <engine name="ios" spec="4.5.4" />
     <engine name="android" spec="7.0.0" />
+    <engine name="browser" spec="5.0.3" />
 </widget>

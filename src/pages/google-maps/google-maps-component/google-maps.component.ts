@@ -1,6 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
 import { LoadingController } from 'ionic-angular';
 import { Platform } from 'ionic-angular';
+
+import { Storage } from '@ionic/storage';
 import { ToastController } from 'ionic-angular';
 import { Geolocation } from '@ionic-native/geolocation';
 import { MouseEvent, LatLngLiteral, LatLngBounds, AgmCircle , AgmMap } from '@agm/core';
@@ -18,8 +20,8 @@ export class GoogleMapsComponent {
   zoom         : number = 8;
   latitude     : any    = 43.7782364;
   longitude    : any    = 11.2609586;
-  radius       : any    ;
-  radiusMeters : any    = 0;
+  radius       : number = 25;
+  radiusMeters : any    = 25000;
   map          : any;
   @ViewChild('circle', {read: AgmCircle}) circle: AgmCircle;
   mapBounds    : LatLngBounds;
@@ -28,12 +30,15 @@ export class GoogleMapsComponent {
               public  loadingCtrl         : LoadingController,
               public  plt                 : Platform,
               private geolocation         : Geolocation,
-              private toastCtrl: ToastController ) {}
+              private toastCtrl           : ToastController,
+              private storage             : Storage ) {
+
+  }
+
 
   mapReady(event: any) {
     this.map = event;
-    this.radius = 50;
-    this.radiusMeters = this.radius * 1000;
+    console.log("MapReady: after getSearchRadius Radius: ", this.radius , " radiusMeters : ", this.radiusMeters);
     this.map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(document.getElementById('LocationButton'));
     this.map.controls[google.maps.ControlPosition.TOP_CENTER].push(document.getElementById('RadiusRange'));
   }
@@ -141,12 +146,12 @@ export class GoogleMapsComponent {
     this.geolocation.getCurrentPosition({timeout: 5000}).then((resp) => {
       this.latitude = resp.coords.latitude;
       this.longitude = resp.coords.longitude;
-      this.radius = 10;
+      this.radius = 5;
       this.radiusMeters = this.radius * 1000
       this.dismissLoader();
     }).catch((error) => {
       console.log('Error getting location', error);
-      this.radius = 10;
+      this.radius = 5;
       this.radiusMeters = this.radius * 1000
       this.dismissLoader();
     });

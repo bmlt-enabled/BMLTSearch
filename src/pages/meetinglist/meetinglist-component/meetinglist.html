@@ -10,12 +10,39 @@
 </ion-header>
 
 <ion-content>
+  <br>
+  <div class="row">
+    <div class="col"></div>
+
+    <button ion-button color="danger" id="LocationButton" (click)="locatePhone()" class="col text-center text-wrap">
+         <ion-icon name="locate">&nbsp;Locate phone</ion-icon>
+    </button>
+    <div class="col"></div>
+
+  </div>
+
+  <div ngSwitch="{{ currentAddress }}">
+    <div *ngSwitchCase="''"></div>
+
+    <div *ngSwitchCase="'Location not found'" [ngClass]="'one'">
+      <ion-item text-wrap><b>Location Not found</b></ion-item>
+    </div>
+
+    <div *ngSwitchDefault>
+      <ion-item text-wrap><b>Meetings around {{ currentAddress }}</b></ion-item>
+
+
+  <ion-range id="RadiusRange" min="1" max="50" [(ngModel)]="radius" (ionBlur)="getAllMeetings()"  color="danger" pin="true">
+    <ion-label range-left>1 km</ion-label>
+    <ion-label range-right>50 km</ion-label>
+  </ion-range>
+
 
   <ion-list>
     <ion-item>
       <ion-label>Group By</ion-label>
       <ion-select [(ngModel)]="HTMLGrouping">
-        <ion-option value="area" selected="true">Area</ion-option>
+        <ion-option value="area" selected="true">ASC</ion-option>
         <ion-option value="city">City</ion-option>
       </ion-select>
     </ion-item>
@@ -92,7 +119,8 @@
 
 <div *ngIf="HTMLGrouping == 'city'">
   <div *ngFor="let group1 of meetingListCity; let i = index" (click)="toggleGroup(i)" [ngClass]="{active: isGroupShown(i)}">
-    <ion-item-divider color="dark"><h3>{{ group1[0].location_sub_province }}</h3>
+    <ion-item-divider color="dark">
+      <h3>{{ group1[0].location_sub_province }}</h3>
       <ion-icon color="success" item-right [name]="isGroupShown(i) ? 'arrow-dropdown' : 'arrow-dropright'"></ion-icon>
     </ion-item-divider>
     <div *ngIf="isGroupShown(i)">
@@ -157,5 +185,7 @@
    </div>
  </div>
 </div>
+    </div>
+  </div>
 
 </ion-content>
