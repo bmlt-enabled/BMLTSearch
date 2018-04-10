@@ -25,6 +25,7 @@ export class GoogleMapsComponent {
   map          : any;
   @ViewChild('circle', {read: AgmCircle}) circle: AgmCircle;
   mapBounds    : LatLngBounds;
+  goFish       : boolean = false;
 
   constructor(private MeetingListProvider : MeetingListProvider,
               public  loadingCtrl         : LoadingController,
@@ -41,6 +42,29 @@ export class GoogleMapsComponent {
     console.log("MapReady: after getSearchRadius Radius: ", this.radius , " radiusMeters : ", this.radiusMeters);
     this.map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(document.getElementById('LocationButton'));
     this.map.controls[google.maps.ControlPosition.TOP_CENTER].push(document.getElementById('RadiusRange'));
+
+    this.storage.get('savedLat').then(value => {
+      if(value) {
+        this.latitude = value;
+        console.log("Saved Lat found :", this.latitude);
+      } else {
+        this.goFish = true;
+      }
+    });
+
+    this.storage.get('savedLng').then(value => {
+      if(value) {
+        this.longitude = value;
+        console.log("Saved Lng found :", this.longitude);
+      } else {
+        this.goFish = true;
+      }
+    });
+
+    if (this.goFish) {
+      console.log("No location details stored");
+      this.locatePhone();
+    } 
   }
 
   dayOfWeekAsString(dayIndex) {
