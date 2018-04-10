@@ -1,10 +1,10 @@
 import { Component }             from '@angular/core';
 import { Platform }              from 'ionic-angular';
 import { Storage }               from '@ionic/storage';
-import { Geolocation }           from '@ionic-native/geolocation';
 import { LoadingController }     from 'ionic-angular';
 import { MeetingListProvider }   from '../../../providers/meeting-list/meeting-list';
 import { ServiceGroupsProvider } from '../../../providers/service-groups/service-groups';
+import { Geolocation }           from '@ionic-native/geolocation';
 import { GeolocateProvider }     from '../../../providers/geolocate/geolocate';
 
 
@@ -20,27 +20,56 @@ export class MeetinglistComponent {
   meetingListCity          : any;
   meetingsListAreaGrouping : string;
   meetingsListCityGrouping : string;
-  shownGroup = null;
-  loader = null;
+  shownGroup                         = null;
+  loader                             = null;
   serviceGroupNames        : any;
   HTMLGrouping             : any;
-  currentAddress           : any    = "";
-  latitude                 : any    = 0;
-  longitude                : any    = 0;
-  radius                   : number = 0;
-  radiusMeters             : number = 0;
+  currentAddress           : any     = "";
+  latitude                 : any     = 0;
+  longitude                : any     = 0;
+  radius                   : number  = 10;
+  radiusMeters             : number  = 10000;
+  goFish                   : boolean = false;
 
   constructor(private MeetingListProvider   : MeetingListProvider,
               private ServiceGroupsProvider : ServiceGroupsProvider,
-              private GeolocateProvider     : GeolocateProvider,
               public  loadingCtrl           : LoadingController,
               public  plt                   : Platform,
               private storage               : Storage,
+              private GeolocateProvider     : GeolocateProvider,
               private geolocation           : Geolocation )
   {
     this.HTMLGrouping = "area";
     this.meetingsListAreaGrouping = 'service_body_bigint';
     this.meetingsListCityGrouping = 'location_sub_province';
+
+    this.storage.get('savedLat').then(value => {
+				if(value) {
+					console.log("Latitude was saved previously : ", value);
+					this.latitude = value;
+					this.storage.get('savedLng').then(value => {
+							if(value) {
+								console.log("Longitude was saved previously : ", value);
+								this.longitude = value;
+								this.storage.get('savedAddress').then(value => {
+										if(value) {
+											console.log("Address was saved previously : ", value);
+											this.currentAddress = value;
+										} else {
+											console.log("No Address previously saved");
+											this.locatePhone();
+										}
+								});
+							} else {
+								console.log("No longitude previously saved");
+								this.locatePhone();
+							}
+					});
+				} else {
+					console.log("No latitude previously saved");
+					this.locatePhone();
+				}
+		});
   }
 
 
@@ -138,16 +167,20 @@ export class MeetinglistComponent {
     this.presentLoader("Locating Phone ...");
     this.geolocation.getCurrentPosition({timeout: 10000}).then((resp) => {
       console.log('Got location ok');
+
       this.latitude = resp.coords.latitude;
       this.longitude = resp.coords.longitude;
-      this.radius = 10;
-      this.radiusMeters = this.radius * 1000
+
+      this.storage.set('savedLat', this.latitude);
+      this.storage.set('savedLng', this.longitude);
 
       console.log("getAddressFromLocation");
       this.GeolocateProvider.convertLatLong(this.latitude, this.longitude).subscribe((json)=>{
         this.currentAddress = json;
         if (this.currentAddress.results[0]) {
           this.currentAddress = this.currentAddress.results[0].formatted_address;
+          this.storage.set('savedAddress', this.currentAddress);
+
           this.dismissLoader();
           this.getAllMeetings();
         } else {
@@ -158,8 +191,6 @@ export class MeetinglistComponent {
 
     }).catch((error) => {
       console.log('Error getting location', error);
-      this.radius = 10;
-      this.radiusMeters = this.radius * 1000
       this.currentAddress = "Location not found";
       this.dismissLoader();
     });
