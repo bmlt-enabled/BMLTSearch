@@ -70,6 +70,12 @@ export class MeetinglistComponent {
 					this.locatePhone();
 				}
 		});
+
+    console.log("getServiceGroupNames");
+    this.ServiceGroupsProvider.getAllServiceGroups().subscribe((serviceGroupData)=>{
+      this.serviceGroupNames = serviceGroupData;
+      console.log("getServiceGroupNames were found");
+    });
   }
 
 
@@ -92,23 +98,17 @@ export class MeetinglistComponent {
   }
 
   getAllMeetings() {
-    console.log("getServiceGroupNames");
+    console.log("getAllMeetings - radius of ", this.radius, " around " , this.latitude, this.longitude);
     this.presentLoader("Finding Meetings ...");
+    this.MeetingListProvider.getCircleMeetings(this.latitude , this.longitude, this.radius).subscribe((data)=>{
+      this.meetingList = data;
+      this.meetingList = this.meetingList.filter(meeting => meeting.service_body_bigint = this.getServiceNameFromID(meeting.service_body_bigint));
+      this.meetingListCity = this.meetingList.concat();
+      this.meetingListArea = this.meetingList.concat();
+      this.meetingListArea = this.groupMeetingList(this.meetingListArea, this.meetingsListAreaGrouping);
+      this.meetingListCity = this.groupMeetingList(this.meetingListCity, this.meetingsListCityGrouping);
 
-    this.ServiceGroupsProvider.getAllServiceGroups().subscribe((serviceGroupData)=>{
-      this.serviceGroupNames = serviceGroupData;
-
-      console.log("getAllMeetings - radius of ", this.radius, " around " , this.latitude, this.longitude);
-      this.MeetingListProvider.getCircleMeetings(this.latitude , this.longitude, this.radius).subscribe((data)=>{
-        this.meetingList = data;
-        this.meetingList = this.meetingList.filter(meeting => meeting.service_body_bigint = this.getServiceNameFromID(meeting.service_body_bigint));
-        this.meetingListCity = this.meetingList.concat();
-        this.meetingListArea = this.meetingList.concat();
-        this.meetingListArea = this.groupMeetingList(this.meetingListArea, this.meetingsListAreaGrouping);
-        this.meetingListCity = this.groupMeetingList(this.meetingListCity, this.meetingsListCityGrouping);
-
-        this.dismissLoader();
-      });
+      this.dismissLoader();
     });
   }
 

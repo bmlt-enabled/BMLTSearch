@@ -25,7 +25,6 @@ export class GoogleMapsComponent {
   map          : any;
   @ViewChild('circle', {read: AgmCircle}) circle: AgmCircle;
   mapBounds    : LatLngBounds;
-  goFish       : boolean = false;
 
   constructor(private MeetingListProvider : MeetingListProvider,
               public  loadingCtrl         : LoadingController,
@@ -33,11 +32,12 @@ export class GoogleMapsComponent {
               private geolocation         : Geolocation,
               private toastCtrl           : ToastController,
               private storage             : Storage ) {
-
+    console.log("GoogleMapsComponent: constructor:");
   }
 
 
   mapReady(event: any) {
+    console.log("mapReady");
     this.map = event;
     console.log("MapReady: after getSearchRadius Radius: ", this.radius , " radiusMeters : ", this.radiusMeters);
     this.map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(document.getElementById('LocationButton'));
@@ -47,24 +47,21 @@ export class GoogleMapsComponent {
       if(value) {
         this.latitude = value;
         console.log("Saved Lat found :", this.latitude);
+        this.storage.get('savedLng').then(value => {
+          if(value) {
+            this.longitude = value;
+            console.log("Saved Lng found :", this.longitude);
+            this.getCircleMeetings(event);
+          } else {
+            console.log("No savedLng");
+            this.locatePhone();
+          }
+        });
       } else {
-        this.goFish = true;
+        console.log("No savedLat");
+        this.locatePhone();
       }
     });
-
-    this.storage.get('savedLng').then(value => {
-      if(value) {
-        this.longitude = value;
-        console.log("Saved Lng found :", this.longitude);
-      } else {
-        this.goFish = true;
-      }
-    });
-
-    if (this.goFish) {
-      console.log("No location details stored");
-      this.locatePhone();
-    } 
   }
 
   dayOfWeekAsString(dayIndex) {
@@ -72,6 +69,8 @@ export class GoogleMapsComponent {
   }
 
   getCircleMeetings(event){
+    console.log("getCircleMeetings:");
+
     if (typeof event === "undefined") {  // spurious event, don't run a search
       return;
     }
@@ -114,6 +113,8 @@ export class GoogleMapsComponent {
   }
 
   circleDragEnd($event: MouseEvent) {
+    console.log("circleDragEnd:");
+
     this.latitude = $event.coords.lat;
     this.longitude = $event.coords.lng;
     this.latitude = parseFloat(this.latitude);
@@ -128,6 +129,8 @@ export class GoogleMapsComponent {
   }
 
   circleRadiusChange(event: any) {
+    console.log("circleRadiusChange:");
+
     this.circle.getBounds().then((bounds) => {
       this.mapBounds =  bounds;
     })
@@ -139,6 +142,8 @@ export class GoogleMapsComponent {
   }
 
   public openMapsLink(destLatitude, destLongitude) {
+    console.log("openMapsLink:");
+
     // ios
     if (this.plt.is('ios')) {
       window.open('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude + ')', '_system');
@@ -150,6 +155,8 @@ export class GoogleMapsComponent {
   }
 
   presentLoader(loaderText) {
+    console.log("presentLoader:");
+
     if (!this.loader) {
       this.loader = this.loadingCtrl.create({
         content: loaderText
@@ -159,6 +166,8 @@ export class GoogleMapsComponent {
   }
 
   dismissLoader() {
+    console.log("dismissLoader:");
+
     if(this.loader){
       this.loader.dismiss();
       this.loader = null;
@@ -166,6 +175,8 @@ export class GoogleMapsComponent {
   }
 
   locatePhone() {
+    console.log("locatePhone:");
+
     this.presentLoader("Locating..");
     this.geolocation.getCurrentPosition({timeout: 5000}).then((resp) => {
       this.latitude = resp.coords.latitude;
@@ -173,6 +184,7 @@ export class GoogleMapsComponent {
       this.radius = 5;
       this.radiusMeters = this.radius * 1000
       this.dismissLoader();
+      this.getCircleMeetings(event);
     }).catch((error) => {
       console.log('Error getting location', error);
       this.radius = 5;
