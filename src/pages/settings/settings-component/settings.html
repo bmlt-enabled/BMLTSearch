@@ -18,5 +18,14 @@
     </ion-select>
     </ion-item>
 
+    <ion-item>
+    <ion-label>{{'THEME' | translate}}</ion-label>
+    <ion-select [(ngModel)]="theme" (ionChange)=selectTheme()>
+      <ion-option value="blue">{{'BLUE' | translate}}</ion-option>
+      <ion-option value="red">{{'RED' | translate}}</ion-option>
+    </ion-select>
+    </ion-item>
+
+
   </ion-list>
 </ion-content>

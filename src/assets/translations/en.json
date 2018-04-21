@@ -2,6 +2,7 @@
     "MENU"              : "Menu",
     "HOME"              : "Home",
     "MEETINGLIST"       : "Current Location Search",
+    "LISTFULL"          : "Worldwide Meeting List",
     "TAGS"              : "Tags",
     "CATEGORY"          : "Category",
     "MENUS"             : "Menus",
@@ -15,5 +16,8 @@
     "ITALIAN"           : "Italian",
     "ADDRESSSEARCH"     : "Enter Address Search",
     "DOIHAVETHEBMLT"    : "Do I have the BMLT?",
-    "MAPRANGE"          : "Default Search Range"
+    "MAPRANGE"          : "Default Search Range",
+    "THEME"             : "Theme",
+    "BLUE"              : "Blue",
+    "RED"               : "Red"
 }

@@ -7,13 +7,14 @@ import { TranslateService } from '@ngx-translate/core';
 })
 export class SettingsComponent {
 
-	language: string;
-  searchRange: number;
+	language        : string;
+  theme           : string;
+  searchRange     : number;
 
 	constructor(
-		private storage: Storage ,
-		private translate: TranslateService
-		){
+		private storage     : Storage ,
+		private translate   : TranslateService
+		) {
 
     }
 
@@ -27,6 +28,15 @@ export class SettingsComponent {
 	        }
 	    });
 
+      this.storage.get('theme')
+	    .then(value => {
+	        if(value) {
+	        	this.theme = value;
+	        } else {
+	        	this.theme = 'blue';
+	        }
+	    });
+
 	}
 
 	selectLanguage() {
@@ -34,5 +44,10 @@ export class SettingsComponent {
     this.translate.setDefaultLang(this.language);
     this.translate.use(this.language);
 	}
+
+  selectTheme() {
+    this.storage.set('theme', this.theme);
+
+  }
 
 }
