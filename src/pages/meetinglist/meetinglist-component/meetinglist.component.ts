@@ -6,7 +6,8 @@ import { MeetingListProvider }   from '../../../providers/meeting-list/meeting-l
 import { ServiceGroupsProvider } from '../../../providers/service-groups/service-groups';
 import { Geolocation }           from '@ionic-native/geolocation';
 import { GeolocateProvider }     from '../../../providers/geolocate/geolocate';
-
+import firstBy                    from 'thenby';
+import thenBy                     from 'thenby';
 
 @Component({
   selector: 'page-meetinglist',
@@ -103,10 +104,26 @@ export class MeetinglistComponent {
     this.MeetingListProvider.getCircleMeetings(this.latitude , this.longitude, this.radius).subscribe((data)=>{
       this.meetingList = data;
       this.meetingList = this.meetingList.filter(meeting => meeting.service_body_bigint = this.getServiceNameFromID(meeting.service_body_bigint));
-      this.meetingListCity = this.meetingList.concat();
+
       this.meetingListArea = this.meetingList.concat();
+      this.meetingListArea.sort((a, b) => a.service_body_bigint.localeCompare(b.service_body_bigint));
       this.meetingListArea = this.groupMeetingList(this.meetingListArea, this.meetingsListAreaGrouping);
+      for (var i = 0; i < this.meetingListArea.length; i++) {
+        this.meetingListArea[i].sort(
+          firstBy("weekday_tinyint")
+          .thenBy("start_time")
+        );
+      }
+
+      this.meetingListCity = this.meetingList.concat();
+      this.meetingListCity.sort((a, b) => a.location_sub_province.localeCompare(b.location_sub_province));
       this.meetingListCity = this.groupMeetingList(this.meetingListCity, this.meetingsListCityGrouping);
+      for (var i = 0; i < this.meetingListCity.length; i++) {
+        this.meetingListCity[i].sort(
+          firstBy("weekday_tinyint")
+          .thenBy("start_time")
+        );
+      }
 
       this.dismissLoader();
     });
