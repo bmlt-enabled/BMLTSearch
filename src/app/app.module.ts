@@ -17,6 +17,7 @@ import { ContactModule }         from '../pages/contact/contact.module';
 import { MeetinglistModule }     from '../pages/meetinglist/meetinglist.module';
 import { AddressSearchModule }   from '../pages/address-search/address-search.module';
 import { DoIHaveTheBmltModule }  from '../pages/do-i-have-the-bmlt/do-i-have-the-bmlt.module';
+import { ListfullModule }        from '../pages/listfull/listfull.module';
 import { MeetingListProvider }   from '../providers/meeting-list/meeting-list';
 import { ServiceGroupsProvider } from '../providers/service-groups/service-groups';
 import { GeolocateProvider }     from '../providers/geolocate/geolocate';
@@ -34,6 +35,7 @@ import { GeolocateProvider }     from '../providers/geolocate/geolocate';
     GoogleMapsModule,
     SettingsModule,
     ContactModule,
+    ListfullModule,
     AddressSearchModule,
     DoIHaveTheBmltModule,
     MeetinglistModule
