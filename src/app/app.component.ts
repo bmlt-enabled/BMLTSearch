@@ -10,9 +10,9 @@ import { TranslateService }        from '@ngx-translate/core';
 import { Config }                  from './app.config';
 import { TabsComponent }           from '../pages/tabs/tabs-component/tabs.component';
 import { SettingsComponent }       from '../pages/settings/settings-component/settings.component';
-import { GoogleMapsComponent }     from '../pages/google-maps/google-maps-component/google-maps.component';
+import { MapSearchComponent }      from '../pages/map-search/map-search-component/map-search.component';
 import { FullMapComponent }        from '../pages/fullmap/fullmap-component/fullmap.component';
-import { MeetinglistComponent }    from '../pages/meetinglist/meetinglist-component/meetinglist.component';
+import { LocationSearchComponent } from '../pages/location-search/location-search-component/location-search.component';
 import { ListfullComponent }       from '../pages/listfull/listfull-component/listfull.component';
 import { AddressSearchComponent}   from '../pages/address-search/address-search-component/address-search.component';
 import { DoIHaveTheBmltComponent } from '../pages/do-i-have-the-bmlt/do-i-have-the-bmlt-component/do-i-have-the-bmlt.component';
@@ -52,9 +52,9 @@ export class MyApp {
 		this.pages = [
 		  { title: 'HOME',           component: TabsComponent,           icon: 'home' },
 	    { title: 'SETTINGS',       component: SettingsComponent,       icon: 'settings'},
-			{ title: 'GOOGLE_MAPS',    component: GoogleMapsComponent,     icon: 'map'},
-			{ title: 'MEETINGLIST',    component: MeetinglistComponent,    icon: 'logo-buffer' },
-			{ title: 'LISTFULL',       component: ListfullComponent,    icon: 'logo-buffer' },
+			{ title: 'MAP_SEARCH',     component: MapSearchComponent,      icon: 'map'},
+			{ title: 'LOCATIONSEARCH', component: LocationSearchComponent, icon: 'logo-buffer' },
+			{ title: 'LISTFULL',       component: ListfullComponent,       icon: 'logo-buffer' },
 			{ title: 'ADDRESSSEARCH',  component: AddressSearchComponent,  icon: 'logo-buffer' },
 			{ title: 'DOIHAVETHEBMLT', component: DoIHaveTheBmltComponent, icon: 'logo-buffer' },
 			{ title: 'CONTACT',        component: ContactComponent,        icon: 'contact'}

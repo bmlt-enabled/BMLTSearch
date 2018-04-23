@@ -6,14 +6,14 @@ import { MeetingListProvider }   from '../../../providers/meeting-list/meeting-l
 import { ServiceGroupsProvider } from '../../../providers/service-groups/service-groups';
 import { Geolocation }           from '@ionic-native/geolocation';
 import { GeolocateProvider }     from '../../../providers/geolocate/geolocate';
-import firstBy                    from 'thenby';
-import thenBy                     from 'thenby';
+import firstBy                   from 'thenby';
+import thenBy                    from 'thenby';
 
 @Component({
   selector: 'page-meetinglist',
-  templateUrl: 'meetinglist.html'
+  templateUrl: 'location-search.html'
 })
-export class MeetinglistComponent {
+export class LocationSearchComponent {
 
   addressData              : any;
   meetingList              : any;

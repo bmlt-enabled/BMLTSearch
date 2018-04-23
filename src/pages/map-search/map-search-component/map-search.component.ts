@@ -1,30 +1,33 @@
-import { Component, ViewChild } from '@angular/core';
-import { LoadingController } from 'ionic-angular';
-import { Platform } from 'ionic-angular';
-
-import { Storage } from '@ionic/storage';
-import { ToastController } from 'ionic-angular';
-import { Geolocation } from '@ionic-native/geolocation';
-import { MouseEvent, LatLngLiteral, LatLngBounds, AgmCircle , AgmMap } from '@agm/core';
-import { MeetingListProvider } from '../../../providers/meeting-list/meeting-list';
+import { Component, ViewChild }       from '@angular/core';
+import { LoadingController }          from 'ionic-angular';
+import { Platform }                   from 'ionic-angular';
+import { Storage }                    from '@ionic/storage';
+import { ToastController }            from 'ionic-angular';
+import { Geolocation }                from '@ionic-native/geolocation';
+import { MouseEvent,
+         LatLngLiteral,
+         LatLngBounds,
+         AgmCircle ,
+         AgmMap }                     from '@agm/core';
+import { MeetingListProvider }        from '../../../providers/meeting-list/meeting-list';
 
 declare const google: any;
 
 @Component({
-  templateUrl: 'google-maps.html'
+  templateUrl: 'map-search.html'
 })
 
-export class GoogleMapsComponent {
-  meetingList  : any    = [];
-  loader                = null;
-  zoom         : number = 8;
-  latitude     : any    = 43.7782364;
-  longitude    : any    = 11.2609586;
-  radius       : number = 25;
-  radiusMeters : any    = 25000;
-  map          : any;
+export class MapSearchComponent {
+  meetingList     : any    = [];
+  loader                   = null;
+  zoom            : number = 8;
+  latitude        : any;
+  longitude       : any;
+  radius          : number = 25;
+  radiusMeters    : any    = 25000;
+  map             : any;
   @ViewChild('circle', {read: AgmCircle}) circle: AgmCircle;
-  mapBounds    : LatLngBounds;
+  mapBounds       : LatLngBounds;
 
   constructor(private MeetingListProvider : MeetingListProvider,
               public  loadingCtrl         : LoadingController,
@@ -32,9 +35,39 @@ export class GoogleMapsComponent {
               private geolocation         : Geolocation,
               private toastCtrl           : ToastController,
               private storage             : Storage ) {
-    console.log("GoogleMapsComponent: constructor:");
-  }
 
+    console.log("MapSearchComponent: constructor:");
+
+    this.storage.get('savedLat').then(value => {
+				if(value) {
+					console.log("Latitude was saved previously : ", value);
+					this.latitude = parseFloat(value);
+					this.storage.get('savedLng').then(value => {
+							if(value) {
+								console.log("Longitude was saved previously : ", value);
+								this.longitude = parseFloat(value);
+							} else {
+								console.log("No longitude previously saved");
+								this.locatePhone();
+							}
+					});
+				} else {
+					console.log("No latitude previously saved");
+					this.locatePhone();
+				}
+		});
+
+    if (this.circle) {
+
+      this.circle.getBounds().then((bounds) => {
+          this.mapBounds =  bounds;
+        })
+        .catch((err) => {
+          console.log("ERROR: this.circle.getBounds() : " , err.message);
+      });
+    }
+
+  }
 
   mapReady(event: any) {
     console.log("mapReady");
@@ -45,11 +78,11 @@ export class GoogleMapsComponent {
 
     this.storage.get('savedLat').then(value => {
       if(value) {
-        this.latitude = value;
+        this.latitude = parseFloat(value);
         console.log("Saved Lat found :", this.latitude);
         this.storage.get('savedLng').then(value => {
           if(value) {
-            this.longitude = value;
+            this.longitude = parseFloat(value);
             console.log("Saved Lng found :", this.longitude);
             this.getCircleMeetings(event);
           } else {
@@ -61,6 +94,13 @@ export class GoogleMapsComponent {
         console.log("No savedLat");
         this.locatePhone();
       }
+    });
+
+    this.circle.getBounds().then((bounds) => {
+        this.mapBounds =  bounds;
+      })
+      .catch((err) => {
+        console.log("ERROR: this.circle.getBounds() : " , err.message);
     });
   }
 
@@ -130,7 +170,8 @@ export class GoogleMapsComponent {
 
   circleRadiusChange(event: any) {
     console.log("circleRadiusChange:");
-
+    this.latitude = parseFloat(this.latitude);
+    this.longitude = parseFloat(this.longitude);
     this.circle.getBounds().then((bounds) => {
       this.mapBounds =  bounds;
     })
@@ -179,8 +220,13 @@ export class GoogleMapsComponent {
 
     this.presentLoader("Locating..");
     this.geolocation.getCurrentPosition({timeout: 5000}).then((resp) => {
+
       this.latitude = resp.coords.latitude;
       this.longitude = resp.coords.longitude;
+
+      this.storage.set('savedLat', this.latitude);
+      this.storage.set('savedLng', this.longitude);
+
       this.radius = 5;
       this.radiusMeters = this.radius * 1000
       this.dismissLoader();

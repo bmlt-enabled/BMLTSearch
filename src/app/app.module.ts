@@ -11,10 +11,10 @@ import { Geolocation }           from '@ionic-native/geolocation';
 import { SharedModule }          from './shared/shared.module'
 import { HomeModule }            from '../pages/home/home.module';
 import { TabsModule }            from '../pages/tabs/tabs.module';
-import { GoogleMapsModule }      from '../pages/google-maps/google-maps.module';
+import { MapSearchModule }       from '../pages/map-search/map-search.module';
 import { SettingsModule }        from '../pages/settings/settings.module';
 import { ContactModule }         from '../pages/contact/contact.module';
-import { MeetinglistModule }     from '../pages/meetinglist/meetinglist.module';
+import { LocationSearchModule }  from '../pages/location-search/location-search.module';
 import { AddressSearchModule }   from '../pages/address-search/address-search.module';
 import { DoIHaveTheBmltModule }  from '../pages/do-i-have-the-bmlt/do-i-have-the-bmlt.module';
 import { ListfullModule }        from '../pages/listfull/listfull.module';
@@ -32,13 +32,13 @@ import { GeolocateProvider }     from '../providers/geolocate/geolocate';
     SharedModule,
     HomeModule,
     TabsModule,
-    GoogleMapsModule,
+    MapSearchModule,
     SettingsModule,
     ContactModule,
     ListfullModule,
     AddressSearchModule,
     DoIHaveTheBmltModule,
-    MeetinglistModule
+    LocationSearchModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [

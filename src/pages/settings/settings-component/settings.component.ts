@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { Storage } from '@ionic/storage';
-import { TranslateService } from '@ngx-translate/core';
+import { Component }            from '@angular/core';
+import { Storage }              from '@ionic/storage';
+import { TranslateService }     from '@ngx-translate/core';
 
 @Component({
     templateUrl: 'settings.html'
@@ -47,7 +47,6 @@ export class SettingsComponent {
 
   selectTheme() {
     this.storage.set('theme', this.theme);
-
   }
 
 }
