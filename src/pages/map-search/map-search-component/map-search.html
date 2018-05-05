@@ -11,20 +11,22 @@
 
 <ion-content>
   <agm-map
-    [latitude]="latitude"
-    [longitude]="longitude"
-    [zoom]="zoom"
-    [disableDefaultUI]="false"
-    [zoomControl]="true"
-    (mapReady)="mapReady($event)">
+    [fitBounds]         = "mapBounds"
+    [latitude]          = "mapLatitude"
+    [longitude]         = "mapLongitude"
+    [zoom]              = "zoom"
+    [disableDefaultUI]  = "false"
+    [zoomControl]       = "true"
+    [streetViewControl] = "false"
+    (mapReady)          = "mapReady($event)">
 
-    <button ion-button color="danger" id="LocationButton" (click)="locatePhone()" class="col text-center text-wrap">
-      <ion-icon name="locate">&nbsp;Locate</ion-icon>
+    <button ion-button color="danger" id="LocationButton" (click)="locatePhone()">
+         <ion-icon name="locate">&nbsp;{{ 'LOCATION' | translate }}</ion-icon>
     </button>
 
-    <ion-range id="RadiusRange" min="1" max="50" [(ngModel)]="radius" (ionBlur)="circleRadiusChange()"  color="danger" pin="true">
-      <ion-label range-left>1 km</ion-label>
-      <ion-label range-right>50 km</ion-label>
+    <ion-range id="RadiusRange" min="5" max="25" [(ngModel)]="autoRadius"  (ionBlur)="getMeetings()" color="danger" pin="true">
+      <ion-label range-left>5 meetings</ion-label>
+      <ion-label range-right>25 meetings</ion-label>
     </ion-range>
 
     <agm-marker-cluster [maxZoom]="18" imagePath="https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclustererplus/images/m">
@@ -33,10 +35,34 @@
         [latitude]="marker.latitude"
         [longitude]="marker.longitude"
         [iconUrl]="'assets/img/marker-na.png'" >
-
         <agm-info-window>
           <h1>{{marker.meeting_name}}</h1>
-          <p><b>{{marker.weekday_tinyint}}  {{marker.start_time}}</b></p>
+          <p><b>
+            <div ngSwitch="{{ marker.weekday_tinyint }}">
+              <div *ngSwitchCase="'1'" [ngClass]="'one'">
+                <ion-badge color="Green">{{'SUNDAY' | translate }}</ion-badge> {{ marker.start_time | slice:0:5 }}
+              </div>
+              <div *ngSwitchCase="'2'" [ngClass]="'one'">
+                <ion-badge color="Teal">{{'MONDAY' | translate }}</ion-badge> {{ marker.start_time | slice:0:5 }}
+              </div>
+              <div *ngSwitchCase="'3'" [ngClass]="'one'">
+                <ion-badge color="Lime">{{'TUESDAY' | translate }}</ion-badge> {{ marker.start_time | slice:0:5 }}
+              </div>
+              <div *ngSwitchCase="'4'" [ngClass]="'one'">
+                <ion-badge color="Purple">{{'WEDNESDAY' | translate }}</ion-badge> {{ marker.start_time | slice:0:5 }}
+              </div>
+              <div *ngSwitchCase="'5'" [ngClass]="'one'">
+                <ion-badge color="Brown">{{'THURSDAY' | translate }}</ion-badge> {{ marker.start_time | slice:0:5 }}
+              </div>
+              <div *ngSwitchCase="'6'" [ngClass]="'one'">
+                <ion-badge color="Pink">{{'FRIDAY' | translate }}</ion-badge> {{ marker.start_time | slice:0:5 }}
+              </div>
+              <div *ngSwitchCase="'7'" [ngClass]="'one'">
+                <ion-badge color="Orange">{{'SATURDAY' | translate }}  </ion-badge>  {{ marker.start_time | slice:0:5 }}
+              </div>
+          	  <div *ngSwitchDefault>??</div>
+          </div>
+            </b></p>
           <div *ngIf="marker.location_text ">{{marker.location_text}}<br></div>
           <div *ngIf="marker.location_street ">{{marker.location_street}}<br></div>
           <div *ngIf="marker.location_city_subsection ">{{marker.location_city_subsection}}<br></div>
@@ -51,26 +77,28 @@
           <div *ngIf="marker.contact_email_1 ">{{marker.contact_email_1 | tidyDelimter }}<br></div>
           <div *ngIf="marker.train_lines ">Train: {{marker.train_lines | tidyDelimter }}<br></div>
           <div *ngIf="marker.bus_lines ">Bus: {{marker.bus_lines | tidyDelimter }}<br></div>
-          <button ion-button small (click)="openMapsLink(marker.latitude , marker.longitude)"><ion-icon name="map"></ion-icon>&nbsp;Map</button>
+          <div *ngIf="marker.formats"><i>{{'FORMATS' | translate }} {{ marker.formats | tidyDelimter }}</i><br></div>
+          <div>Distance: <i>{{ marker.distance_in_miles | number  }} miles, {{ marker.distance_in_km | number  }} kms </i><br></div>
+          <button ion-button small (click)="openMapsLink(marker.latitude , marker.longitude)"><ion-icon name="map"></ion-icon>&nbsp;{{'MAP' | translate }}</button>
         </agm-info-window>
       </agm-marker>
     </agm-marker-cluster>
 
     <agm-circle #circle
-      [latitude]="latitude"
-      [longitude]="longitude"
-      [radius]="radiusMeters"
-      [strokeOpacity]="1"
-      [strokePosition]="0"
-      [strokeWeight]="2"
-      [strokeColor]="'#706bd6'"
-      [fillColor]="'red'"
-      [fillOpacity]="0.2"
-      [circleDraggable]="true"
-      [editable]="false"
-      (dragEnd)="circleDragEnd($event)"
-      (radiusChange)="circleRadiusChange($event)">
+      [latitude]          = "mapLatitude"
+      [longitude]         = "mapLongitude"
+      [radius]            = "circleRadiusMeters"
+      [strokeOpacity]     = "1"
+      [strokePosition]    = "0"
+      [strokeWeight]      = "2"
+      [strokeColor]       = "'#706bd6'"
+      [fillColor]         = "'red'"
+      [fillOpacity]       = "0.1"
+      [circleDraggable]   = "true"
+      [editable]          = "false"
+      (dragEnd)           = "circleDragEnd($event)">
     </agm-circle>
+
   </agm-map>
 
 </ion-content>

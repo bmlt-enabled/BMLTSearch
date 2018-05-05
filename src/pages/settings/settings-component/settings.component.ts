@@ -20,18 +20,18 @@ export class SettingsComponent {
 
 	ngOnInit() {
 	    this.storage.get('language')
-	    .then(value => {
-	        if(value) {
-	        	this.language = value;
+	    .then(langValue => {
+	        if(langValue) {
+	        	this.language = langValue;
 	        } else {
 	        	this.language = 'en';
 	        }
 	    });
 
       this.storage.get('theme')
-	    .then(value => {
-	        if(value) {
-	        	this.theme = value;
+	    .then(themeValue => {
+	        if(themeValue) {
+	        	this.theme = themeValue;
 	        } else {
 	        	this.theme = 'blue';
 	        }
