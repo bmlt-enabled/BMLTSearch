@@ -4,7 +4,7 @@
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-title>
-      <ion-title>{{'MEETINGLIST' | translate}}</ion-title>
+      <ion-title>{{'LOCATIONSEARCH' | translate}}</ion-title>
     </ion-title>
   </ion-navbar>
 </ion-header>
@@ -29,12 +29,12 @@
     </div>
 
     <div *ngSwitchDefault>
-      <ion-item text-wrap><b>Meetings around {{ currentAddress }}</b></ion-item>
+      <ion-item text-wrap><b>Meetings nearest {{ currentAddress }}</b></ion-item>
 
 
-  <ion-range id="RadiusRange" min="1" max="50" [(ngModel)]="radius" (ionBlur)="getAllMeetings()"  color="danger" pin="true">
-    <ion-label range-left>1 km</ion-label>
-    <ion-label range-right>50 km</ion-label>
+  <ion-range id="RadiusRange" min="1" max="25" [(ngModel)]="radius" (ionBlur)="getAllMeetings()"  color="danger" pin="true">
+    <ion-label range-left>1 meeting</ion-label>
+    <ion-label range-right>25 meetings</ion-label>
   </ion-range>
 
 

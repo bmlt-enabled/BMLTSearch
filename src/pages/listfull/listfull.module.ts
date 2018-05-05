@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SharedModule } from '../../app/shared/shared.module';
-import { MeetinglistComponent } from './meetinglist-component/meetinglist.component';
+import { ListfullComponent } from './listfull-component/listfull.component';
 import { PipesModule } from '../../pipes/pipes.module';
 
 @NgModule({
   declarations: [
-    MeetinglistComponent
+    ListfullComponent
   ],
   imports: [
   	CommonModule,
@@ -14,10 +14,10 @@ import { PipesModule } from '../../pipes/pipes.module';
     PipesModule
   ],
   exports: [
-    MeetinglistComponent
+    ListfullComponent
   ],
   entryComponents:[
-  	MeetinglistComponent
+  	ListfullComponent
   ]
 })
-export class MeetinglistModule {}
+export class ListfullModule {}
