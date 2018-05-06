@@ -41,38 +41,38 @@ export class LocationSearchComponent {
     this.meetingsListAreaGrouping = 'service_body_bigint';
     this.meetingsListCityGrouping = 'location_sub_province';
 
-    this.storage.get('savedAddressLat').then(value => {
-			if(value) {
-				console.log("addressLatitude was saved previously : ", value);
-				this.addressLatitude = value;
-				this.storage.get('savedAddressLng').then(value => {
-						if(value) {
-							console.log("addressLongitude was saved previously : ", value);
-							this.addressLongitude = value;
-							this.storage.get('savedAddress').then(value => {
-									if(value) {
-										console.log("Address was saved previously : ", value);
-										this.currentAddress = value;
-									} else {
-										console.log("No Address previously saved");
-										this.locatePhone();
-									}
-							});
-						} else {
-							console.log("No addressLongitude previously saved");
-							this.locatePhone();
-						}
-				});
-			} else {
-				console.log("No addressLatitude previously saved");
-				this.locatePhone();
-			}
-		});
-
     console.log("getServiceGroupNames");
     this.ServiceGroupsProvider.getAllServiceGroups().subscribe((serviceGroupData)=>{
       this.serviceGroupNames = serviceGroupData;
       console.log("getServiceGroupNames were found");
+      this.storage.get('savedAddressLat').then(value => {
+  			if(value) {
+  				console.log("addressLatitude was saved previously : ", value);
+  				this.addressLatitude = value;
+  				this.storage.get('savedAddressLng').then(value => {
+  						if(value) {
+  							console.log("addressLongitude was saved previously : ", value);
+  							this.addressLongitude = value;
+  							this.storage.get('savedAddress').then(value => {
+  									if(value) {
+  										console.log("Address was saved previously : ", value);
+  										this.currentAddress = value;
+                      this.getAllMeetings();
+  									} else {
+  										console.log("No Address previously saved");
+  										this.locatePhone();
+  									}
+  							});
+  						} else {
+  							console.log("No addressLongitude previously saved");
+  							this.locatePhone();
+  						}
+  				});
+  			} else {
+  				console.log("No addressLatitude previously saved");
+  				this.locatePhone();
+  			}
+  		});
     });
   }
 

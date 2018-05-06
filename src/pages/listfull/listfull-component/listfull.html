@@ -9,6 +9,77 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content>
-<p> insert wordlwide meetings list here ;-) </p>
+<ion-content no-padding>
+  <div *ngFor="let topLevel of serviceGroupHierarchy; let i = index" (click)="toggleGroup(i)" [ngClass]="{active: isGroupShown(i)}">
+    <ion-item-divider color="dark">
+      <h3>{{ topLevel.name }}</h3>
+    </ion-item-divider>
+
+    <div *ngIf="isGroupShown(i)">
+      <div *ngFor="let nextLevel of topLevel.childServiceGroup; let j = index" (click)="toggleGroup(j)" [ngClass]="{active: isGroupShown(j)}">
+        <ion-grid>
+          <ion-row>
+            <ion-col col-1>
+            </ion-col>
+            <ion-col>
+              <ion-item-divider color="Blue">
+                <h3>{{ nextLevel.name }}</h3>
+              </ion-item-divider>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+        <div *ngIf="isGroupShown(i)">
+          <div *ngFor="let nextLevelAgain of nextLevel.childServiceGroup; let k = index" (click)="toggleGroup(k)" [ngClass]="{active: isGroupShown(k)}">
+
+              <ion-grid>
+                <ion-row>
+                  <ion-col col-2>
+                  </ion-col>
+                  <ion-col>
+                    <ion-item-divider color="light">
+                      <h3>{{ nextLevelAgain.name }}</h3>
+                    </ion-item-divider>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+
+
+            <div *ngIf="isGroupShown(i)">
+              <div *ngFor="let nextLevelAgainAgain of nextLevelAgain.childServiceGroup; let l = index" (click)="toggleGroup(l)" [ngClass]="{active: isGroupShown(l)}">
+                  <ion-grid>
+                    <ion-row>
+                      <ion-col col-3>
+                      </ion-col>
+                      <ion-col>
+                        <ion-item-divider color="Teal">
+                          <h3>{{ nextLevelAgainAgain.name }}</h3>
+                        </ion-item-divider>
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+
+                <div *ngIf="isGroupShown(i)">
+                  <div *ngFor="let nextLevelAgainAgainAgain of nextLevelAgainAgain.childServiceGroup; let l = index" (click)="toggleGroup(l)" [ngClass]="{active: isGroupShown(l)}">
+
+                    <ion-grid>
+                      <ion-row>
+                        <ion-col col-4>
+                        </ion-col>
+                        <ion-col>
+                          <ion-item-divider color="Lime">
+                            <h3>{{ nextLevelAgainAgain.name }}</h3>
+                          </ion-item-divider>
+                        </ion-col>
+                      </ion-row>
+                    </ion-grid>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </ion-content>
