@@ -78,7 +78,7 @@
                         <div *ngIf="group2.formats"><i>Formati: {{group2.formats | tidyDelimter }}</i><br></div>
                       </ion-col>
                       <ion-col>
-                        <button ion-button (click)="openMapsLink(group2.latitude , group2.longitude)"><ion-icon name="map"> </ion-icon>&nbsp;Map</button>
+                        <button ion-button (click)="openMapsLink(group2.latitude , group2.longitude)"><ion-icon name="navigate"> </ion-icon>&nbsp;Directions</button>
                       </ion-col>
                     </ion-row>
                   </ion-grid>
@@ -145,7 +145,7 @@
                         <div *ngIf="group2.formats"><i>Formati: {{group2.formats | tidyDelimter }}</i><br></div>
                       </ion-col>
                       <ion-col>
-                        <button ion-button (click)="openMapsLink(group2.latitude , group2.longitude)"><ion-icon name="map"> </ion-icon>&nbsp;Map</button>
+                        <button ion-button (click)="openMapsLink(group2.latitude , group2.longitude)"><ion-icon name="navigate"> </ion-icon>&nbsp;Directions</button>
                       </ion-col>
                     </ion-row>
                   </ion-grid>
@@ -159,29 +159,29 @@
   </div>
 </ion-content>
 
-<ion-footer>
+<ion-footer no-padding>
   <ion-toolbar>
-    <ion-list>
-      <ion-item text-wrap>
-        <ion-grid>
-          <ion-row>
-            <ion-col col-10>
-              <b>{{radius}} meetings nearest {{ currentAddress }}</b>
-            </ion-col>
-            <ion-col>
-              <button ion-button color="danger" id="LocationButton" (click)="locatePhone()" class="col text-center text-wrap">
-               <ion-icon name="locate">&nbsp;</ion-icon>
+
+    <ion-item text-wrap>
+      <ion-grid>
+        <ion-row>
+          <ion-col col-10>
+            <b>{{radius}} meetings nearest {{ currentAddress }}</b>
+          </ion-col>
+          <ion-col>
+            <button ion-button color="danger" id="LocationButton" (click)="locatePhone()" class="col text-center text-wrap">
+               <ion-icon name="locate"></ion-icon>
           </button>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </ion-item>
-      <ion-item>
-        <ion-range id="RadiusRange" min="1" max="25" [(ngModel)]="radius" (ionBlur)="getAllMeetings()" color="danger" pin="true">
-          <ion-label range-left>1 meeting</ion-label>
-          <ion-label range-right>25 meetings</ion-label>
-        </ion-range>
-      </ion-item>
-    </ion-list>
-  </ion-toolbar>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-item>
+    <ion-item>
+      <ion-range id="RadiusRange" min="1" max="25" [(ngModel)]="radius" (ionBlur)="getAllMeetings()" color="danger" pin="true">
+        <ion-label range-left>1 meeting</ion-label>
+        <ion-label range-right>25 meetings</ion-label>
+      </ion-range>
+    </ion-item>
+
+</ion-toolbar>
 </ion-footer>
