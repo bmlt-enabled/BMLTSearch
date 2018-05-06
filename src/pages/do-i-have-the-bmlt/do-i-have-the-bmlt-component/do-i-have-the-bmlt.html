@@ -12,13 +12,41 @@
 <ion-content>
   <ion-card>
     <ion-card-content>
-      <ion-card-title>Do I have the BMLT?</ion-card-title>
+      <ion-card-title>
+        <ion-icon name="information-circle" item-left></ion-icon>
+        Is my location covered by the BMLT?
+      </ion-card-title>
       <ion-list>
         <ion-item text-wrap>
-         <ion-icon name="information-circle" item-left></ion-icon>
-         Is my location covered by the BMLT?
+           <div *ngIf="bmltEnabled == 'true'"><h2>Yes! <ion-icon name="md-happy" item-right></ion-icon></h2>
+             <p>On the BMLT worldwide DB, the nearest meeting to your current location is {{ nearestMeeting[0].distance_in_miles | number }} miles (<i>{{ nearestMeeting[0].distance_in_km | number }} kms</i>) away.</p>
+             <p>So it looks like your local service body (<i>{{ nearestMeeting[0].service_body_bigint }}</i>) has implemented the BMLT for their meetings list.</p>
+           </div>
+           <div *ngIf="bmltEnabled == 'false'"><p>No </p>
+             <p>On the BMLT worldwide DB, it looks like the nearest meeting to your current location  is {{ nearestMeeting[0].distance_in_miles | number }} miles (<i>{{ nearestMeeting[0].distance_in_km | number }} kms</i>) away.</p>
+             <p>So, it looks like your local service body has not implemented the BMLT for their meetings list.</p>
+           </div>
+           <div *ngIf="bmltEnabled == 'maybe'"><p>Checking...</p>
+           </div>
         </ion-item>
       </ion-list>
     </ion-card-content>
   </ion-card>
+
+  <ion-content>
+    <ion-card>
+      <ion-card-content>
+        <ion-card-title>How do I find out more about the BMLT?</ion-card-title>
+        <ion-list>
+          <ion-item text-wrap>
+           <button ion-button small onclick="window.open('https://www.facebook.com/groups/149214049107349/', '_system', 'location=yes')"><ion-icon name="logo-facebook" item-left></ion-icon>&nbsp;Join our Facebook Group</button>
+          </ion-item>
+          <ion-item text-wrap>
+           <button ion-button small onclick="window.open('https://bmlt.magshare.net/', '_system', 'location=yes')"><ion-icon name="globe" item-left></ion-icon>&nbsp;Visit the website</button>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+
 </ion-content>
