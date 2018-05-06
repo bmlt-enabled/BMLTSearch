@@ -36,4 +36,17 @@ export class MeetingListProvider {
     return this.http.get(getAddressMeetingsURL);
   }
 
+  getNearestMeeting(lat, long) {
+    var getAddressMeetingsURL : string = this.tomatoBMLT
+                                      + "?switcher=GetSearchResults&geo_width_km="
+                                      + "-1"
+                                      + "&long_val="
+                                      + long
+                                      + "&lat_val="
+                                      + lat
+                                      + "&sort_keys=longitude,latitude&callingApp=ionic-bmltapp";
+    return this.http.get(getAddressMeetingsURL);
+  }
+
+
 }
