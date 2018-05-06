@@ -3,41 +3,24 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>
-      <ion-title>{{'LOCATIONSEARCH' | translate}}</ion-title>
-    </ion-title>
+    <ion-title>{{'LOCATIONSEARCH' | translate}}</ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content>
-  <br>
-  <div class="row">
-    <div class="col"></div>
-    <button ion-button color="danger" id="LocationButton" (click)="locatePhone()" class="col text-center text-wrap">
-         <ion-icon name="locate">&nbsp;Update location</ion-icon>
-    </button>
-    <div class="col"></div>
-  </div>
   <div ngSwitch="{{ currentAddress }}">
     <div *ngSwitchCase="''"></div>
     <div *ngSwitchCase="'Location not found'" [ngClass]="'one'">
       <ion-item text-wrap><b>Location not set</b></ion-item>
     </div>
     <div *ngSwitchDefault>
-      <ion-item text-wrap><b>Meetings nearest {{ currentAddress }}</b></ion-item>
-      <ion-range id="RadiusRange" min="1" max="25" [(ngModel)]="radius" (ionBlur)="getAllMeetings()" color="danger" pin="true">
-        <ion-label range-left>1 meeting</ion-label>
-        <ion-label range-right>25 meetings</ion-label>
-      </ion-range>
-      <ion-list>
-        <ion-item>
-          <ion-label>Group By</ion-label>
-          <ion-select [(ngModel)]="HTMLGrouping">
-            <ion-option value="area" selected="true">Service Committee</ion-option>
-            <ion-option value="county">County/Sub-Province</ion-option>
-          </ion-select>
-        </ion-item>
-      </ion-list>
+      <ion-item>
+        <ion-label>Group By</ion-label>
+        <ion-select [(ngModel)]="HTMLGrouping">
+          <ion-option value="area" selected="true">Service Committee</ion-option>
+          <ion-option value="county">County/Sub-Province</ion-option>
+        </ion-select>
+      </ion-item>
       <div *ngIf="HTMLGrouping == 'area'">
         <div *ngFor="let group1 of meetingListArea; let i = index" (click)="toggleGroup(i)" [ngClass]="{active: isGroupShown(i)}">
           <ion-item-divider color="dark">
@@ -175,3 +158,30 @@
     </div>
   </div>
 </ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-list>
+      <ion-item text-wrap>
+        <ion-grid>
+          <ion-row>
+            <ion-col col-10>
+              <b>{{radius}} meetings nearest {{ currentAddress }}</b>
+            </ion-col>
+            <ion-col>
+              <button ion-button color="danger" id="LocationButton" (click)="locatePhone()" class="col text-center text-wrap">
+               <ion-icon name="locate">&nbsp;</ion-icon>
+          </button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-item>
+      <ion-item>
+        <ion-range id="RadiusRange" min="1" max="25" [(ngModel)]="radius" (ionBlur)="getAllMeetings()" color="danger" pin="true">
+          <ion-label range-left>1 meeting</ion-label>
+          <ion-label range-right>25 meetings</ion-label>
+        </ion-range>
+      </ion-item>
+    </ion-list>
+  </ion-toolbar>
+</ion-footer>

@@ -57,6 +57,7 @@ export class LocationSearchComponent {
   									if(value) {
   										console.log("Address was saved previously : ", value);
   										this.currentAddress = value;
+                      this.getAllMeetings();
   									} else {
   										console.log("No Address previously saved");
   										this.locatePhone();
@@ -71,7 +72,7 @@ export class LocationSearchComponent {
   				console.log("No addressLatitude previously saved");
   				this.locatePhone();
   			}
-  		});      
+  		});
     });
   }
 
