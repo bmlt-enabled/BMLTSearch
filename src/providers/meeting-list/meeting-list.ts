@@ -48,5 +48,13 @@ export class MeetingListProvider {
     return this.http.get(getAddressMeetingsURL);
   }
 
+  getMeetingsByAreaProvider(areaID) {
+    var getMeetingsByAreaURL : string = this.tomatoBMLT
+                                      + "?switcher=GetSearchResults&services="
+                                      + areaID
+                                      + "&sort_keys=weekday_tinyint,start_time&callingApp=ionic-bmltapp";
+    return this.http.get(getMeetingsByAreaURL);
+
+  }
 
 }
