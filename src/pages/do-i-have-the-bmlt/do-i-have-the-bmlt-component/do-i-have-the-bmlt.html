@@ -19,11 +19,11 @@
       <ion-list>
         <ion-item text-wrap>
            <div *ngIf="bmltEnabled == 'true'"><h2>Yes! <ion-icon name="md-happy" item-right></ion-icon></h2>
-             <p>On the BMLT worldwide DB, the nearest meeting to your current location is {{ nearestMeeting[0].distance_in_miles | number }} miles (<i>{{ nearestMeeting[0].distance_in_km | number }} kms</i>) away.</p>
+             <p>On the BMLT worldwide DB, the nearest meeting to your current location is {{ nearestMeeting[0].distance_in_miles | number:'1.1-1' }} miles (<i>{{ nearestMeeting[0].distance_in_km | number:'1.1-1' }} kms</i>) away.</p>
              <p>So it looks like your local service body (<i>{{ nearestMeeting[0].service_body_bigint }}</i>) has implemented the BMLT for their meetings list.</p>
            </div>
            <div *ngIf="bmltEnabled == 'false'"><p>No </p>
-             <p>On the BMLT worldwide DB, it looks like the nearest meeting to your current location  is {{ nearestMeeting[0].distance_in_miles | number }} miles (<i>{{ nearestMeeting[0].distance_in_km | number }} kms</i>) away.</p>
+             <p>On the BMLT worldwide DB, it looks like the nearest meeting to your current location  is {{ nearestMeeting[0].distance_in_miles | number:'1.1-1' }} miles (<i>{{ nearestMeeting[0].distance_in_km | number:'1.1-1' }} kms</i>) away.</p>
              <p>So, it looks like your local service body has not implemented the BMLT for their meetings list.</p>
            </div>
            <div *ngIf="bmltEnabled == 'maybe'"><p>Checking...</p>
