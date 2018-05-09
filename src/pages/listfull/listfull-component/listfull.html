@@ -3,9 +3,14 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>
-      <ion-title>{{'LISTFULL' | translate}} - {{ areaName }}</ion-title>
-    </ion-title>
+
+      <div *ngIf="areaName != '' ; else BMLT_List">
+      <ion-title>{{ areaName }}</ion-title>
+      </div>
+      <ng-template #BMLT_List>
+        <ion-title>{{'LISTFULL' | translate}} </ion-title>
+      </ng-template>
+
   </ion-navbar>
 </ion-header>
 

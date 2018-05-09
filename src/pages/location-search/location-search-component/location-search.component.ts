@@ -2,7 +2,6 @@ import { Component }             from '@angular/core';
 import { Storage }               from '@ionic/storage';
 import { LoadingController }     from 'ionic-angular';
 import { MeetingListProvider }   from '../../../providers/meeting-list/meeting-list';
-import { ServiceGroupsProvider } from '../../../providers/service-groups/service-groups';
 import { Geolocation }           from '@ionic-native/geolocation';
 import { GeolocateProvider }     from '../../../providers/geolocate/geolocate';
 import firstBy                   from 'thenby';
@@ -16,14 +15,12 @@ export class LocationSearchComponent {
 
   addressData              : any;
   addressMeetingList       : any;
-  meetingListArea          : any;
-  meetingListCity          : any;
-  meetingsListAreaGrouping : string;
-  meetingsListCityGrouping : string;
+  meetingListGrouped       : any;
+  meetingsListGrouping     : string;
+
   shownGroup                         = null;
   loader                             = null;
-  serviceGroupNames        : any;
-  HTMLGrouping             : any;
+
   currentAddress           : any     = "";
   addressLatitude          : any     = 0;
   addressLongitude         : any     = 0;
@@ -31,58 +28,48 @@ export class LocationSearchComponent {
   radiusMeters             : number  = 10000;
 
   constructor(private MeetingListProvider   : MeetingListProvider,
-              private ServiceGroupsProvider : ServiceGroupsProvider,
               private loadingCtrl           : LoadingController,
               private storage               : Storage,
               private GeolocateProvider     : GeolocateProvider,
               private geolocation           : Geolocation )
   {
-    this.HTMLGrouping = "area";
-    this.meetingsListAreaGrouping = 'service_body_bigint';
-    this.meetingsListCityGrouping = 'location_sub_province';
+    this.meetingsListGrouping = 'weekday_tinyint';
 
     console.log("getServiceGroupNames");
-    this.ServiceGroupsProvider.getAllServiceGroups().subscribe((serviceGroupData)=>{
-      this.serviceGroupNames = serviceGroupData;
-      console.log("getServiceGroupNames were found");
-      this.storage.get('savedAddressLat').then(value => {
-  			if(value) {
-  				console.log("addressLatitude was saved previously : ", value);
-  				this.addressLatitude = value;
-  				this.storage.get('savedAddressLng').then(value => {
-  						if(value) {
-  							console.log("addressLongitude was saved previously : ", value);
-  							this.addressLongitude = value;
-  							this.storage.get('savedAddress').then(value => {
-  									if(value) {
-  										console.log("Address was saved previously : ", value);
-  										this.currentAddress = value;
-                      this.getAllMeetings();
-  									} else {
-  										console.log("No Address previously saved");
-  										this.locatePhone();
-  									}
-  							});
-  						} else {
-  							console.log("No addressLongitude previously saved");
-  							this.locatePhone();
-  						}
-  				});
-  			} else {
-  				console.log("No addressLatitude previously saved");
-  				this.locatePhone();
-  			}
-  		});
-    });
+
+    this.storage.get('savedAddressLat').then(value => {
+			if(value) {
+				console.log("addressLatitude was saved previously : ", value);
+				this.addressLatitude = value;
+				this.storage.get('savedAddressLng').then(value => {
+						if(value) {
+							console.log("addressLongitude was saved previously : ", value);
+							this.addressLongitude = value;
+							this.storage.get('savedAddress').then(value => {
+									if(value) {
+										console.log("Address was saved previously : ", value);
+										this.currentAddress = value;
+                    this.getAllMeetings();
+									} else {
+										console.log("No Address previously saved");
+										this.locatePhone();
+									}
+							});
+						} else {
+							console.log("No addressLongitude previously saved");
+							this.locatePhone();
+						}
+				});
+			} else {
+				console.log("No addressLatitude previously saved");
+				this.locatePhone();
+			}
+		});
+
   }
 
   public openMapsLink(destLatitude, destLongitude) {
     window.open('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude + ')', '_system');
-  }
-
-  getServiceNameFromID(id) {
-    var obj = this.serviceGroupNames.find(function (obj) { return obj.id === id; });
-    return obj.name;
   }
 
   getAllMeetings() {
@@ -90,28 +77,16 @@ export class LocationSearchComponent {
     this.presentLoader("Finding Meetings ...");
     this.MeetingListProvider.getAddressMeetings(this.addressLatitude , this.addressLongitude, this.radius).subscribe((data)=>{
       this.addressMeetingList = data;
-      this.addressMeetingList = this.addressMeetingList.filter(meeting => meeting.service_body_bigint = this.getServiceNameFromID(meeting.service_body_bigint));
 
-      this.meetingListArea = this.addressMeetingList.concat();
-      this.meetingListArea.sort((a, b) => a.service_body_bigint.localeCompare(b.service_body_bigint));
-      this.meetingListArea = this.groupMeetingList(this.meetingListArea, this.meetingsListAreaGrouping);
-      for (var i = 0; i < this.meetingListArea.length; i++) {
-        this.meetingListArea[i].sort(
+      this.meetingListGrouped = this.addressMeetingList.concat();
+      this.meetingListGrouped.sort((a, b) => a.weekday_tinyint.localeCompare(b.weekday_tinyint));
+      this.meetingListGrouped = this.groupMeetingList(this.meetingListGrouped, this.meetingsListGrouping);
+      for (var i = 0; i < this.meetingListGrouped.length; i++) {
+        this.meetingListGrouped[i].sort(
           firstBy("weekday_tinyint")
           .thenBy("start_time")
         );
       }
-
-      this.meetingListCity = this.addressMeetingList.concat();
-      this.meetingListCity.sort((a, b) => a.location_sub_province.localeCompare(b.location_sub_province));
-      this.meetingListCity = this.groupMeetingList(this.meetingListCity, this.meetingsListCityGrouping);
-      for (var i = 0; i < this.meetingListCity.length; i++) {
-        this.meetingListCity[i].sort(
-          firstBy("weekday_tinyint")
-          .thenBy("start_time")
-        );
-      }
-
       this.dismissLoader();
     });
   }

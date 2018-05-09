@@ -78,7 +78,7 @@
           <div *ngIf="marker.train_lines ">Train: {{marker.train_lines | tidyDelimter }}<br></div>
           <div *ngIf="marker.bus_lines ">Bus: {{marker.bus_lines | tidyDelimter }}<br></div>
           <div *ngIf="marker.formats"><i>{{'FORMATS' | translate }} {{ marker.formats | tidyDelimter }}</i><br></div>
-          <div>Distance: <i>{{ marker.distance_in_miles | number  }} miles, {{ marker.distance_in_km | number  }} kms </i><br></div>
+          <div>Distance: <i>{{ marker.distance_in_miles | number:'1.1-1'  }} miles, {{ marker.distance_in_km | number:'1.1-1'  }} kms </i><br></div>
           <button ion-button small (click)="openMapsLink(marker.latitude , marker.longitude)"><ion-icon name="ios-navigate-outline"></ion-icon>&nbsp;{{'MAP' | translate }}</button>
         </agm-info-window>
       </agm-marker>
