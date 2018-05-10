@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 
 import { LoadingController }          from 'ionic-angular';
-import { Platform } from 'ionic-angular';
+import { Platform, Content } from 'ionic-angular';
 import { ServiceGroupsProvider } from '../../../providers/service-groups/service-groups';
 import { MeetingListProvider }        from '../../../providers/meeting-list/meeting-list';
 
@@ -15,10 +15,15 @@ import thenBy from 'thenby';
 })
 export class ListfullComponent {
 
-
+  @ViewChild(Content) content: Content;
   serviceGroups: any;
   serviceGroupHierarchy: any = [];
-  shownGroup = null;
+  shownDay = null;
+  shownGroupL1 = null;
+  shownGroupL2 = null;
+  shownGroupL3 = null;
+  shownGroupL4 = null;
+
   HTMLGrouping = "areas";
   loader = null;
   meetingListArea        : any     = [];
@@ -29,13 +34,11 @@ export class ListfullComponent {
                private loadingCtrl           : LoadingController,
                private translate           : TranslateService) {
 
-    console.log("ListfullComponent constructor : ", this.serviceGroupHierarchy);
     this.translate.get('LOADING').subscribe(value => {this.presentLoader(value);})
     this.ServiceGroupsProvider.getAllServiceGroups().subscribe((serviceGroupData) => {
       this.serviceGroups = serviceGroupData;
       this.serviceGroups.sort(firstBy("parent_id").thenBy("name").thenBy("id"));
       this.serviceGroupHierarchy = this.getServiceHierarchy(this.serviceGroups, 0);
-      console.log("Service Group Hierarchy : ", this.serviceGroupHierarchy);
       this.dismissLoader();
     });
   }
@@ -54,34 +57,64 @@ export class ListfullComponent {
     return serviceGroupHierarchy;
   }
 
-  toggleGroup(group) {
-    if (this.isGroupShown(group)) {
-      this.shownGroup = null;
+  toggleDay(day) {
+    if (this.isDayShown(day)) {
+      this.shownDay = null;
     } else {
-      this.shownGroup = group;
+      this.shownDay = day;
     }
   };
 
-  isGroupShown(group) {
-    return this.shownGroup === group;
+  toggleL1Group(L1group) {
+    if (this.isL1GroupShown(L1group)) {
+      this.shownGroupL1 = null;
+    } else {
+      this.shownGroupL1 = L1group;
+    }
   };
 
+  toggleL2Group(L2group) {
+    if (this.isL2GroupShown(L2group)) {
+      this.shownGroupL2 = null;
+    } else {
+      this.shownGroupL2 = L2group;
+    }
+  };
+
+  toggleL3Group(L3group) {
+    if (this.isL3GroupShown(L3group)) {
+      this.shownGroupL3 = null;
+    } else {
+      this.shownGroupL3 = L3group;
+    }
+  };
+
+  toggleL4Group(L4group) {
+    if (this.isL4GroupShown(L4group)) {
+      this.shownGroupL4 = null;
+    } else {
+      this.shownGroupL4 = L4group;
+    }
+  };
+
+  isDayShown(day) {return this.shownDay === day;};
+
+  isL1GroupShown(L1group) {return this.shownGroupL1 === L1group;};
+  isL2GroupShown(L2group) {return this.shownGroupL2 === L2group;};
+  isL3GroupShown(L3group) {return this.shownGroupL3 === L3group;};
+  isL4GroupShown(L4group) {return this.shownGroupL4 === L4group;};
+
   getMeetingsByArea(areaID, areaName){
-    console.log("getMeetingsByArea:");
     this.translate.get('LOADING').subscribe(value => {this.presentLoader(value);})
     this.areaName = areaName;
     this.MeetingListProvider.getMeetingsByAreaProvider(areaID).subscribe((data)=>{
-      console.log("getMeetings: subscribe data results");
 
       if (JSON.stringify(data) == "{}") {  // empty result set!
-        console.log("getMeetings: empty result set");
         this.meetingListArea = JSON.parse("[]");
       } else {
-        console.log("getMeetings: non-empty result set", data);
         this.meetingListArea  = data;
         this.meetingListArea  = this.meetingListArea.filter(meeting => meeting.latitude = parseFloat(meeting.latitude));
         this.meetingListArea  = this.meetingListArea.filter(meeting => meeting.longitude = parseFloat(meeting.longitude));
-
 
         this.meetingListArea.sort((a, b) => a.location_sub_province.localeCompare(b.location_sub_province));
         this.meetingListArea = this.groupMeetingList(this.meetingListArea, 'weekday_tinyint');
@@ -91,11 +124,10 @@ export class ListfullComponent {
             .thenBy("start_time")
           );
         }
-
-
       }
       this.HTMLGrouping = "meetings";
       this.dismissLoader();
+      this.content.resize();
     });
 
   }
@@ -145,7 +177,7 @@ export class ListfullComponent {
   showServiceStructure() {
     this.HTMLGrouping = "areas";
     this.areaName = "";
-    this.shownGroup = null;
+    this.shownGroupL1 = null;
   }
 
 }
