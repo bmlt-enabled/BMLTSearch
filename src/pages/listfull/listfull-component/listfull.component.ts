@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 
 import { LoadingController }          from 'ionic-angular';
-import { Platform } from 'ionic-angular';
+import { Platform, Content } from 'ionic-angular';
 import { ServiceGroupsProvider } from '../../../providers/service-groups/service-groups';
 import { MeetingListProvider }        from '../../../providers/meeting-list/meeting-list';
 
@@ -15,7 +15,7 @@ import thenBy from 'thenby';
 })
 export class ListfullComponent {
 
-
+  @ViewChild(Content) content: Content;
   serviceGroups: any;
   serviceGroupHierarchy: any = [];
   shownGroup = null;
@@ -82,7 +82,6 @@ export class ListfullComponent {
         this.meetingListArea  = this.meetingListArea.filter(meeting => meeting.latitude = parseFloat(meeting.latitude));
         this.meetingListArea  = this.meetingListArea.filter(meeting => meeting.longitude = parseFloat(meeting.longitude));
 
-
         this.meetingListArea.sort((a, b) => a.location_sub_province.localeCompare(b.location_sub_province));
         this.meetingListArea = this.groupMeetingList(this.meetingListArea, 'weekday_tinyint');
         for (var i = 0; i < this.meetingListArea.length; i++) {
@@ -91,11 +90,10 @@ export class ListfullComponent {
             .thenBy("start_time")
           );
         }
-
-
       }
       this.HTMLGrouping = "meetings";
       this.dismissLoader();
+      this.content.resize();
     });
 
   }
