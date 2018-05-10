@@ -4,12 +4,12 @@
       <ion-icon name="menu"></ion-icon>
     </button>
 
-      <div *ngIf="areaName != '' ; else BMLT_List">
+    <div *ngIf="areaName != '' ; else BMLT_List">
       <ion-title>{{ areaName }}</ion-title>
-      </div>
-      <ng-template #BMLT_List>
-        <ion-title>{{'LISTFULL' | translate}} </ion-title>
-      </ng-template>
+    </div>
+    <ng-template #BMLT_List>
+      <ion-title>{{'LISTFULL' | translate}} </ion-title>
+    </ng-template>
 
   </ion-navbar>
 </ion-header>
@@ -18,35 +18,35 @@
 
   <div *ngIf="HTMLGrouping == 'areas'">
 
-    <div *ngFor="let L1 of serviceGroupHierarchy; let i = index" (click)="toggleGroup(i)" [ngClass]="{active: isGroupShown(i)}">
+    <div *ngFor="let L1 of serviceGroupHierarchy; let i = index">
       <div *ngIf="L1.childServiceGroup;else L1_no_children">
-        <ion-item-divider color="blue1">
-          <h3>{{ L1.name }}</h3>
-          <ion-icon color="success" item-left [name]="isGroupShown(i) ? 'close' : 'add'"></ion-icon>
+        <ion-item-divider color="blue1" (click)="toggleL1Group(i)" [ngClass]="{active: isL1GroupShown(i)}">
+          <h3>{{ L1.name }} L1 + child</h3>
+          <ion-icon color="success" item-left [name]="isL1GroupShown(i) ? 'close' : 'add'"></ion-icon>
         </ion-item-divider>
       </div>
       <ng-template #L1_no_children>
         <ion-item-divider color="blue1" (click)="getMeetingsByArea(L1.id, L1.name)">
-          <h3>{{ L1.name }}</h3>
+          <h3>{{ L1.name }} L1 no child</h3>
           <ion-icon color="success" item-left name="arrow-dropright"></ion-icon>
         </ion-item-divider>
       </ng-template>
 
-      <div *ngIf="isGroupShown(i)">
+      <div *ngIf="isL1GroupShown(i)">
         <div *ngFor="let L2 of L1.childServiceGroup; let j = index">
           <ion-grid>
             <ion-row>
               <ion-col col-1></ion-col>
               <ion-col>
                 <div *ngIf="L2.childServiceGroup;else L2_no_children">
-                  <ion-item-divider color="blue2" >
-                    <h3>{{ L2.name }}</h3>
-                    <ion-icon color="success" item-left [name]="isGroupShown(i) ? 'close' : 'add'"></ion-icon>
+                  <ion-item-divider color="blue2" (click)="toggleL2Group(j)" [ngClass]="{active: isL2GroupShown(j)}">
+                    <h3>{{ L2.name }} L2 + children</h3>
+                    <ion-icon color="success" item-left [name]="isL2GroupShown(j) ? 'close' : 'add'"></ion-icon>
                   </ion-item-divider>
                 </div>
                 <ng-template #L2_no_children>
                   <ion-item-divider color="blue2" (click)="getMeetingsByArea(L2.id, L2.name)">
-                    <h3>{{ L2.name }}</h3>
+                    <h3>{{ L2.name }} L2 no children</h3>
                     <ion-icon color="success" item-left name="arrow-dropright"></ion-icon>
                   </ion-item-divider>
                 </ng-template>
@@ -54,41 +54,21 @@
             </ion-row>
           </ion-grid>
 
-          <div *ngFor="let L3 of L2.childServiceGroup; let k = index">
-            <ion-grid>
-              <ion-row>
-                <ion-col col-2></ion-col>
-                <ion-col>
-                  <div *ngIf="L3.childServiceGroup;else L3_no_children">
-                    <ion-item-divider color="blue3">
-                      <h3>{{ L3.name }}</h3>
-                      <ion-icon color="success" item-left [name]="isGroupShown(i) ? 'close' : 'add'"></ion-icon>
-                    </ion-item-divider>
-                  </div>
-                  <ng-template #L3_no_children>
-                    <ion-item-divider color="blue3"  (click)="getMeetingsByArea(L3.id, L3.name)">
-                      <h3>{{ L3.name }}</h3>
-                      <ion-icon color="success" item-left name="arrow-dropright"></ion-icon>
-                    </ion-item-divider>
-                  </ng-template>
-                </ion-col>
-              </ion-row>
-            </ion-grid>
-
-            <div *ngFor="let L4 of L3.childServiceGroup; let l = index">
+          <div *ngIf="isL2GroupShown(j)">
+            <div *ngFor="let L3 of L2.childServiceGroup; let k = index" [ngClass]="{active: isL3GroupShown(j)}">
               <ion-grid>
                 <ion-row>
-                  <ion-col col-3></ion-col>
+                  <ion-col col-2></ion-col>
                   <ion-col>
-                    <div *ngIf="L4.childServiceGroup;else L4_no_children">
-                      <ion-item-divider color="blue4">
-                        <h3>{{ L4.name }}</h3>
-                        <ion-icon color="success" item-left [name]="isGroupShown(i) ? 'close' : 'add'"></ion-icon>
+                    <div *ngIf="L3.childServiceGroup;else L3_no_children">
+                      <ion-item-divider color="blue3" (click)="toggleL3Group(k)" [ngClass]="{active: isL3GroupShown(k)}">
+                        <h3>{{ L3.name }} L3 + children</h3>
+                        <ion-icon color="success" item-left [name]="isL3GroupShown(k) ? 'close' : 'add'"></ion-icon>
                       </ion-item-divider>
                     </div>
-                    <ng-template #L4_no_children>
-                      <ion-item-divider color="blue4" (click)="getMeetingsByArea(L4.id, L4.name)">
-                        <h3>{{ L4.name }}</h3>
+                    <ng-template #L3_no_children>
+                      <ion-item-divider color="blue3" (click)="getMeetingsByArea(L3.id, L3.name)">
+                        <h3>{{ L3.name }} L3 no children</h3>
                         <ion-icon color="success" item-left name="arrow-dropright"></ion-icon>
                       </ion-item-divider>
                     </ng-template>
@@ -96,27 +76,50 @@
                 </ion-row>
               </ion-grid>
 
-              <div *ngFor="let L5 of L4.childServiceGroup; let m = index">
-                <ion-grid>
-                  <ion-row>
-                    <ion-col col-4></ion-col>
-                    <ion-col>
-                      <div *ngIf="L5.childServiceGroup;else L5_no_children">
-                        <ion-item-divider color="Teal">
-                          <h3>{{ L5.name }}</h3>
-                          <ion-icon color="success" item-left [name]="isGroupShown(i) ? 'close' : 'add'"></ion-icon>
-                        </ion-item-divider>
-                      </div>
-                      <ng-template #L5_no_children>
-                        <ion-item-divider color="Teal" (click)="getMeetingsByArea(L5.id, L5.name)">
-                          <h3>{{ L5.name }}</h3>
-                          <ion-icon color="success" item-left name="arrow-dropright"></ion-icon>
-                        </ion-item-divider>
-                      </ng-template>
-                    </ion-col>
-                  </ion-row>
-                </ion-grid>
+              <div *ngIf="isL3GroupShown(k)">
+                <div *ngFor="let L4 of L3.childServiceGroup; let l = index" [ngClass]="{active: isL4GroupShown(k)}">
+                  <ion-grid>
+                    <ion-row>
+                      <ion-col col-3></ion-col>
+                      <ion-col>
+                        <div *ngIf="L4.childServiceGroup;else L4_no_children">
+                          <ion-item-divider color="blue4">
+                            <h3>{{ L4.name }}</h3>
+                            <ion-icon color="success" item-left [name]="isL1GroupShown(i) ? 'close' : 'add'"></ion-icon>
+                          </ion-item-divider>
+                        </div>
+                        <ng-template #L4_no_children>
+                          <ion-item-divider color="blue4" (click)="getMeetingsByArea(L4.id, L4.name)">
+                            <h3>{{ L4.name }}</h3>
+                            <ion-icon color="success" item-left name="arrow-dropright"></ion-icon>
+                          </ion-item-divider>
+                        </ng-template>
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
 
+                  <div *ngFor="let L5 of L4.childServiceGroup; let m = index">
+                    <ion-grid>
+                      <ion-row>
+                        <ion-col col-4></ion-col>
+                        <ion-col>
+                          <div *ngIf="L5.childServiceGroup;else L5_no_children">
+                            <ion-item-divider color="Teal">
+                              <h3>{{ L5.name }}</h3>
+                              <ion-icon color="success" item-left [name]="isL1GroupShown(i) ? 'close' : 'add'"></ion-icon>
+                            </ion-item-divider>
+                          </div>
+                          <ng-template #L5_no_children>
+                            <ion-item-divider color="Teal" (click)="getMeetingsByArea(L5.id, L5.name)">
+                              <h3>{{ L5.name }}</h3>
+                              <ion-icon color="success" item-left name="arrow-dropright"></ion-icon>
+                            </ion-item-divider>
+                          </ng-template>
+                        </ion-col>
+                      </ion-row>
+                    </ion-grid>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -126,24 +129,31 @@
   </div>
 
   <div *ngIf="HTMLGrouping == 'meetings'">
-    <div *ngFor="let group1 of meetingListArea; let i = index" (click)="toggleGroup(i)" [ngClass]="{active: isGroupShown(i)}">
+    <div *ngFor="let group1 of meetingListArea; let i = index" (click)="toggleDay(i)" [ngClass]="{active: isDayShown(i)}">
       <ion-item-divider color="dark">
-          <div ngSwitch="{{ group1[0].weekday_tinyint }}">
-            <div *ngSwitchCase="'1'"><h3>Sunday</h3>  </div>
-            <div *ngSwitchCase="'2'"><h3>Monday</h3></div>
-            <div *ngSwitchCase="'3'"><h3>Tuesday</h3></div>
-            <div *ngSwitchCase="'4'"><h3>Wednesday</h3></div>
-            <div *ngSwitchCase="'5'"><h3>Thursday</h3></div>
-            <div *ngSwitchCase="'6'"><h3>Friday</h3></div>
-            <div *ngSwitchCase="'7'"><h3>Saturday</h3></div>
-            <div *ngSwitchDefault>Nothing Found.</div>
-          </div>
-        <ion-icon color="success" item-right [name]="isGroupShown(i) ? 'arrow-dropdown' : 'arrow-dropright'"></ion-icon>
+        <div ngSwitch="{{ group1[0].weekday_tinyint }}">
+          <div *ngSwitchCase="'1'">
+            <h3>Sunday</h3> </div>
+          <div *ngSwitchCase="'2'">
+            <h3>Monday</h3></div>
+          <div *ngSwitchCase="'3'">
+            <h3>Tuesday</h3></div>
+          <div *ngSwitchCase="'4'">
+            <h3>Wednesday</h3></div>
+          <div *ngSwitchCase="'5'">
+            <h3>Thursday</h3></div>
+          <div *ngSwitchCase="'6'">
+            <h3>Friday</h3></div>
+          <div *ngSwitchCase="'7'">
+            <h3>Saturday</h3></div>
+          <div *ngSwitchDefault>Nothing Found.</div>
+        </div>
+        <ion-icon color="success" item-right [name]="isDayShown(i) ? 'arrow-dropdown' : 'arrow-dropright'"></ion-icon>
       </ion-item-divider>
-      <div *ngIf="isGroupShown(i)">
+      <div *ngIf="isDayShown(i)">
         <ion-list *ngFor="let group2 of group1; let j = index">
-        <ion-card text-wrap>
-          <ion-card-header>
+          <ion-card text-wrap>
+            <ion-card-header>
               <div ngSwitch="{{ group2.weekday_tinyint }}">
                 <div *ngSwitchCase="'1'" [ngClass]="'one'">
                   <ion-badge color="Green"><b>Sunday   {{ group2.start_time | slice:0:5 }} </b></ion-badge>
@@ -167,53 +177,47 @@
                   <ion-badge color="Orange"><b>Saturday   {{ group2.start_time | slice:0:5 }} </b></ion-badge>
                 </div>
 
-            	  <div *ngSwitchDefault>Nothing Found.</div>
-            </div>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-grid>
-              <ion-row>
-                <ion-col col-10 >
-                  <h1>{{group2.meeting_name}}</h1>
-                  <div *ngIf="group2.location_text">{{group2.location_text}}<br></div>
-                  <div *ngIf="group2.location_street">{{group2.location_street}}<br></div>
-                  <div *ngIf="group2.location_city_subsection">{{group2.location_city_subsection}}<br></div>
-                  <div *ngIf="group2.location_neighbourhood">{{group2.location_neighbourhood}}<br></div>
-                  <div *ngIf="group2.location_municipality">{{group2.location_municipality}}<br></div>
-                  <div *ngIf="group2.location_sub_province">{{group2.location_sub_province}}<br></div>
-                  <div *ngIf="group2.location_province">{{group2.location_province}}<br></div>
-                  <div *ngIf="group2.location_code_1">{{group2.location_code_1}}<br></div>
-                  <div *ngIf="group2.location_info">{{group2.location_info}}<br></div>
-                  <div *ngIf="group2.comments">{{group2.comments}}<br></div>
-                  <div *ngIf="group2.contact_phone_1">{{group2.contact_phone_1 | tidyDelimter }}<br></div>
-                  <div *ngIf="group2.contact_email_1">{{group2.contact_email_1 | tidyDelimter }}<br></div>
-                  <div *ngIf="group2.train_lines">{{group2.train_lines | tidyDelimter }}<br></div>
-                  <div *ngIf="group2.bus_lines">{{group2.bus_lines | tidyDelimter }}<br></div>
-                  <div *ngIf="group2.formats"><i>Formats: {{group2.formats | tidyDelimter }}</i><br></div>
-                </ion-col>
-                <ion-col>
-                  <button ion-button  (click)="openMapsLink(group2.latitude , group2.longitude)"><ion-icon name="map"> </ion-icon>&nbsp;Map</button>
-                </ion-col>
-              </ion-row>
-            </ion-grid>
-           </ion-card-content>
-         </ion-card>
-       </ion-list>
-     </div>
-   </div>
+                <div *ngSwitchDefault>Nothing Found.</div>
+              </div>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-grid>
+                <ion-row>
+                  <ion-col col-10>
+                    <h1>{{group2.meeting_name}}</h1>
+                    <div *ngIf="group2.location_text">{{group2.location_text}}<br></div>
+                    <div *ngIf="group2.location_street">{{group2.location_street}}<br></div>
+                    <div *ngIf="group2.location_city_subsection">{{group2.location_city_subsection}}<br></div>
+                    <div *ngIf="group2.location_neighbourhood">{{group2.location_neighbourhood}}<br></div>
+                    <div *ngIf="group2.location_municipality">{{group2.location_municipality}}<br></div>
+                    <div *ngIf="group2.location_sub_province">{{group2.location_sub_province}}<br></div>
+                    <div *ngIf="group2.location_province">{{group2.location_province}}<br></div>
+                    <div *ngIf="group2.location_code_1">{{group2.location_code_1}}<br></div>
+                    <div *ngIf="group2.location_info">{{group2.location_info}}<br></div>
+                    <div *ngIf="group2.comments">{{group2.comments}}<br></div>
+                    <div *ngIf="group2.contact_phone_1">{{group2.contact_phone_1 | tidyDelimter }}<br></div>
+                    <div *ngIf="group2.contact_email_1">{{group2.contact_email_1 | tidyDelimter }}<br></div>
+                    <div *ngIf="group2.train_lines">{{group2.train_lines | tidyDelimter }}<br></div>
+                    <div *ngIf="group2.bus_lines">{{group2.bus_lines | tidyDelimter }}<br></div>
+                    <div *ngIf="group2.formats"><i>Formats: {{group2.formats | tidyDelimter }}</i><br></div>
+                  </ion-col>
+                  <ion-col>
+                    <button ion-button (click)="openMapsLink(group2.latitude , group2.longitude)"><ion-icon name="map"> </ion-icon>&nbsp;Map</button>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </ion-card-content>
+          </ion-card>
+        </ion-list>
+      </div>
+    </div>
   </div>
-
-
-
-
 </ion-content>
 
 <div *ngIf="HTMLGrouping == 'meetings'">
   <ion-footer>
     <ion-toolbar>
-      <button ion-button (click)="showServiceStructure()">
-    Back
-   </button>
+      <button ion-button (click)="showServiceStructure()">Back</button>
     </ion-toolbar>
   </ion-footer>
 </div>

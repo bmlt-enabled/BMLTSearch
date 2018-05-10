@@ -18,7 +18,12 @@ export class ListfullComponent {
   @ViewChild(Content) content: Content;
   serviceGroups: any;
   serviceGroupHierarchy: any = [];
-  shownGroup = null;
+  shownDay = null;
+  shownGroupL1 = null;
+  shownGroupL2 = null;
+  shownGroupL3 = null;
+  shownGroupL4 = null;
+
   HTMLGrouping = "areas";
   loader = null;
   meetingListArea        : any     = [];
@@ -54,17 +59,52 @@ export class ListfullComponent {
     return serviceGroupHierarchy;
   }
 
-  toggleGroup(group) {
-    if (this.isGroupShown(group)) {
-      this.shownGroup = null;
+  toggleDay(day) {
+    if (this.isDayShown(day)) {
+      this.shownDay = null;
     } else {
-      this.shownGroup = group;
+      this.shownDay = day;
     }
   };
 
-  isGroupShown(group) {
-    return this.shownGroup === group;
+  toggleL1Group(L1group) {
+    if (this.isL1GroupShown(L1group)) {
+      this.shownGroupL1 = null;
+    } else {
+      this.shownGroupL1 = L1group;
+    }
   };
+
+  toggleL2Group(L2group) {
+    if (this.isL2GroupShown(L2group)) {
+      this.shownGroupL2 = null;
+    } else {
+      this.shownGroupL2 = L2group;
+    }
+  };
+
+  toggleL3Group(L3group) {
+    if (this.isL3GroupShown(L3group)) {
+      this.shownGroupL3 = null;
+    } else {
+      this.shownGroupL3 = L3group;
+    }
+  };
+
+  toggleL4Group(L4group) {
+    if (this.isL4GroupShown(L4group)) {
+      this.shownGroupL4 = null;
+    } else {
+      this.shownGroupL4 = L4group;
+    }
+  };
+
+  isDayShown(day) {return this.shownDay === day;};
+
+  isL1GroupShown(L1group) {return this.shownGroupL1 === L1group;};
+  isL2GroupShown(L2group) {return this.shownGroupL2 === L2group;};
+  isL3GroupShown(L3group) {return this.shownGroupL3 === L3group;};
+  isL4GroupShown(L4group) {return this.shownGroupL4 === L4group;};
 
   getMeetingsByArea(areaID, areaName){
     console.log("getMeetingsByArea:");
@@ -143,7 +183,7 @@ export class ListfullComponent {
   showServiceStructure() {
     this.HTMLGrouping = "areas";
     this.areaName = "";
-    this.shownGroup = null;
+    this.shownGroupL1 = null;
   }
 
 }
