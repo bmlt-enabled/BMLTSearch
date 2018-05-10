@@ -34,13 +34,11 @@ export class ListfullComponent {
                private loadingCtrl           : LoadingController,
                private translate           : TranslateService) {
 
-    console.log("ListfullComponent constructor : ", this.serviceGroupHierarchy);
     this.translate.get('LOADING').subscribe(value => {this.presentLoader(value);})
     this.ServiceGroupsProvider.getAllServiceGroups().subscribe((serviceGroupData) => {
       this.serviceGroups = serviceGroupData;
       this.serviceGroups.sort(firstBy("parent_id").thenBy("name").thenBy("id"));
       this.serviceGroupHierarchy = this.getServiceHierarchy(this.serviceGroups, 0);
-      console.log("Service Group Hierarchy : ", this.serviceGroupHierarchy);
       this.dismissLoader();
     });
   }
@@ -107,17 +105,13 @@ export class ListfullComponent {
   isL4GroupShown(L4group) {return this.shownGroupL4 === L4group;};
 
   getMeetingsByArea(areaID, areaName){
-    console.log("getMeetingsByArea:");
     this.translate.get('LOADING').subscribe(value => {this.presentLoader(value);})
     this.areaName = areaName;
     this.MeetingListProvider.getMeetingsByAreaProvider(areaID).subscribe((data)=>{
-      console.log("getMeetings: subscribe data results");
 
       if (JSON.stringify(data) == "{}") {  // empty result set!
-        console.log("getMeetings: empty result set");
         this.meetingListArea = JSON.parse("[]");
       } else {
-        console.log("getMeetings: non-empty result set", data);
         this.meetingListArea  = data;
         this.meetingListArea  = this.meetingListArea.filter(meeting => meeting.latitude = parseFloat(meeting.latitude));
         this.meetingListArea  = this.meetingListArea.filter(meeting => meeting.longitude = parseFloat(meeting.longitude));

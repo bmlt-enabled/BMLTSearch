@@ -21,14 +21,14 @@
     <div *ngFor="let L1 of serviceGroupHierarchy; let i = index">
       <div *ngIf="L1.childServiceGroup;else L1_no_children">
         <ion-item-divider color="blue1" (click)="toggleL1Group(i)" [ngClass]="{active: isL1GroupShown(i)}">
-          <h3>{{ L1.name }} L1 + child</h3>
-          <ion-icon color="success" item-left [name]="isL1GroupShown(i) ? 'close' : 'add'"></ion-icon>
+          <h3>{{ L1.name }}</h3>
+          <ion-icon color="white" item-left [name]="isL1GroupShown(i) ? 'close' : 'add'"></ion-icon>
         </ion-item-divider>
       </div>
       <ng-template #L1_no_children>
         <ion-item-divider color="blue1" (click)="getMeetingsByArea(L1.id, L1.name)">
-          <h3>{{ L1.name }} L1 no child</h3>
-          <ion-icon color="success" item-left name="arrow-dropright"></ion-icon>
+          <h3>{{ L1.name }}</h3>
+          <ion-icon color="white" item-left name="arrow-dropright"></ion-icon>
         </ion-item-divider>
       </ng-template>
 
@@ -40,14 +40,14 @@
               <ion-col>
                 <div *ngIf="L2.childServiceGroup;else L2_no_children">
                   <ion-item-divider color="blue2" (click)="toggleL2Group(j)" [ngClass]="{active: isL2GroupShown(j)}">
-                    <h3>{{ L2.name }} L2 + children</h3>
-                    <ion-icon color="success" item-left [name]="isL2GroupShown(j) ? 'close' : 'add'"></ion-icon>
+                    <h3>{{ L2.name }}</h3>
+                    <ion-icon color="white" item-left [name]="isL2GroupShown(j) ? 'close' : 'add'"></ion-icon>
                   </ion-item-divider>
                 </div>
                 <ng-template #L2_no_children>
                   <ion-item-divider color="blue2" (click)="getMeetingsByArea(L2.id, L2.name)">
-                    <h3>{{ L2.name }} L2 no children</h3>
-                    <ion-icon color="success" item-left name="arrow-dropright"></ion-icon>
+                    <h3>{{ L2.name }}</h3>
+                    <ion-icon color="white" item-left name="arrow-dropright"></ion-icon>
                   </ion-item-divider>
                 </ng-template>
               </ion-col>
@@ -62,14 +62,14 @@
                   <ion-col>
                     <div *ngIf="L3.childServiceGroup;else L3_no_children">
                       <ion-item-divider color="blue3" (click)="toggleL3Group(k)" [ngClass]="{active: isL3GroupShown(k)}">
-                        <h3>{{ L3.name }} L3 + children</h3>
-                        <ion-icon color="success" item-left [name]="isL3GroupShown(k) ? 'close' : 'add'"></ion-icon>
+                        <h3>{{ L3.name }}</h3>
+                        <ion-icon color="white" item-left [name]="isL3GroupShown(k) ? 'close' : 'add'"></ion-icon>
                       </ion-item-divider>
                     </div>
                     <ng-template #L3_no_children>
                       <ion-item-divider color="blue3" (click)="getMeetingsByArea(L3.id, L3.name)">
-                        <h3>{{ L3.name }} L3 no children</h3>
-                        <ion-icon color="success" item-left name="arrow-dropright"></ion-icon>
+                        <h3>{{ L3.name }}</h3>
+                        <ion-icon color="white" item-left name="arrow-dropright"></ion-icon>
                       </ion-item-divider>
                     </ng-template>
                   </ion-col>
@@ -85,13 +85,13 @@
                         <div *ngIf="L4.childServiceGroup;else L4_no_children">
                           <ion-item-divider color="blue4">
                             <h3>{{ L4.name }}</h3>
-                            <ion-icon color="success" item-left [name]="isL1GroupShown(i) ? 'close' : 'add'"></ion-icon>
+                            <ion-icon color="white" item-left [name]="isL1GroupShown(i) ? 'close' : 'add'"></ion-icon>
                           </ion-item-divider>
                         </div>
                         <ng-template #L4_no_children>
                           <ion-item-divider color="blue4" (click)="getMeetingsByArea(L4.id, L4.name)">
                             <h3>{{ L4.name }}</h3>
-                            <ion-icon color="success" item-left name="arrow-dropright"></ion-icon>
+                            <ion-icon color="white" item-left name="arrow-dropright"></ion-icon>
                           </ion-item-divider>
                         </ng-template>
                       </ion-col>
@@ -106,13 +106,13 @@
                           <div *ngIf="L5.childServiceGroup;else L5_no_children">
                             <ion-item-divider color="Teal">
                               <h3>{{ L5.name }}</h3>
-                              <ion-icon color="success" item-left [name]="isL1GroupShown(i) ? 'close' : 'add'"></ion-icon>
+                              <ion-icon color="white" item-left [name]="isL1GroupShown(i) ? 'close' : 'add'"></ion-icon>
                             </ion-item-divider>
                           </div>
                           <ng-template #L5_no_children>
                             <ion-item-divider color="Teal" (click)="getMeetingsByArea(L5.id, L5.name)">
                               <h3>{{ L5.name }}</h3>
-                              <ion-icon color="success" item-left name="arrow-dropright"></ion-icon>
+                              <ion-icon color="white" item-left name="arrow-dropright"></ion-icon>
                             </ion-item-divider>
                           </ng-template>
                         </ion-col>
