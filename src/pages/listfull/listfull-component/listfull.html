@@ -37,7 +37,7 @@
           <ion-grid>
             <ion-row>
               <ion-col col-1></ion-col>
-              <ion-col>
+              <ion-col col-11>
                 <div *ngIf="L2.childServiceGroup;else L2_no_children">
                   <ion-item-divider color="blue2" (click)="toggleL2Group(j)" [ngClass]="{active: isL2GroupShown(j)}">
                     <h3>{{ L2.name }}</h3>
@@ -59,7 +59,7 @@
               <ion-grid>
                 <ion-row>
                   <ion-col col-2></ion-col>
-                  <ion-col>
+                  <ion-col col-10>
                     <div *ngIf="L3.childServiceGroup;else L3_no_children">
                       <ion-item-divider color="blue3" (click)="toggleL3Group(k)" [ngClass]="{active: isL3GroupShown(k)}">
                         <h3>{{ L3.name }}</h3>
@@ -81,7 +81,7 @@
                   <ion-grid>
                     <ion-row>
                       <ion-col col-3></ion-col>
-                      <ion-col>
+                      <ion-col col-9>
                         <div *ngIf="L4.childServiceGroup;else L4_no_children">
                           <ion-item-divider color="blue4">
                             <h3>{{ L4.name }}</h3>
@@ -102,7 +102,7 @@
                     <ion-grid>
                       <ion-row>
                         <ion-col col-4></ion-col>
-                        <ion-col>
+                        <ion-col col-8>
                           <div *ngIf="L5.childServiceGroup;else L5_no_children">
                             <ion-item-divider color="Teal">
                               <h3>{{ L5.name }}</h3>

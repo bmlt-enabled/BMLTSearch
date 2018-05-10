@@ -1,13 +1,11 @@
-import { Component, ViewChild } from '@angular/core';
-
-import { LoadingController }          from 'ionic-angular';
-import { Platform, Content } from 'ionic-angular';
+import { Component, ViewChild }  from '@angular/core';
+import { LoadingController }     from 'ionic-angular';
+import { Platform, Content }     from 'ionic-angular';
 import { ServiceGroupsProvider } from '../../../providers/service-groups/service-groups';
-import { MeetingListProvider }        from '../../../providers/meeting-list/meeting-list';
-
-import { TranslateService }           from '@ngx-translate/core';
-import firstBy from 'thenby';
-import thenBy from 'thenby';
+import { MeetingListProvider }   from '../../../providers/meeting-list/meeting-list';
+import { TranslateService }      from '@ngx-translate/core';
+import   firstBy                 from 'thenby';
+import   thenBy                  from 'thenby';
 
 @Component({
   selector: 'page-listfull',
@@ -16,18 +14,17 @@ import thenBy from 'thenby';
 export class ListfullComponent {
 
   @ViewChild(Content) content: Content;
-  serviceGroups: any;
-  serviceGroupHierarchy: any = [];
-  shownDay = null;
-  shownGroupL1 = null;
-  shownGroupL2 = null;
-  shownGroupL3 = null;
-  shownGroupL4 = null;
-
-  HTMLGrouping = "areas";
-  loader = null;
-  meetingListArea        : any     = [];
-  areaName : any = "";
+  serviceGroups          : any;
+  serviceGroupHierarchy  : any = [];
+  shownDay                     = null;
+  shownGroupL1                 = null;
+  shownGroupL2                 = null;
+  shownGroupL3                 = null;
+  shownGroupL4                 = null;
+  HTMLGrouping                 = "areas";
+  loader                       = null;
+  meetingListArea        : any = [];
+  areaName               : any = "";
 
   constructor( private MeetingListProvider : MeetingListProvider,
                private ServiceGroupsProvider : ServiceGroupsProvider,
@@ -97,8 +94,7 @@ export class ListfullComponent {
     }
   };
 
-  isDayShown(day) {return this.shownDay === day;};
-
+  isDayShown(day)         {return this.shownDay     === day    ;};
   isL1GroupShown(L1group) {return this.shownGroupL1 === L1group;};
   isL2GroupShown(L2group) {return this.shownGroupL2 === L2group;};
   isL3GroupShown(L3group) {return this.shownGroupL3 === L3group;};
@@ -131,8 +127,6 @@ export class ListfullComponent {
     });
 
   }
-
-
 
   groupMeetingList(meetingList, groupingOption) {
     // A function to convert a flat json list to an javascript array
@@ -177,7 +171,11 @@ export class ListfullComponent {
   showServiceStructure() {
     this.HTMLGrouping = "areas";
     this.areaName = "";
+    this.shownDay = null;
     this.shownGroupL1 = null;
+    this.shownGroupL2 = null;
+    this.shownGroupL3 = null;
+    this.shownGroupL4 = null;
   }
 
 }
