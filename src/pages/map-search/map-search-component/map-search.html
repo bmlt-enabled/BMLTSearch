@@ -11,30 +11,29 @@
 
 <ion-content>
   <agm-map
-    [fitBounds]         = "mapBounds"
-    [latitude]          = "mapLatitude"
-    [longitude]         = "mapLongitude"
-    [zoom]              = "zoom"
-    [disableDefaultUI]  = "false"
-    [zoomControl]       = "true"
-    [streetViewControl] = "false"
-    (mapReady)          = "mapReady($event)">
+  [fitBounds]="mapBounds"
+  [latitude]="mapLatitude"
+  [longitude]="mapLongitude"
+  [zoom]="zoom"
+  [disableDefaultUI]="false"
+  [zoomControl]="true"
+  [streetViewControl]="false"
+  (mapReady)="mapReady($event)">
 
     <button ion-button color="danger" id="LocationButton" (click)="locatePhone()">
          <ion-icon name="locate">&nbsp;{{ 'LOCATION' | translate }}</ion-icon>
     </button>
 
-    <ion-range id="RadiusRange" min="5" max="25" [(ngModel)]="autoRadius"  (ionBlur)="getMeetings()" color="danger" pin="true">
+    <ion-range id="RadiusRange" min="5" max="25" [(ngModel)]="autoRadius" (ionBlur)="getMeetings()" color="danger" pin="true">
       <ion-label range-left>5 meetings</ion-label>
       <ion-label range-right>25 meetings</ion-label>
     </ion-range>
 
     <agm-marker-cluster [maxZoom]="18" imagePath="https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclustererplus/images/m">
-      <agm-marker
-        *ngFor="let marker of meetingList "
-        [latitude]="marker.latitude"
-        [longitude]="marker.longitude"
-        [iconUrl]="'assets/img/marker-na.png'" >
+      <agm-marker *ngFor="let marker of meetingList "
+      [latitude]="marker.latitude"
+      [longitude]="marker.longitude"
+      [iconUrl]="'assets/img/marker-na.png'">
         <agm-info-window>
           <h1>{{marker.meeting_name}}</h1>
           <p><b>
@@ -84,6 +83,17 @@
       </agm-marker>
     </agm-marker-cluster>
 
+
+    <agm-marker
+    [latitude]="mapLatitude"
+    [longitude]="mapLongitude"
+    [markerDraggable]="true"
+    (dragEnd)="markerDragEnd($event)">
+      <agm-info-window>
+        <h1>Drag marker to set position</h1>
+      </agm-info-window>
+    </agm-marker>
+
     <agm-circle #circle
       [latitude]          = "mapLatitude"
       [longitude]         = "mapLongitude"
@@ -94,9 +104,8 @@
       [strokeColor]       = "'#706bd6'"
       [fillColor]         = "'red'"
       [fillOpacity]       = "0.1"
-      [circleDraggable]   = "true"
-      [editable]          = "false"
-      (dragEnd)           = "circleDragEnd($event)">
+      [circleDraggable]   = "false"
+      [editable]          = "false">
     </agm-circle>
 
   </agm-map>

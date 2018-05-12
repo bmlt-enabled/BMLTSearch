@@ -25,12 +25,12 @@ export class MapSearchComponent {
   mapLatitude        : any     =  51.899 ;
   mapLongitude       : any     = -8.474 ;
   autoRadius         : any     = 10 ;
-  circleRadiusMeters : number  = 0 ;
   map                : any     = null ;
   mapBounds          : LatLngBounds;
   myLatLng           : LatLng;
-
+  circleRadiusMeters : number  = 0 ;
   @ViewChild('circle', {read: AgmCircle}) circle: AgmCircle;
+
 
   constructor(private MeetingListProvider : MeetingListProvider,
               public  loadingCtrl         : LoadingController,
@@ -135,15 +135,13 @@ export class MapSearchComponent {
       tempMapBounds.extend(this.myLatLng);
     } // for
 
-    this.mapBounds = tempMapBounds;
-
     this.circleRadiusMeters = dist * 1000;
-    console.log("setLatLngOffsets : circleRadiusMeters changed to ", this.circleRadiusMeters);
-    console.log("setLatLngOffsets : mapBounds ", this.mapBounds);
+//    this.mapBounds = tempMapBounds;
+
   }
 
-  circleDragEnd($event: MouseEvent) {
-    console.log("circleDragEnd:");
+  markerDragEnd($event: MouseEvent) {
+    console.log("markerDragEnd:");
 
     this.mapLatitude = $event.coords.lat;
     this.mapLongitude = $event.coords.lng;
