@@ -26,7 +26,7 @@
               <div *ngSwitchCase="'7'"><h3>Saturday</h3></div>
               <div *ngSwitchDefault>Nothing Found.</div>
             </div>
-            <ion-icon color="success" item-right [name]="isGroupShown(i) ? 'arrow-dropdown' : 'arrow-dropright'"></ion-icon>
+            <ion-icon color="white" item-left [name]="isGroupShown(i) ? 'close-circle' : 'add-circle'"></ion-icon>
           </ion-item-divider>
           <div *ngIf="isGroupShown(i)">
             <ion-list *ngFor="let group2 of group1; let j = index">

@@ -53,10 +53,10 @@ export class MyApp {
 		  { title: 'HOME',           component: TabsComponent,           icon: 'home' },
 	    { title: 'SETTINGS',       component: SettingsComponent,       icon: 'settings'},
 			{ title: 'MAP_SEARCH',     component: MapSearchComponent,      icon: 'map'},
-			{ title: 'LOCATIONSEARCH', component: LocationSearchComponent, icon: 'logo-buffer' },
-			{ title: 'LISTFULL',       component: ListfullComponent,       icon: 'logo-buffer' },
-			{ title: 'ADDRESSSEARCH',  component: AddressSearchComponent,  icon: 'logo-buffer' },
-			{ title: 'DOIHAVETHEBMLT', component: DoIHaveTheBmltComponent, icon: 'logo-buffer' },
+			{ title: 'LOCATIONSEARCH', component: LocationSearchComponent, icon: 'pin' },
+			{ title: 'LISTFULL',       component: ListfullComponent,       icon: 'globe' },
+			{ title: 'ADDRESSSEARCH',  component: AddressSearchComponent,  icon: 'compass' },
+			{ title: 'DOIHAVETHEBMLT', component: DoIHaveTheBmltComponent, icon: 'cloud-done' },
 			{ title: 'CONTACT',        component: ContactComponent,        icon: 'contact'}
 		];
 	}
