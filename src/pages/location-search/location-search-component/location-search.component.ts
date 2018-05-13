@@ -24,7 +24,7 @@ export class LocationSearchComponent {
   currentAddress           : any     = "";
   addressLatitude          : any     = 0;
   addressLongitude         : any     = 0;
-  radius                   : number  = 25;
+  radius                   : number;
   radiusMeters             : number  = 10000;
   sunCount                           = 0;
   monCount                           = 0;
@@ -43,6 +43,16 @@ export class LocationSearchComponent {
     this.meetingsListGrouping = 'weekday_tinyint';
 
     console.log("getServiceGroupNames");
+
+    this.storage.get('searchRange')
+    .then(searchValue => {
+        if(searchValue) {
+          console.log("Setting radius to ", searchValue);
+          this.radius = searchValue;
+        } else {
+          this.radius = 25;
+        }
+    });
 
     this.storage.get('savedAddressLat').then(value => {
 			if(value) {

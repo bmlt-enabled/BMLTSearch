@@ -48,6 +48,15 @@ export class MapSearchComponent {
     this.map = event;
     this.map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById('LocationButton'));
 
+    this.storage.get('searchRange')
+    .then(searchValue => {
+        if(searchValue) {
+          this.autoRadius = searchValue;
+        } else {
+          this.autoRadius = 25;
+        }
+    });
+
     this.storage.get('savedMapLat').then(value => {
       if(value) {
         console.log("mapLatitude was saved previously : ", value);
