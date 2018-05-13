@@ -22,3 +22,13 @@
     </ion-card-content>
   </ion-card>
 </ion-content>
+
+<ion-footer no-padding>
+  <ion-toolbar no-padding>
+
+      <ion-range id="RadiusRange" min="5" max="50" [(ngModel)]="autoRadius" (ionBlur)="getMeetings()" color="danger" pin="true">
+        <ion-label range-left>5 meetings</ion-label>
+        <ion-label range-right>50 meetings</ion-label>
+      </ion-range>
+</ion-toolbar>
+</ion-footer>

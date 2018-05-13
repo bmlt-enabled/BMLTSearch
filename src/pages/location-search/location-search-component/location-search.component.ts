@@ -24,7 +24,7 @@ export class LocationSearchComponent {
   currentAddress           : any     = "";
   addressLatitude          : any     = 0;
   addressLongitude         : any     = 0;
-  radius                   : number  = 10;
+  radius                   : number  = 25;
   radiusMeters             : number  = 10000;
   sunCount                           = 0;
   monCount                           = 0;
@@ -199,5 +199,5 @@ export class LocationSearchComponent {
       return false;
     }
   }
-  
+
 }

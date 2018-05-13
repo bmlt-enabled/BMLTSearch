@@ -8,11 +8,15 @@ import { Config } from '../../../app/app.config';
 })
 export class AddressSearchComponent {
 
+autoRadius = 25;
   constructor(
     private config: Config
   ) {
 
   }
 
+public getMeetings(){
+  console.log("Address Search : getMeetings");
+}
 
 }
