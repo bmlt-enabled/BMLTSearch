@@ -8,6 +8,7 @@ import { SplashScreen }            from '@ionic-native/splash-screen';
 import { Storage }                 from '@ionic/storage';
 import { TranslateService }        from '@ngx-translate/core';
 import { Config }                  from './app.config';
+import { HomeComponent }           from '../pages/home/home-component/home.component';
 import { TabsComponent }           from '../pages/tabs/tabs-component/tabs.component';
 import { SettingsComponent }       from '../pages/settings/settings-component/settings.component';
 import { MapSearchComponent }      from '../pages/map-search/map-search-component/map-search.component';
@@ -24,7 +25,7 @@ import { ContactComponent }        from '../pages/contact/contact-component/cont
 export class MyApp {
 	@ViewChild(Nav) nav: Nav;
 
-	rootPage = TabsComponent;
+	rootPage = HomeComponent;
 	pages: Array<{title: string, component: any, icon: string}>;
 
 
@@ -50,13 +51,13 @@ export class MyApp {
 		});
 
 		this.pages = [
-		  { title: 'HOME',           component: TabsComponent,           icon: 'home' },
-	    { title: 'SETTINGS',       component: SettingsComponent,       icon: 'settings'},
+		  { title: 'HOME',           component: HomeComponent,           icon: 'home' },
 			{ title: 'MAP_SEARCH',     component: MapSearchComponent,      icon: 'map'},
 			{ title: 'LOCATIONSEARCH', component: LocationSearchComponent, icon: 'pin' },
-			{ title: 'LISTFULL',       component: ListfullComponent,       icon: 'globe' },
 			{ title: 'ADDRESSSEARCH',  component: AddressSearchComponent,  icon: 'compass' },
+			{ title: 'LISTFULL',       component: ListfullComponent,       icon: 'globe' },
 			{ title: 'DOIHAVETHEBMLT', component: DoIHaveTheBmltComponent, icon: 'cloud-done' },
+	    { title: 'SETTINGS',       component: SettingsComponent,       icon: 'settings'},
 			{ title: 'CONTACT',        component: ContactComponent,        icon: 'contact'}
 		];
 	}
