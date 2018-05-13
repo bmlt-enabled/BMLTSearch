@@ -180,7 +180,17 @@ export class ListfullComponent {
   }
 
   public openMapsLink(destLatitude, destLongitude) {
-      window.open('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude + ')', '_system');
+      window.open('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
+  }
+
+  public isToday(dayOfWeek) {
+    var d = new Date();
+    var n = d.getDay();
+    if (dayOfWeek == (n+1)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   showServiceStructure() {

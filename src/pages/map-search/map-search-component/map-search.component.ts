@@ -24,7 +24,7 @@ export class MapSearchComponent {
   zoom               : number  = 8;
   mapLatitude        : any     =  51.899 ;
   mapLongitude       : any     = -8.474 ;
-  autoRadius         : any     = 10 ;
+  autoRadius         : any     = 25 ;
   map                : any     = null ;
   mapBounds          : LatLngBounds;
   myLatLng           : LatLng;
@@ -47,7 +47,15 @@ export class MapSearchComponent {
     console.log("mapReady : event");
     this.map = event;
     this.map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById('LocationButton'));
-    this.map.controls[google.maps.ControlPosition.TOP_CENTER].push(document.getElementById('RadiusRange'));
+
+    this.storage.get('searchRange')
+    .then(searchValue => {
+        if(searchValue) {
+          this.autoRadius = searchValue;
+        } else {
+          this.autoRadius = 25;
+        }
+    });
 
     this.storage.get('savedMapLat').then(value => {
       if(value) {
@@ -151,7 +159,7 @@ export class MapSearchComponent {
   }
 
   public openMapsLink(destLatitude, destLongitude) {
-    window.open('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude + ')', '_system');
+    window.open('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
   }
 
   presentLoader(loaderText) {

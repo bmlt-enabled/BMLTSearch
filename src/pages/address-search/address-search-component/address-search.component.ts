@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { Config } from '../../../app/app.config';
+import { Component }  from '@angular/core';
+import { Config }     from '../../../app/app.config';
+import { Storage }    from '@ionic/storage';
 
 
 @Component({
@@ -8,11 +9,24 @@ import { Config } from '../../../app/app.config';
 })
 export class AddressSearchComponent {
 
-  constructor(
-    private config: Config
-  ) {
+  autoRadius;
 
+  constructor(	private storage     : Storage ,
+                private config      : Config  ) {
+
+    this.storage.get('searchRange')
+    .then(searchValue => {
+        if(searchValue) {
+          console.log("Setting radius to ", searchValue);
+          this.autoRadius = searchValue;
+        } else {
+          this.autoRadius = 25;
+        }
+    });
   }
 
+public getMeetings(){
+  console.log("Address Search : getMeetings");
+}
 
 }

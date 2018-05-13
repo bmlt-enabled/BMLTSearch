@@ -24,11 +24,6 @@
          <ion-icon name="locate">&nbsp;{{ 'LOCATION' | translate }}</ion-icon>
     </button>
 
-    <ion-range id="RadiusRange" min="5" max="25" [(ngModel)]="autoRadius" (ionBlur)="getMeetings()" color="danger" pin="true">
-      <ion-label range-left>5 meetings</ion-label>
-      <ion-label range-right>25 meetings</ion-label>
-    </ion-range>
-
     <agm-marker-cluster [maxZoom]="18" imagePath="https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclustererplus/images/m">
       <agm-marker *ngFor="let marker of meetingList "
       [latitude]="marker.latitude"
@@ -90,7 +85,7 @@
     [markerDraggable]="true"
     (dragEnd)="markerDragEnd($event)">
       <agm-info-window>
-        <h1>Drag marker to set position</h1>
+        <p>Drag marker to set position</p>
       </agm-info-window>
     </agm-marker>
 
@@ -111,3 +106,13 @@
   </agm-map>
 
 </ion-content>
+
+<ion-footer no-padding>
+  <ion-toolbar no-padding>
+
+      <ion-range id="RadiusRange" min="5" max="50" [(ngModel)]="autoRadius" (ionBlur)="getMeetings()" color="danger" pin="true">
+        <ion-label range-left>5 meetings</ion-label>
+        <ion-label range-right>50 meetings</ion-label>
+      </ion-range>
+</ion-toolbar>
+</ion-footer>
