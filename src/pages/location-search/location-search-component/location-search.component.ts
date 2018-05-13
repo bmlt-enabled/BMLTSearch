@@ -190,4 +190,14 @@ export class LocationSearchComponent {
     });
   }
 
+  public isToday(dayOfWeek) {
+    var d = new Date();
+    var n = d.getDay();
+    if (dayOfWeek == (n+1)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
 }

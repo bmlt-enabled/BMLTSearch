@@ -130,10 +130,10 @@
 
   <div *ngIf="HTMLGrouping == 'meetings'">
     <div *ngFor="let group1 of meetingListArea; let i = index" (click)="toggleDay(i)" [ngClass]="{active: isDayShown(i)}">
-      <ion-item-divider color="dark">
+      <ion-item-divider [color]="isToday(group1[0].weekday_tinyint) ? 'today' : 'dark'">
         <div ngSwitch="{{ group1[0].weekday_tinyint }}">
           <div *ngSwitchCase="'1'">
-            <h3>Sunday ({{sunCount}})</h3> </div>
+            <h3>Sunday ({{sunCount}})</h3></div>
           <div *ngSwitchCase="'2'">
             <h3>Monday ({{monCount}})</h3></div>
           <div *ngSwitchCase="'3'">
