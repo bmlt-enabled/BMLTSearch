@@ -2,6 +2,7 @@
     "MENU"              : "Menu",
     "HOME"              : "Home",
     "LOCATIONSEARCH"    : "Current Location Search",
+    "LOADINGMAP"        : "Loading map...",
     "LOCATION"          : "",
     "LOCATING"          : "Locating...",
     "LISTFULL"          : "BMLT Meeting List",
