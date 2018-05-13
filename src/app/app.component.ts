@@ -9,7 +9,6 @@ import { Storage }                 from '@ionic/storage';
 import { TranslateService }        from '@ngx-translate/core';
 import { Config }                  from './app.config';
 import { HomeComponent }           from '../pages/home/home-component/home.component';
-import { TabsComponent }           from '../pages/tabs/tabs-component/tabs.component';
 import { SettingsComponent }       from '../pages/settings/settings-component/settings.component';
 import { MapSearchComponent }      from '../pages/map-search/map-search-component/map-search.component';
 import { FullMapComponent }        from '../pages/fullmap/fullmap-component/fullmap.component';
