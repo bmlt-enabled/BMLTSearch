@@ -17,13 +17,13 @@
         <div *ngFor="let group1 of meetingListGrouped; let i = index" (click)="toggleGroup(i)" [ngClass]="{active: isGroupShown(i)}">
           <ion-item-divider color="dark">
             <div ngSwitch="{{ group1[0].weekday_tinyint }}">
-              <div *ngSwitchCase="'1'"><h3>Sunday</h3>  </div>
-              <div *ngSwitchCase="'2'"><h3>Monday</h3></div>
-              <div *ngSwitchCase="'3'"><h3>Tuesday</h3></div>
-              <div *ngSwitchCase="'4'"><h3>Wednesday</h3></div>
-              <div *ngSwitchCase="'5'"><h3>Thursday</h3></div>
-              <div *ngSwitchCase="'6'"><h3>Friday</h3></div>
-              <div *ngSwitchCase="'7'"><h3>Saturday</h3></div>
+              <div *ngSwitchCase="'1'"><h3>Sunday ({{sunCount}})</h3></div>
+              <div *ngSwitchCase="'2'"><h3>Monday ({{monCount}})</h3></div>
+              <div *ngSwitchCase="'3'"><h3>Tuesday ({{tueCount}})</h3></div>
+              <div *ngSwitchCase="'4'"><h3>Wednesday ({{wedCount}})</h3></div>
+              <div *ngSwitchCase="'5'"><h3>Thursday ({{thuCount}})</h3></div>
+              <div *ngSwitchCase="'6'"><h3>Friday ({{friCount}})</h3></div>
+              <div *ngSwitchCase="'7'"><h3>Saturday ({{satCount}})</h3></div>
               <div *ngSwitchDefault>Nothing Found.</div>
             </div>
             <ion-icon color="white" item-left [name]="isGroupShown(i) ? 'close-circle' : 'add-circle'"></ion-icon>
