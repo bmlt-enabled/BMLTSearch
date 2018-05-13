@@ -46,7 +46,6 @@ export class MapSearchComponent {
   mapReady(event: any) {
     console.log("mapReady : event");
     this.map = event;
-    this.map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById('LocationButton'));
 
     this.storage.get('searchRange')
     .then(searchValue => {
@@ -55,29 +54,28 @@ export class MapSearchComponent {
         } else {
           this.autoRadius = 25;
         }
-    });
+      this.storage.get('savedLat').then(value => {
+        if(value) {
+          console.log("mapLatitude was saved previously : ", value);
+          this.mapLatitude = value;
+          this.storage.get('savedLng').then(value => {
+            if(value) {
+              console.log("mapLongitude was saved previously : ", value);
+              this.mapLongitude = value;
 
-    this.storage.get('savedMapLat').then(value => {
-      if(value) {
-        console.log("mapLatitude was saved previously : ", value);
-        this.mapLatitude = value;
-        this.storage.get('savedMapLng').then(value => {
-          if(value) {
-            console.log("mapLongitude was saved previously : ", value);
-            this.mapLongitude = value;
-
-            this.mapLatitude = parseFloat(this.mapLatitude);
-            this.mapLongitude = parseFloat(this.mapLongitude);
-            this.getMeetings();
-          } else {
-            console.log("No mapLongitude previously saved");
-            this.locatePhone();
-          }
-        });
-      } else {
-        console.log("No mapLatitude previously saved");
-        this.locatePhone();
-      }
+              this.mapLatitude = parseFloat(this.mapLatitude);
+              this.mapLongitude = parseFloat(this.mapLongitude);
+              this.getMeetings();
+            } else {
+              console.log("No mapLongitude previously saved");
+              this.locatePhone();
+            }
+          });
+        } else {
+          console.log("No mapLatitude previously saved");
+          this.locatePhone();
+        }
+      });
     });
   }
 
