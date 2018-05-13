@@ -24,7 +24,7 @@ export class MapSearchComponent {
   zoom               : number  = 8;
   mapLatitude        : any     =  51.899 ;
   mapLongitude       : any     = -8.474 ;
-  autoRadius         : any     = 25 ;
+  autoRadius         : any;
   map                : any     = null ;
   mapBounds          : LatLngBounds;
   myLatLng           : LatLng;
