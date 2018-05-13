@@ -25,6 +25,13 @@ export class ListfullComponent {
   loader                       = null;
   meetingListArea        : any = [];
   areaName               : any = "";
+  sunCount                           = 0;
+  monCount                           = 0;
+  tueCount                           = 0;
+  wedCount                           = 0;
+  thuCount                           = 0;
+  friCount                           = 0;
+  satCount                           = 0;
 
   constructor( private MeetingListProvider : MeetingListProvider,
                private ServiceGroupsProvider : ServiceGroupsProvider,
@@ -111,6 +118,14 @@ export class ListfullComponent {
         this.meetingListArea  = data;
         this.meetingListArea  = this.meetingListArea.filter(meeting => meeting.latitude = parseFloat(meeting.latitude));
         this.meetingListArea  = this.meetingListArea.filter(meeting => meeting.longitude = parseFloat(meeting.longitude));
+
+        this.sunCount = this.meetingListArea.filter(i => i.weekday_tinyint == 1).length;
+        this.monCount = this.meetingListArea.filter(i => i.weekday_tinyint == 2).length;
+        this.tueCount = this.meetingListArea.filter(i => i.weekday_tinyint == 3).length;
+        this.wedCount = this.meetingListArea.filter(i => i.weekday_tinyint == 4).length;
+        this.thuCount = this.meetingListArea.filter(i => i.weekday_tinyint == 5).length;
+        this.friCount = this.meetingListArea.filter(i => i.weekday_tinyint == 6).length;
+        this.satCount = this.meetingListArea.filter(i => i.weekday_tinyint == 7).length;
 
         this.meetingListArea.sort((a, b) => a.location_sub_province.localeCompare(b.location_sub_province));
         this.meetingListArea = this.groupMeetingList(this.meetingListArea, 'weekday_tinyint');

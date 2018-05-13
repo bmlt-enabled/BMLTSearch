@@ -26,6 +26,13 @@ export class LocationSearchComponent {
   addressLongitude         : any     = 0;
   radius                   : number  = 10;
   radiusMeters             : number  = 10000;
+  sunCount                           = 0;
+  monCount                           = 0;
+  tueCount                           = 0;
+  wedCount                           = 0;
+  thuCount                           = 0;
+  friCount                           = 0;
+  satCount                           = 0;
 
   constructor(private MeetingListProvider   : MeetingListProvider,
               private loadingCtrl           : LoadingController,
@@ -79,6 +86,14 @@ export class LocationSearchComponent {
       this.addressMeetingList = data;
 
       this.meetingListGrouped = this.addressMeetingList.concat();
+      this.sunCount = this.meetingListGrouped.filter(i => i.weekday_tinyint == 1).length;
+      this.monCount = this.meetingListGrouped.filter(i => i.weekday_tinyint == 2).length;
+      this.tueCount = this.meetingListGrouped.filter(i => i.weekday_tinyint == 3).length;
+      this.wedCount = this.meetingListGrouped.filter(i => i.weekday_tinyint == 4).length;
+      this.thuCount = this.meetingListGrouped.filter(i => i.weekday_tinyint == 5).length;
+      this.friCount = this.meetingListGrouped.filter(i => i.weekday_tinyint == 6).length;
+      this.satCount = this.meetingListGrouped.filter(i => i.weekday_tinyint == 7).length;
+
       this.meetingListGrouped.sort((a, b) => a.weekday_tinyint.localeCompare(b.weekday_tinyint));
       this.meetingListGrouped = this.groupMeetingList(this.meetingListGrouped, this.meetingsListGrouping);
       for (var i = 0; i < this.meetingListGrouped.length; i++) {
