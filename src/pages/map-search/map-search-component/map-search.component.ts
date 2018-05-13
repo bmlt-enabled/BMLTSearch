@@ -46,7 +46,6 @@ export class MapSearchComponent {
   mapReady(event: any) {
     console.log("mapReady : event");
     this.map = event;
-    this.map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById('LocationButton'));
 
     this.storage.get('searchRange')
     .then(searchValue => {

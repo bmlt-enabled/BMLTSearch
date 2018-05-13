@@ -16,7 +16,7 @@
       <ion-list>
         <ion-item text-wrap>
          <ion-icon name="search" item-left></ion-icon>
-         Search By Address
+         Search By Address - Not implemeted yet
         </ion-item>
       </ion-list>
     </ion-card-content>
@@ -26,9 +26,33 @@
 <ion-footer no-padding>
   <ion-toolbar no-padding>
 
-      <ion-range id="RadiusRange" min="5" max="50" [(ngModel)]="autoRadius" (ionBlur)="getMeetings()" color="danger" pin="true">
-        <ion-label range-left>5 meetings</ion-label>
-        <ion-label range-right>50 meetings</ion-label>
-      </ion-range>
+
 </ion-toolbar>
+</ion-footer>
+
+
+<ion-footer no-padding>
+  <ion-toolbar no-padding>
+
+    <ion-item text-wrap>
+      <ion-grid>
+        <ion-row>
+          <ion-col col-10>
+            <b>{{autoRadius}} meetings nearest entered address</b>
+          </ion-col>
+          <ion-col>
+            <button ion-button color="danger" id="LocationButton" (click)="locatePhone()" class="col text-center text-wrap">
+               <ion-icon name="locate"></ion-icon>
+          </button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-item>
+
+    <ion-range id="RadiusRange" min="5" max="50" [(ngModel)]="autoRadius" (ionBlur)="getMeetings()" color="danger" pin="true">
+      <ion-label range-left>5 meetings</ion-label>
+      <ion-label range-right>50 meetings</ion-label>
+    </ion-range>
+
+  </ion-toolbar>
 </ion-footer>
