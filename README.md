@@ -28,39 +28,6 @@ or
 ```
 $ ionic serve --lab
 ```
-Build iOS
-```
-$ ionic cordova platform rm ios
+To build for app store distribution, I have found that the best thing to do is to run the re-plugin.sh script.
 
-$ ionic cordova platform add ios
-
-$ ionic cordova build ios --prod
-```
-Build Android
-```
-$ ionic cordova platform rm android
-
-$ ionic cordova platform add android
-
-$ ionic cordova build android --prod
-```
-Build Android (Production)
-```
-$ ionic state restore
-
-$ ionic platforms add android
-
-$ ionic build android --release --prod
-```
-
-To sign the app for apppstore submission
-```
-$ cd platforms/android/build/outputs/apk/
-
-$ keytool -genkey -v -keystore my-release-key.keystore -alias alias_name -keyalg RSA -keysize 2048 -validity 10000
-
-$ jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore my-release-key.keystore android-release-unsigned.apk alias_name
-
-$ /Users/paulnagle/Development/sdk/build-tools/21.1.2/zipalign -v 4 android-release-unsigned.apk NAIreland.apk
-```
-You can then submit the app to the appstore.
+After this, a platforms directory will be created with folder for android that contains an Android Studio project, and a folder for ios that contains an xcode project.
