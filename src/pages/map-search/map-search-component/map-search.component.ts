@@ -19,12 +19,13 @@ declare const google: any;
 
 export class MapSearchComponent {
 
+  timeDisplay        : string  = "";
   meetingList        : any     = [];
   loader                       = null;
   zoom               : number  = 8;
   mapLatitude        : any     =  51.899 ;
   mapLongitude       : any     = -8.474 ;
-  autoRadius         : any     = 25 ;
+  autoRadius         : any;
   map                : any     = null ;
   mapBounds          : LatLngBounds;
   myLatLng           : LatLng;
@@ -47,36 +48,45 @@ export class MapSearchComponent {
     console.log("mapReady : event");
     this.map = event;
 
-    this.storage.get('searchRange')
-    .then(searchValue => {
-        if(searchValue) {
-          this.autoRadius = searchValue;
+    this.storage.get('timeDisplay')
+    .then(timeDisplay => {
+        if(timeDisplay) {
+          console.log("Setting timeDisplay to ", timeDisplay);
+          this.timeDisplay = timeDisplay;
         } else {
-          this.autoRadius = 25;
+          this.timeDisplay = "24hr";
         }
-      this.storage.get('savedLat').then(value => {
-        if(value) {
-          console.log("mapLatitude was saved previously : ", value);
-          this.mapLatitude = value;
-          this.storage.get('savedLng').then(value => {
-            if(value) {
-              console.log("mapLongitude was saved previously : ", value);
-              this.mapLongitude = value;
-
-              this.mapLatitude = parseFloat(this.mapLatitude);
-              this.mapLongitude = parseFloat(this.mapLongitude);
-              this.getMeetings();
+        this.storage.get('searchRange')
+        .then(searchValue => {
+            if(searchValue) {
+              this.autoRadius = searchValue;
             } else {
-              console.log("No mapLongitude previously saved");
+              this.autoRadius = 25;
+            }
+          this.storage.get('savedLat').then(value => {
+            if(value) {
+              console.log("mapLatitude was saved previously : ", value);
+              this.mapLatitude = value;
+              this.storage.get('savedLng').then(value => {
+                if(value) {
+                  console.log("mapLongitude was saved previously : ", value);
+                  this.mapLongitude = value;
+
+                  this.mapLatitude = parseFloat(this.mapLatitude);
+                  this.mapLongitude = parseFloat(this.mapLongitude);
+                  this.getMeetings();
+                } else {
+                  console.log("No mapLongitude previously saved");
+                  this.locatePhone();
+                }
+              });
+            } else {
+              console.log("No mapLatitude previously saved");
               this.locatePhone();
             }
           });
-        } else {
-          console.log("No mapLatitude previously saved");
-          this.locatePhone();
-        }
+        });
       });
-    });
   }
 
   getMeetings(){
@@ -94,6 +104,8 @@ export class MapSearchComponent {
         this.meetingList  = data;
         this.meetingList  = this.meetingList.filter(meeting => meeting.latitude = parseFloat(meeting.latitude));
         this.meetingList  = this.meetingList.filter(meeting => meeting.longitude = parseFloat(meeting.longitude));
+        this.meetingList.filter(i => i.start_time = this.convertTo12Hr(i.start_time));
+
       }
 
       this.setLatLngOffsets();
@@ -197,4 +209,18 @@ export class MapSearchComponent {
       this.dismissLoader();
     });
   }
+
+   public convertTo12Hr(timeString){
+     if (this.timeDisplay == "12hr") {
+       var H = +timeString.substr(0, 2);
+       var h = H % 12 || 12;
+       var ampm = (H < 12 || H === 24) ? " AM" : " PM";
+       timeString = h + timeString.substr(2, 3) + ampm;
+       return timeString;
+     } else {
+      return timeString.slice(0, -3);
+     }
+   }
+
+
 }

@@ -24,5 +24,8 @@
     "MAPRANGE"          : "Default Search Range",
     "THEME"             : "Theme",
     "BLUE"              : "Blue",
-    "RED"               : "Red"
+    "RED"               : "Red",
+    "TIMEDISPLAY"       : "Time format",
+    "24HR"              : "24 hr clock",
+    "12HR"              : "12 hr clock"
 }

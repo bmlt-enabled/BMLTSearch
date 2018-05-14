@@ -10,6 +10,7 @@ export class SettingsComponent {
 	language        : string;
   theme           : string;
   searchRange     : number;
+  timeDisplay     : string;
 
 	constructor(
 		private storage     : Storage ,
@@ -46,6 +47,14 @@ export class SettingsComponent {
           }
       });
 
+      this.storage.get('timeDisplay')
+      .then(timeDisplay => {
+          if(timeDisplay) {
+            this.timeDisplay = timeDisplay;
+          } else {
+            this.timeDisplay = "24hr";
+          }
+      });
 	}
 
 	selectLanguage() {
@@ -60,6 +69,10 @@ export class SettingsComponent {
 
   selectSearchRange() {
     this.storage.set('searchRange', this.searchRange);
-
   }
+
+  selectTimeDisplay() {
+    this.storage.set('timeDisplay', this.timeDisplay);
+  }
+
 }
