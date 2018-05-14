@@ -33,6 +33,7 @@ export class LocationSearchComponent {
   thuCount                           = 0;
   friCount                           = 0;
   satCount                           = 0;
+  timeDisplay              : string  = "";
 
   constructor(private MeetingListProvider   : MeetingListProvider,
               private loadingCtrl           : LoadingController,
@@ -41,8 +42,6 @@ export class LocationSearchComponent {
               private geolocation           : Geolocation )
   {
     this.meetingsListGrouping = 'weekday_tinyint';
-
-    console.log("getServiceGroupNames");
 
     this.storage.get('searchRange')
     .then(searchValue => {
@@ -54,34 +53,44 @@ export class LocationSearchComponent {
         }
     });
 
-    this.storage.get('savedAddressLat').then(value => {
-			if(value) {
-				console.log("addressLatitude was saved previously : ", value);
-				this.addressLatitude = value;
-				this.storage.get('savedAddressLng').then(value => {
-						if(value) {
-							console.log("addressLongitude was saved previously : ", value);
-							this.addressLongitude = value;
-							this.storage.get('savedAddress').then(value => {
-									if(value) {
-										console.log("Address was saved previously : ", value);
-										this.currentAddress = value;
-                    this.getAllMeetings();
-									} else {
-										console.log("No Address previously saved");
-										this.locatePhone();
-									}
-							});
-						} else {
-							console.log("No addressLongitude previously saved");
-							this.locatePhone();
-						}
-				});
-			} else {
-				console.log("No addressLatitude previously saved");
-				this.locatePhone();
-			}
-		});
+    this.storage.get('timeDisplay')
+    .then(timeDisplay => {
+        if(timeDisplay) {
+          console.log("Setting timeDisplay to ", timeDisplay);
+          this.timeDisplay = timeDisplay;
+        } else {
+          this.timeDisplay = "24hr";
+        }
+
+        this.storage.get('savedAddressLat').then(value => {
+    			if(value) {
+    				console.log("addressLatitude was saved previously : ", value);
+    				this.addressLatitude = value;
+    				this.storage.get('savedAddressLng').then(value => {
+    						if(value) {
+    							console.log("addressLongitude was saved previously : ", value);
+    							this.addressLongitude = value;
+    							this.storage.get('savedAddress').then(value => {
+    									if(value) {
+    										console.log("Address was saved previously : ", value);
+    										this.currentAddress = value;
+                        this.getAllMeetings();
+    									} else {
+    										console.log("No Address previously saved");
+    										this.locatePhone();
+    									}
+    							});
+    						} else {
+    							console.log("No addressLongitude previously saved");
+    							this.locatePhone();
+    						}
+    				});
+    			} else {
+    				console.log("No addressLatitude previously saved");
+    				this.locatePhone();
+    			}
+    		});
+    });
 
   }
 
@@ -103,6 +112,8 @@ export class LocationSearchComponent {
       this.thuCount = this.meetingListGrouped.filter(i => i.weekday_tinyint == 5).length;
       this.friCount = this.meetingListGrouped.filter(i => i.weekday_tinyint == 6).length;
       this.satCount = this.meetingListGrouped.filter(i => i.weekday_tinyint == 7).length;
+
+      this.meetingListGrouped.filter(i => i.start_time = this.convertTo12Hr(i.start_time));
 
       this.meetingListGrouped.sort((a, b) => a.weekday_tinyint.localeCompare(b.weekday_tinyint));
       this.meetingListGrouped = this.groupMeetingList(this.meetingListGrouped, this.meetingsListGrouping);
@@ -209,5 +220,17 @@ export class LocationSearchComponent {
       return false;
     }
   }
+
+ public convertTo12Hr(timeString){
+   if (this.timeDisplay == "12hr") {
+     var H = +timeString.substr(0, 2);
+     var h = H % 12 || 12;
+     var ampm = (H < 12 || H === 24) ? " AM" : " PM";
+     timeString = h + timeString.substr(2, 3) + ampm;
+     return timeString;
+   } else {
+    return timeString.slice(0, -3);
+   }
+ }
 
 }

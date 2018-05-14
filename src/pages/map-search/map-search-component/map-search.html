@@ -30,25 +30,25 @@
           <p><b>
             <div ngSwitch="{{ marker.weekday_tinyint }}">
               <div *ngSwitchCase="'1'" [ngClass]="'one'">
-                <ion-badge color="Green">{{'SUNDAY' | translate }}</ion-badge> {{ marker.start_time | slice:0:5 }}
+                <ion-badge color="Green">{{'SUNDAY' | translate }}</ion-badge> {{ marker.start_time }}
               </div>
               <div *ngSwitchCase="'2'" [ngClass]="'one'">
-                <ion-badge color="Teal">{{'MONDAY' | translate }}</ion-badge> {{ marker.start_time | slice:0:5 }}
+                <ion-badge color="Teal">{{'MONDAY' | translate }}</ion-badge> {{ marker.start_time }}
               </div>
               <div *ngSwitchCase="'3'" [ngClass]="'one'">
-                <ion-badge color="Lime">{{'TUESDAY' | translate }}</ion-badge> {{ marker.start_time | slice:0:5 }}
+                <ion-badge color="Lime">{{'TUESDAY' | translate }}</ion-badge> {{ marker.start_time }}
               </div>
               <div *ngSwitchCase="'4'" [ngClass]="'one'">
-                <ion-badge color="Purple">{{'WEDNESDAY' | translate }}</ion-badge> {{ marker.start_time | slice:0:5 }}
+                <ion-badge color="Purple">{{'WEDNESDAY' | translate }}</ion-badge> {{ marker.start_time }}
               </div>
               <div *ngSwitchCase="'5'" [ngClass]="'one'">
-                <ion-badge color="Brown">{{'THURSDAY' | translate }}</ion-badge> {{ marker.start_time | slice:0:5 }}
+                <ion-badge color="Brown">{{'THURSDAY' | translate }}</ion-badge> {{ marker.start_time }}
               </div>
               <div *ngSwitchCase="'6'" [ngClass]="'one'">
-                <ion-badge color="Pink">{{'FRIDAY' | translate }}</ion-badge> {{ marker.start_time | slice:0:5 }}
+                <ion-badge color="Pink">{{'FRIDAY' | translate }}</ion-badge> {{ marker.start_time }}
               </div>
               <div *ngSwitchCase="'7'" [ngClass]="'one'">
-                <ion-badge color="Orange">{{'SATURDAY' | translate }}  </ion-badge>  {{ marker.start_time | slice:0:5 }}
+                <ion-badge color="Orange">{{'SATURDAY' | translate }}  </ion-badge>  {{ marker.start_time }}
               </div>
           	  <div *ngSwitchDefault>??</div>
           </div>

@@ -1,6 +1,7 @@
 import { Component, ViewChild }  from '@angular/core';
 import { LoadingController }     from 'ionic-angular';
 import { Platform, Content }     from 'ionic-angular';
+import { Storage }               from '@ionic/storage';
 import { ServiceGroupsProvider } from '../../../providers/service-groups/service-groups';
 import { MeetingListProvider }   from '../../../providers/meeting-list/meeting-list';
 import { TranslateService }      from '@ngx-translate/core';
@@ -32,13 +33,27 @@ export class ListfullComponent {
   thuCount                           = 0;
   friCount                           = 0;
   satCount                           = 0;
+  timeDisplay             : string   = "";
 
-  constructor( private MeetingListProvider : MeetingListProvider,
+  constructor( private MeetingListProvider   : MeetingListProvider,
                private ServiceGroupsProvider : ServiceGroupsProvider,
                private loadingCtrl           : LoadingController,
-               private translate           : TranslateService) {
+               private translate             : TranslateService,
+               private storage               : Storage  ) {
 
     this.translate.get('LOADING').subscribe(value => {this.presentLoader(value);})
+
+    this.storage.get('timeDisplay')
+    .then(timeDisplay => {
+        if(timeDisplay) {
+          console.log("Setting timeDisplay to ", timeDisplay);
+          this.timeDisplay = timeDisplay;
+        } else {
+          this.timeDisplay = "24hr";
+        }
+      });
+
+
     this.ServiceGroupsProvider.getAllServiceGroups().subscribe((serviceGroupData) => {
       this.serviceGroups = serviceGroupData;
       this.serviceGroups.sort(firstBy("parent_id").thenBy("name").thenBy("id"));
@@ -118,6 +133,7 @@ export class ListfullComponent {
         this.meetingListArea  = data;
         this.meetingListArea  = this.meetingListArea.filter(meeting => meeting.latitude = parseFloat(meeting.latitude));
         this.meetingListArea  = this.meetingListArea.filter(meeting => meeting.longitude = parseFloat(meeting.longitude));
+        this.meetingListArea.filter(i => i.start_time = this.convertTo12Hr(i.start_time));
 
         this.sunCount = this.meetingListArea.filter(i => i.weekday_tinyint == 1).length;
         this.monCount = this.meetingListArea.filter(i => i.weekday_tinyint == 2).length;
@@ -201,6 +217,18 @@ export class ListfullComponent {
     this.shownGroupL2 = null;
     this.shownGroupL3 = null;
     this.shownGroupL4 = null;
+  }
+
+  public convertTo12Hr(timeString){
+    if (this.timeDisplay == "12hr") {
+      var H = +timeString.substr(0, 2);
+      var h = H % 12 || 12;
+      var ampm = (H < 12 || H === 24) ? " AM" : " PM";
+      timeString = h + timeString.substr(2, 3) + ampm;
+      return timeString;
+    } else {
+     return timeString.slice(0, -3);
+    }
   }
 
 }
