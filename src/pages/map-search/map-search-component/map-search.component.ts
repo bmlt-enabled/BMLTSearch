@@ -115,11 +115,6 @@ export class MapSearchComponent {
   }
 
   setLatLngOffsets() {
-    if (this.mapBounds) {
-      delete this.mapBounds;
-    }
-    var tempMapBounds = new google.maps.LatLngBounds();
-
     var i : any;
     var dist : number = 0;
     for (i = 0; i < this.meetingList.length - 1; i++) {
@@ -146,15 +141,23 @@ export class MapSearchComponent {
           break;
         }
       } // while
-      if (this.myLatLng) {
-        delete this.myLatLng;
-      }
-      this.myLatLng = new google.maps.LatLng(this.meetingList[i].latitude, this.meetingList[i].longitude);
-      tempMapBounds.extend(this.myLatLng);
+
     } // for
 
     this.circleRadiusMeters = dist * 1000;
-//    this.mapBounds = tempMapBounds;
+  }
+
+  public radiusChange() {
+    var tempMapBounds = new google.maps.LatLngBounds();
+
+    this.circle.getBounds().then( value => {
+      console.log("GetBounds retuned!!", value);
+
+      tempMapBounds.extend(value.getNorthEast());
+      tempMapBounds.extend(value.getSouthWest());
+
+      this.mapBounds = tempMapBounds;
+    });
 
   }
 
