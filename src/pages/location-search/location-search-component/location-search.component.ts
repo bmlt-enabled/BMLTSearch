@@ -113,7 +113,7 @@ export class LocationSearchComponent {
       this.friCount = this.meetingListGrouped.filter(i => i.weekday_tinyint == 6).length;
       this.satCount = this.meetingListGrouped.filter(i => i.weekday_tinyint == 7).length;
 
-      this.meetingListGrouped.filter(i => i.start_time = this.convertTo12Hr(i.start_time));
+      this.meetingListGrouped.filter(i => i.start_time_set = this.convertTo12Hr(i.start_time));
 
       this.meetingListGrouped.sort((a, b) => a.weekday_tinyint.localeCompare(b.weekday_tinyint));
       this.meetingListGrouped = this.groupMeetingList(this.meetingListGrouped, this.meetingsListGrouping);
