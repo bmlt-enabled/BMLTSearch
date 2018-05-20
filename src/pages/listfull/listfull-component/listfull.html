@@ -6,6 +6,7 @@
 
     <div *ngIf="areaName != '' ; else BMLT_List">
       <ion-title>{{ areaName }}</ion-title>
+        <button ion-button small (click)="showServiceStructure()">Back</button>
     </div>
     <ng-template #BMLT_List>
       <ion-title>{{'LISTFULL' | translate}} </ion-title>
@@ -213,11 +214,3 @@
     </div>
   </div>
 </ion-content>
-
-<div *ngIf="HTMLGrouping == 'meetings'">
-  <ion-footer>
-    <ion-toolbar>
-      <button ion-button (click)="showServiceStructure()">Back</button>
-    </ion-toolbar>
-  </ion-footer>
-</div>

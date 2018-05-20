@@ -14,26 +14,25 @@ import   thenBy                  from 'thenby';
 })
 export class ListfullComponent {
 
-  @ViewChild(Content) content: Content;
   serviceGroups          : any;
-  serviceGroupHierarchy  : any = [];
-  shownDay                     = null;
-  shownGroupL1                 = null;
-  shownGroupL2                 = null;
-  shownGroupL3                 = null;
-  shownGroupL4                 = null;
-  HTMLGrouping                 = "areas";
-  loader                       = null;
-  meetingListArea        : any = [];
-  areaName               : any = "";
-  sunCount                           = 0;
-  monCount                           = 0;
-  tueCount                           = 0;
-  wedCount                           = 0;
-  thuCount                           = 0;
-  friCount                           = 0;
-  satCount                           = 0;
-  timeDisplay             : string   = "";
+  serviceGroupHierarchy  : any    = [];
+  shownDay                        = null;
+  shownGroupL1                    = null;
+  shownGroupL2                    = null;
+  shownGroupL3                    = null;
+  shownGroupL4                    = null;
+  HTMLGrouping                    = "areas";
+  loader                          = null;
+  meetingListArea        : any    = [];
+  areaName               : any    = "";
+  sunCount                        = 0;
+  monCount                        = 0;
+  tueCount                        = 0;
+  wedCount                        = 0;
+  thuCount                        = 0;
+  friCount                        = 0;
+  satCount                        = 0;
+  timeDisplay            : string = "";
 
   constructor( private MeetingListProvider   : MeetingListProvider,
                private ServiceGroupsProvider : ServiceGroupsProvider,
@@ -124,6 +123,7 @@ export class ListfullComponent {
 
   getMeetingsByArea(areaID, areaName){
     this.translate.get('LOADING').subscribe(value => {this.presentLoader(value);})
+    this.HTMLGrouping = "meetings";
     this.areaName = areaName;
     this.MeetingListProvider.getMeetingsByAreaProvider(areaID).subscribe((data)=>{
 
@@ -152,9 +152,8 @@ export class ListfullComponent {
           );
         }
       }
-      this.HTMLGrouping = "meetings";
+
       this.dismissLoader();
-      this.content.resize();
     });
 
   }
@@ -213,10 +212,10 @@ export class ListfullComponent {
     this.HTMLGrouping = "areas";
     this.areaName = "";
     this.shownDay = null;
-    this.shownGroupL1 = null;
-    this.shownGroupL2 = null;
-    this.shownGroupL3 = null;
-    this.shownGroupL4 = null;
+//    this.shownGroupL1 = null;
+//    this.shownGroupL2 = null;
+//    this.shownGroupL3 = null;
+//    this.shownGroupL4 = null;
   }
 
   public convertTo12Hr(timeString){
