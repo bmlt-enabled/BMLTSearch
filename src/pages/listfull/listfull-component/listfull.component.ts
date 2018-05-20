@@ -133,7 +133,7 @@ export class ListfullComponent {
         this.meetingListArea  = data;
         this.meetingListArea  = this.meetingListArea.filter(meeting => meeting.latitude = parseFloat(meeting.latitude));
         this.meetingListArea  = this.meetingListArea.filter(meeting => meeting.longitude = parseFloat(meeting.longitude));
-        this.meetingListArea.filter(i => i.start_time = this.convertTo12Hr(i.start_time));
+        this.meetingListArea.filter(i => i.start_time_set = this.convertTo12Hr(i.start_time));
 
         this.sunCount = this.meetingListArea.filter(i => i.weekday_tinyint == 1).length;
         this.monCount = this.meetingListArea.filter(i => i.weekday_tinyint == 2).length;
@@ -151,6 +151,7 @@ export class ListfullComponent {
             .thenBy("start_time")
           );
         }
+
       }
 
       this.dismissLoader();
