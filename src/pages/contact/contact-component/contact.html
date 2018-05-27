@@ -10,15 +10,40 @@
 </ion-header>
 
 <ion-content>
+
+
   <ion-card>
     <ion-card-content>
-      <ion-card-title>About</ion-card-title>
+        <ion-card-title>App Source Code</ion-card-title>
+        <ion-item text-wrap>
+          <ion-icon name="globe" item-left></ion-icon>
+          <button ion-button small  (click)='openLink(sourceCodeLink)'>https://github.com</button>
+        </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-content>
+        <ion-card-title>Open a bug report/enhancement request</ion-card-title>
+        <ion-item text-wrap>
+          <ion-icon name="globe" item-left></ion-icon>
+          <button ion-button small  (click)='openLink(sourceBugs)'>https://github.com</button>
+        </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-content>
+      <ion-card-title>How do I find out more about the BMLT?</ion-card-title>
       <ion-list>
         <ion-item text-wrap>
-         <ion-icon name="home" item-left></ion-icon>
-         About this app
+         <button ion-button small onclick="window.open('https://www.facebook.com/groups/149214049107349/', '_system', 'location=yes')"><ion-icon name="logo-facebook" item-left></ion-icon>&nbsp;Join our Facebook Group</button>
+        </ion-item>
+        <ion-item text-wrap>
+         <button ion-button small onclick="window.open('https://bmlt.magshare.net/', '_system', 'location=yes')"><ion-icon name="globe" item-left></ion-icon>&nbsp;Visit the website</button>
         </ion-item>
       </ion-list>
     </ion-card-content>
   </ion-card>
+
 </ion-content>
