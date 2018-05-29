@@ -1,8 +1,5 @@
 import { Component } from '@angular/core';
 import { Config } from '../../../app/app.config';
-import { ServiceGroupsProvider } from '../../../providers/service-groups/service-groups';
-
-import { LoadingController } from 'ionic-angular';
 
 @Component({
   selector: 'page-contact',
@@ -10,25 +7,16 @@ import { LoadingController } from 'ionic-angular';
 })
 export class ContactComponent {
 
-  loader = null;
-  serviceGroupNames : any;
+  sourceCodeLink    : string = "https://github.com/paulnagle/BMLTSearch";
+  sourceBugs        : string = "https://github.com/paulnagle/BMLTSearch/issues";
+  bmltLink          : string = "https://bmlt.magshare.net/";
+  
+  constructor( private config: Config) {
 
-  constructor(
-    private ServiceGroupsProvider : ServiceGroupsProvider,
-    public loadingCtrl: LoadingController,
-  	private config: Config
-  ) {
-
-        this.getServiceGroupContactDetails();
   }
 
-
-  getServiceGroupContactDetails(){
-      this.ServiceGroupsProvider.getAllServiceGroups().subscribe((serviceGroupData)=>{
-        this.serviceGroupNames = serviceGroupData;
-
-    });
+  public openLink(url) {
+    window.open(url , '_system');
   }
-
 
 }
