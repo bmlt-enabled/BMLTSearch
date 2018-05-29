@@ -7,9 +7,17 @@
       {{'ADDRESSSEARCH' | translate}}
     </ion-title>
   </ion-navbar>
+  <ion-searchbar no-padding
+     color="primary"
+     id="autocomplete"
+     type="text"
+     (ionInput)="onInput($event)"
+     #searchbar
+     placeholder="Enter address here..."></ion-searchbar>
 </ion-header>
 
 <ion-content>
+
   <agm-map
   [fitBounds]="mapBounds"
   [latitude]="mapLatitude"
@@ -105,10 +113,7 @@
 
 <ion-footer no-padding>
   <ion-toolbar no-padding>
-    <ion-item text-wrap>
-      <ion-label floating>Enter Address Here</ion-label>
-      <ion-input id="autocompleteInput" type="text"></ion-input>
-    </ion-item>
+
 
     <ion-range id="RadiusRange" min="5" max="50" [(ngModel)]="autoRadius" (ionBlur)="getMeetings()" color="danger" pin="true">
       <ion-label range-left>5 meetings</ion-label>

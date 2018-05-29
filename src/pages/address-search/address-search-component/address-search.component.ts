@@ -1,9 +1,8 @@
-import { Component, ViewChild }       from '@angular/core';
+import { Component, ViewChild, ElementRef, NgZone  }       from '@angular/core';
 import { LoadingController }          from 'ionic-angular';
 import { Config }                     from '../../../app/app.config';
 import { Storage }                    from '@ionic/storage';
 import { ToastController }            from 'ionic-angular';
-import { Geolocation }                from '@ionic-native/geolocation';
 import { MouseEvent,
          LatLngLiteral,
          LatLngBounds,
@@ -35,14 +34,15 @@ export class AddressSearchComponent {
   formattedAddress   : string;
 
   @ViewChild('circle', {read: AgmCircle}) circle: AgmCircle;
+  @ViewChild('searchbar', {read: ElementRef}) searchbar: ElementRef;
 
   constructor(private MeetingListProvider : MeetingListProvider,
               public  loadingCtrl         : LoadingController,
-              private geolocation         : Geolocation,
               private toastCtrl           : ToastController,
               private storage             : Storage,
               private translate           : TranslateService,
-              private MapsAPIloader       : MapsAPILoader  ) {
+              private MapsAPIloader       : MapsAPILoader,
+              private zone                : NgZone  ) {
 
      console.log("AddressSearchComponent: constructor");
   }
@@ -89,22 +89,27 @@ export class AddressSearchComponent {
           });
         });
       });
-
-      this.MapsAPIloader.load().then(() => {
-        console.log("MADE IT HERE");
-        let input = document.getElementById('autocompleteInput').getElementsByTagName('input')[0];
-
-        let autocomplete = new google.maps.places.Autocomplete(input, {});
-        google.maps.event.addListener(autocomplete, 'place_changed', () => {
-            let place = autocomplete.getPlace();
-            this.mapLatitude = place.geometry.location.lat();
-            this.mapLongitude = place.geometry.location.lng();
-            this.formattedAddress = place.formatted_address;
-            this.getMeetings();
-            console.log(place);
-        });
-      });
   }
+
+
+onInput($event) {
+   console.log("onInput");
+  let autocomplete = new google.maps.places.Autocomplete(this.searchbar.nativeElement.querySelector('.searchbar-input'), {
+    types: ["geocode"]
+  });
+
+  autocomplete.addListener('place_changed', () => {
+    this.zone.run(() => {
+      let place = autocomplete.getPlace();
+      this.mapLatitude = place.geometry.location.lat();
+      this.mapLongitude = place.geometry.location.lng();
+      this.formattedAddress = place.formatted_address;
+      this.getMeetings();
+      console.log(place);
+    });
+  });
+
+}
 
 
   getMeetings(){
@@ -205,6 +210,10 @@ export class AddressSearchComponent {
       this.mapBounds = tempMapBounds;
     });
 
+  }
+
+  public openMapsLink(destLatitude, destLongitude) {
+    window.open('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
   }
 
 }
