@@ -1,4 +1,7 @@
-import { Component, ViewChild, ElementRef, NgZone  }       from '@angular/core';
+import { Component,
+         ViewChild,
+         ElementRef,
+         NgZone  }                    from '@angular/core';
 import { LoadingController }          from 'ionic-angular';
 import { Config }                     from '../../../app/app.config';
 import { Storage }                    from '@ionic/storage';
@@ -11,6 +14,7 @@ import { MouseEvent,
          MapsAPILoader  }             from '@agm/core';
 import { MeetingListProvider }        from '../../../providers/meeting-list/meeting-list';
 import { TranslateService }           from '@ngx-translate/core';
+import   * as $                       from 'jquery';
 
 declare const google: any;
 
@@ -31,10 +35,17 @@ export class AddressSearchComponent {
   mapBounds          : LatLngBounds;
   myLatLng           : LatLng;
   circleRadiusMeters : number  = 0 ;
-  formattedAddress   : string;
+  formattedAddress   : string  = '';
+
+	autocompleteService: any;
+	placesService      : any;
+	query              : string  = '';
+	places             : any     = [];
+	location           : any;
+
+
 
   @ViewChild('circle', {read: AgmCircle}) circle: AgmCircle;
-  @ViewChild('searchbar', {read: ElementRef}) searchbar: ElementRef;
 
   constructor(private MeetingListProvider : MeetingListProvider,
               public  loadingCtrl         : LoadingController,
@@ -47,69 +58,90 @@ export class AddressSearchComponent {
      console.log("AddressSearchComponent: constructor");
   }
 
+	selectPlace(place){
+    console.log("Selecting a place");
+		this.places = [];
+		let location = {
+			lat: null,
+			lng: null,
+			name: place.name
+		};
+		this.placesService.getDetails({placeId: place.place_id}, (details) => {
+			this.zone.run(() => {
+
+        this.mapLatitude = details.geometry.location.lat();
+        this.mapLongitude = details.geometry.location.lng();
+        this.formattedAddress = details.formatted_address;
+        this.getMeetings();
+        console.log("Place : ", details);
+
+			});
+		});
+	}
+
+	searchPlace(){
+		if(this.query.length) {
+			let config = {
+				types: ['geocode'],
+				input: this.query
+			}
+			this.autocompleteService.getPlacePredictions(config, (predictions, status) => {
+				if(status == google.maps.places.PlacesServiceStatus.OK && predictions){
+					this.places = [];
+					predictions.forEach((prediction) => {
+						this.places.push(prediction);
+					});
+				}
+			});
+		} else {
+			this.places = [];
+		}
+
+	}
 
   mapReady(event: any) {
     console.log("mapReady : event");
     this.map = event;
 
-    this.storage.get('timeDisplay')
-    .then(timeDisplay => {
-        if(timeDisplay) {
-          console.log("Setting timeDisplay to ", timeDisplay);
-          this.timeDisplay = timeDisplay;
-        } else {
-          this.timeDisplay = "24hr";
-        }
-        this.storage.get('searchRange')
-        .then(searchValue => {
-            if(searchValue) {
-              this.autoRadius = searchValue;
-            } else {
-              this.autoRadius = 25;
-            }
-          this.storage.get('savedLat').then(value => {
-            if(value) {
-              console.log("mapLatitude was saved previously : ", value);
-              this.mapLatitude = value;
-              this.storage.get('savedLng').then(value => {
-                if(value) {
-                  console.log("mapLongitude was saved previously : ", value);
-                  this.mapLongitude = value;
+    this.autocompleteService = new google.maps.places.AutocompleteService();
+    this.placesService = new google.maps.places.PlacesService(this.map);
 
-                  this.mapLatitude = parseFloat(this.mapLatitude);
-                  this.mapLongitude = parseFloat(this.mapLongitude);
-                  this.getMeetings();
-                } else {
-                  console.log("No mapLongitude previously saved");
-                }
-              });
-            } else {
-              console.log("No mapLatitude previously saved");
-            }
-          });
+    this.storage.get('timeDisplay').then(timeDisplay => {
+      if(timeDisplay) {
+        console.log("Setting timeDisplay to ", timeDisplay);
+        this.timeDisplay = timeDisplay;
+      } else {
+        this.timeDisplay = "24hr";
+      }
+      this.storage.get('searchRange').then(searchValue => {
+        if(searchValue) {
+          this.autoRadius = searchValue;
+        } else {
+          this.autoRadius = 25;
+        }
+        this.storage.get('savedLat').then(value => {
+          if(value) {
+            console.log("mapLatitude was saved previously : ", value);
+            this.mapLatitude = value;
+            this.storage.get('savedLng').then(value => {
+              if(value) {
+                console.log("mapLongitude was saved previously : ", value);
+                this.mapLongitude = value;
+
+                this.mapLatitude = parseFloat(this.mapLatitude);
+                this.mapLongitude = parseFloat(this.mapLongitude);
+                this.getMeetings();
+              } else {
+                console.log("No mapLongitude previously saved");
+              }
+            });
+          } else {
+            console.log("No mapLatitude previously saved");
+          }
         });
       });
-  }
-
-
-onInput($event) {
-   console.log("onInput");
-  let autocomplete = new google.maps.places.Autocomplete(this.searchbar.nativeElement.querySelector('.searchbar-input'), {
-    types: ["geocode"]
-  });
-
-  autocomplete.addListener('place_changed', () => {
-    this.zone.run(() => {
-      let place = autocomplete.getPlace();
-      this.mapLatitude = place.geometry.location.lat();
-      this.mapLongitude = place.geometry.location.lng();
-      this.formattedAddress = place.formatted_address;
-      this.getMeetings();
-      console.log(place);
     });
-  });
-
-}
+  }
 
 
   getMeetings(){

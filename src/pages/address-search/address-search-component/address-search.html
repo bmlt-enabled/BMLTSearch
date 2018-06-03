@@ -7,18 +7,16 @@
       {{'ADDRESSSEARCH' | translate}}
     </ion-title>
   </ion-navbar>
-  <ion-searchbar no-padding
-     color="primary"
-     id="autocomplete"
-     type="text"
-     (ionInput)="onInput($event)"
-     #searchbar
-     placeholder="Enter address here..."></ion-searchbar>
+  <ion-searchbar nopadding [(ngModel)]="query" (ionInput)="searchPlace()"></ion-searchbar>
+  <ion-list>
+   <ion-item nopadding tappable *ngFor="let place of places" (touchstart)="selectPlace(place)">{{place.description}}</ion-item>
+ </ion-list>
 </ion-header>
 
 <ion-content>
 
   <agm-map
+  nopadding
   [fitBounds]="mapBounds"
   [latitude]="mapLatitude"
   [longitude]="mapLongitude"
