@@ -25,3 +25,5 @@ ionic cordova prepare
 
 ionic cordova resources ios
 ionic cordova resources android
+
+ionic build --prod
