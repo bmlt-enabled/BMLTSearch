@@ -1,4 +1,4 @@
-BMLT Meeting Search
+## BMLT Meeting Search
 
 example commands to build a git clone of this app (on a mac)
 

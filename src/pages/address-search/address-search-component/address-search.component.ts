@@ -14,7 +14,6 @@ import { MouseEvent,
          MapsAPILoader  }             from '@agm/core';
 import { MeetingListProvider }        from '../../../providers/meeting-list/meeting-list';
 import { TranslateService }           from '@ngx-translate/core';
-import   * as $                       from 'jquery';
 
 declare const google: any;
 
@@ -71,7 +70,7 @@ export class AddressSearchComponent {
 
         this.mapLatitude = details.geometry.location.lat();
         this.mapLongitude = details.geometry.location.lng();
-        this.formattedAddress = details.formatted_address;
+        this.query = details.formatted_address;
         this.getMeetings();
         console.log("Place : ", details);
 
