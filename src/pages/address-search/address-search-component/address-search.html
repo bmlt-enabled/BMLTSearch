@@ -7,16 +7,15 @@
       {{'ADDRESSSEARCH' | translate}}
     </ion-title>
   </ion-navbar>
-  <ion-searchbar nopadding [(ngModel)]="query" (ionInput)="searchPlace()"></ion-searchbar>
+  <ion-searchbar no-padding [(ngModel)]="query" (ionInput)="searchPlace()"></ion-searchbar>
   <ion-list>
-   <ion-item nopadding tappable *ngFor="let place of places" (touchstart)="selectPlace(place)">{{place.description}}</ion-item>
+   <ion-item  tappable *ngFor="let place of places" (touchstart)="selectPlace(place)">{{place.description}}</ion-item>
  </ion-list>
 </ion-header>
 
 <ion-content>
 
   <agm-map
-  nopadding
   [fitBounds]="mapBounds"
   [latitude]="mapLatitude"
   [longitude]="mapLongitude"
@@ -86,7 +85,7 @@
     [longitude]="mapLongitude"
     [markerDraggable]="false">
       <agm-info-window>
-        <p>{{ formattedAddress}}</p>
+        <p>{{ query }}</p>
       </agm-info-window>
     </agm-marker>
 
