@@ -2,7 +2,7 @@
 <widget id="ie.nasouth.bmltsearch" version="0.0.34" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>BMLT Search</name>
     <description>BMLT Meeting Search</description>
-    <author email="paulnagle@gmail.com" href="https://www.nasouth.ie">Paul Nagle</author>
+    <author email="paulnagle@gmail.com" href="https://bmlt.magshare.net/">Paul Nagle</author>
     <content src="index.html" />
     <access origin="*" />
     <content original-src="index.html" />
@@ -96,7 +96,7 @@
     <plugin name="cordova-plugin-geolocation" spec="^4.0.1">
         <variable name="GEOLOCATION_USAGE_DESCRIPTION" value="To locate you" />
     </plugin>
-    <engine name="ios" spec="4.5.4" />
+    <engine name="ios" spec="4.5.5" />
     <engine name="android" spec="7.0.0" />
     <engine name="browser" spec="5.0.3" />
 </widget>
