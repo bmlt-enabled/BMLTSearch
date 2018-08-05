@@ -20,8 +20,9 @@ ionic cordova plugin add cordova-plugin-statusbar
 ionic cordova plugin add cordova-plugin-whitelist
 ionic cordova plugin add cordova-plugin-geolocation --variable GEOLOCATION_USAGE_DESCRIPTION="To locate you"
 
-
-ionic cordova prepare
+ionic cordova prepare ios
+ionic cordova prepare android
+ionic cordova prepare browser
 
 ionic cordova resources ios
 ionic cordova resources android

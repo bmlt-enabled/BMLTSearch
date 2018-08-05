@@ -1,8 +1,8 @@
 {
-  "name": "NAItaly",
+  "name": "BMLTSearch",
   "version": "1.0.0",
   "author": "Paul Nagle",
-  "homepage": "http://www.na-italia.org",
+  "homepage": "https://bmlt.magshare.net/",
   "private": true,
   "scripts": {
     "clean": "ionic-app-scripts clean",
@@ -32,7 +32,7 @@
     "@ngx-translate/http-loader": "2.0.0",
     "cordova-android": "7.0.0",
     "cordova-browser": "5.0.3",
-    "cordova-ios": "4.5.4",
+    "cordova-ios": "4.5.5",
     "cordova-plugin-geolocation": "^4.0.1",
     "cordova-plugin-splashscreen": "^5.0.2",
     "cordova-plugin-statusbar": "^2.4.2",
