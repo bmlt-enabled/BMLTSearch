@@ -111,7 +111,7 @@
       <ion-grid>
         <ion-row>
           <ion-col col-10>
-            <b>{{autoRadius}} meetings nearest the red marker. Drag the red marker to move the search.</b>
+            <b>{{autoRadius}} {{'MAP_SEARCH_DESC' | translate }}</b>
           </ion-col>
           <ion-col>
             <button ion-button color="danger" id="LocationButton" (click)="locatePhone()" class="col text-center text-wrap">
@@ -124,8 +124,8 @@
     </ion-item>
 
       <ion-range id="RadiusRange" min="5" max="50" [(ngModel)]="autoRadius" (ionBlur)="getMeetings()" color="danger" pin="true">
-        <ion-label range-left>5 meetings</ion-label>
-        <ion-label range-right>50 meetings</ion-label>
+        <ion-label range-left>5 {{'MEETINGS' | translate }}</ion-label>
+        <ion-label range-right>50 {{'MEETINGS' | translate }}</ion-label>
       </ion-range>
 </ion-toolbar>
 </ion-footer>
