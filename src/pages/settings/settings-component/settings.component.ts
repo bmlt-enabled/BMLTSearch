@@ -29,15 +29,6 @@ export class SettingsComponent {
 	        }
 	    });
 
-      this.storage.get('theme')
-	    .then(themeValue => {
-	        if(themeValue) {
-	        	this.theme = themeValue;
-	        } else {
-	        	this.theme = 'blue';
-	        }
-	    });
-
       this.storage.get('searchRange')
       .then(searchValue => {
           if(searchValue) {

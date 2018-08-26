@@ -7,38 +7,31 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content >
+<ion-content>
   <ion-list>
 
     <ion-item>
-    <ion-label>{{'LANGUAGE' | translate}}</ion-label>
-    <ion-select [(ngModel)]="language" (ionChange)=selectLanguage()>
-      <ion-option value="en">{{'ENGLISH' | translate}}</ion-option>
-      <ion-option value="it">{{'ITALIAN' | translate}}</ion-option>
-    </ion-select>
+      <ion-label>{{'LANGUAGE' | translate}}</ion-label>
+      <ion-select [(ngModel)]="language" (ionChange)=selectLanguage()>
+        <ion-option value="en">{{'ENGLISH' | translate}}</ion-option>
+        <ion-option value="it">{{'ITALIAN' | translate}}</ion-option>
+      </ion-select>
     </ion-item>
 
     <ion-item>
-    <ion-label>{{'THEME' | translate}}</ion-label>
-    <ion-select [(ngModel)]="theme" (ionChange)=selectTheme()>
-      <ion-option value="blue">{{'BLUE' | translate}}</ion-option>
-      <ion-option value="red">{{'RED' | translate}}</ion-option>
-    </ion-select>
+      <ion-label>{{'TIMEDISPLAY' | translate}}</ion-label>
+      <ion-select [(ngModel)]="timeDisplay" (ionChange)=selectTimeDisplay()>
+        <ion-option value="12hr">{{'12HR' | translate}}</ion-option>
+        <ion-option value="24hr">{{'24HR' | translate}}</ion-option>
+      </ion-select>
     </ion-item>
 
     <ion-item>
-    <ion-label>{{'TIMEDISPLAY' | translate}}</ion-label>
-    <ion-select [(ngModel)]="timeDisplay" (ionChange)=selectTimeDisplay()>
-      <ion-option value="12hr">{{'12HR' | translate}}</ion-option>
-      <ion-option value="24hr">{{'24HR' | translate}}</ion-option>
-    </ion-select>
-    </ion-item>
-    <ion-item>
-    <ion-label>{{'SEARCHRANGESETTING' | translate}} = {{searchRange}} meetings</ion-label>
-    <ion-range id="RadiusRange" min="5" max="50" [(ngModel)]="searchRange" (ionBlur)="selectSearchRange()" color="danger" pin="true">
-      <ion-label range-left>5 meetings</ion-label>
-      <ion-label range-right>50 meetings</ion-label>
-    </ion-range>
+      <ion-label>{{'SEARCHRANGESETTING' | translate}} = {{searchRange}} meetings</ion-label>
+      <ion-range id="RadiusRange" min="5" max="50" [(ngModel)]="searchRange" (ionBlur)="selectSearchRange()" color="danger" pin="true">
+        <ion-label range-left>5 meetings</ion-label>
+        <ion-label range-right>50 meetings</ion-label>
+      </ion-range>
     </ion-item>
 
   </ion-list>
