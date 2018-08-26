@@ -5,8 +5,7 @@ import { Storage }               from '@ionic/storage';
 import { ServiceGroupsProvider } from '../../../providers/service-groups/service-groups';
 import { MeetingListProvider }   from '../../../providers/meeting-list/meeting-list';
 import { TranslateService }      from '@ngx-translate/core';
-import   firstBy                 from 'thenby';
-import   thenBy                  from 'thenby';
+import { firstBy }               from 'thenby';
 
 @Component({
   selector: 'page-listfull',

@@ -4,8 +4,8 @@ import { LoadingController }     from 'ionic-angular';
 import { MeetingListProvider }   from '../../../providers/meeting-list/meeting-list';
 import { Geolocation }           from '@ionic-native/geolocation';
 import { GeolocateProvider }     from '../../../providers/geolocate/geolocate';
-import firstBy                   from 'thenby';
-import thenBy                    from 'thenby';
+import { firstBy }               from 'thenby';
+
 
 @Component({
   templateUrl: 'location-search.html'
