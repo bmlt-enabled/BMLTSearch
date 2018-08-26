@@ -1,11 +1,14 @@
-import { Component } from '@angular/core';
-import { Config } from '../../../app/app.config';
-import { MeetingListProvider } from '../../../providers/meeting-list/meeting-list';
-import { LoadingController } from 'ionic-angular';
+import { Component }             from '@angular/core';
+import { Config }                from '../../../app/app.config';
+import { MeetingListProvider }   from '../../../providers/meeting-list/meeting-list';
+import { LoadingController }     from 'ionic-angular';
 import { ServiceGroupsProvider } from '../../../providers/service-groups/service-groups';
-import { Storage } from '@ionic/storage';
-import { Geolocation } from '@ionic-native/geolocation';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { Storage }               from '@ionic/storage';
+import { Geolocation }           from '@ionic-native/geolocation';
+import { TranslateService }      from '@ngx-translate/core';
+import { IonicPage,
+         NavController,
+         NavParams }             from 'ionic-angular';
 
 
 @Component({
@@ -22,12 +25,13 @@ export class DoIHaveTheBmltComponent {
   serviceGroupNames : any;
   bmltEnabled : string = 'maybe';
 
-  constructor(  private config: Config,
-                private MeetingListProvider: MeetingListProvider,
+  constructor(  private config:                Config,
+                private MeetingListProvider:   MeetingListProvider,
                 private ServiceGroupsProvider: ServiceGroupsProvider,
-                private loadingCtrl: LoadingController,
-                private storage: Storage,
-                private geolocation: Geolocation ) {
+                private loadingCtrl:           LoadingController,
+                private translate:             TranslateService,
+                private storage:               Storage,
+                private geolocation:           Geolocation ) {
 
     console.log("getServiceGroupNames");
     this.ServiceGroupsProvider.getAllServiceGroups().subscribe((serviceGroupData)=>{
@@ -61,7 +65,8 @@ export class DoIHaveTheBmltComponent {
   }
 
   findNearestMeeting() {
-    this.presentLoader("Finding Meetings...");
+    this.translate.get('LOCATING').subscribe(value => {this.presentLoader(value);})
+
     this.MeetingListProvider.getNearestMeeting(this.addressLatitude , this.addressLongitude).subscribe((data)=>{
       this.nearestMeeting = data;
       this.nearestMeeting = this.nearestMeeting.filter(meeting => meeting.service_body_bigint = this.getServiceNameFromID(meeting.service_body_bigint));
@@ -76,7 +81,6 @@ export class DoIHaveTheBmltComponent {
       }
     });
   }
-
 
   presentLoader(loaderText) {
     if (this.loader) {
@@ -98,7 +102,8 @@ export class DoIHaveTheBmltComponent {
   }
 
   locatePhone() {
-    this.presentLoader("Locating Phone ...");
+    this.translate.get('LOCATING').subscribe(value => {this.presentLoader(value);})
+
     this.geolocation.getCurrentPosition({ timeout: 10000 }).then((resp) => {
       console.log('Got location ok');
 

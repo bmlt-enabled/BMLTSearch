@@ -5,6 +5,7 @@ import { NavController,
 import { Geolocation }         from '@ionic-native/geolocation';
 import { GeolocateProvider }   from '../../../providers/geolocate/geolocate';
 import { Storage }             from '@ionic/storage';
+import { TranslateService }    from '@ngx-translate/core';
 
 @Component({
 	selector: 'page-home',
@@ -25,6 +26,7 @@ export class HomeComponent {
 		private events                : Events,
 		private GeolocateProvider     : GeolocateProvider,
 		private geolocation           : Geolocation,
+		private translate             : TranslateService,
 		private storage               : Storage            ) {}
 
 	ngOnInit() {
@@ -82,7 +84,7 @@ export class HomeComponent {
 
 			this.storage.set('savedLat', this.savedLat);
 			this.storage.set('savedLng', this.savedLng);
-			
+
       console.log("Try to getAddressFromLocation");
       this.GeolocateProvider.convertLatLong(this.savedLat, this.savedLng).subscribe((json)=>{
 				console.log("Result retrieved from getAddressFromLocation");

@@ -39,7 +39,7 @@ export class ListfullComponent {
                private translate             : TranslateService,
                private storage               : Storage  ) {
 
-    this.translate.get('LOADING').subscribe(value => {this.presentLoader(value);})
+    this.translate.get('FINDING_MTGS').subscribe(value => {this.presentLoader(value);})
 
     this.storage.get('timeDisplay')
     .then(timeDisplay => {
@@ -121,7 +121,7 @@ export class ListfullComponent {
   isL4GroupShown(L4group) {return this.shownGroupL4 === L4group;};
 
   getMeetingsByArea(areaID, areaName){
-    this.translate.get('LOADING').subscribe(value => {this.presentLoader(value);})
+    this.translate.get('FINDING_MTGS').subscribe(value => {this.presentLoader(value);})
     this.HTMLGrouping = "meetings";
     this.areaName = areaName;
     this.MeetingListProvider.getMeetingsByAreaProvider(areaID).subscribe((data)=>{
