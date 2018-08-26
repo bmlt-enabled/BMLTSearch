@@ -5,7 +5,7 @@ import { MeetingListProvider }   from '../../../providers/meeting-list/meeting-l
 import { Geolocation }           from '@ionic-native/geolocation';
 import { GeolocateProvider }     from '../../../providers/geolocate/geolocate';
 import { firstBy }               from 'thenby';
-
+import { TranslateService }      from '@ngx-translate/core';
 
 @Component({
   templateUrl: 'location-search.html'
@@ -38,6 +38,7 @@ export class LocationSearchComponent {
   constructor(private MeetingListProvider   : MeetingListProvider,
               private loadingCtrl           : LoadingController,
               private storage               : Storage,
+              private translate           : TranslateService,
               private GeolocateProvider     : GeolocateProvider,
               private geolocation           : Geolocation )
   {
@@ -100,7 +101,8 @@ export class LocationSearchComponent {
 
   getAllMeetings() {
     console.log("getAllMeetings - radius of ", this.radius, " around " , this.addressLatitude, this.addressLongitude);
-    this.presentLoader("Finding Meetings ...");
+
+    this.translate.get('FINDING_MTGS').subscribe(value => {this.presentLoader(value);})
     this.MeetingListProvider.getAddressMeetings(this.addressLatitude , this.addressLongitude, this.radius).subscribe((data)=>{
       this.addressMeetingList = data;
 
@@ -179,7 +181,7 @@ export class LocationSearchComponent {
   }
 
   locatePhone() {
-    this.presentLoader("Locating Phone ...");
+    this.translate.get('LOCATING').subscribe(value => {this.presentLoader(value);})
     this.geolocation.getCurrentPosition({timeout: 10000}).then((resp) => {
       console.log('Got location ok');
 
