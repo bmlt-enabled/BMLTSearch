@@ -41,10 +41,10 @@
       <ion-card-title>{{'FIND_OUT_MORE' | translate}}</ion-card-title>
       <ion-list>
         <ion-item text-wrap>
-          <button ion-button small onclick="window.open('https://www.facebook.com/groups/149214049107349/', '_system', 'location=yes')"><ion-icon name="logo-facebook" item-left></ion-icon>&nbsp;{{'JOIN_FB_GROUP' | translate}}</button>
+          <button ion-button small  (click)="openLink('https://www.facebook.com/groups/149214049107349/')"><ion-icon name="logo-facebook" item-left></ion-icon>&nbsp;{{'JOIN_FB_GROUP' | translate}}</button>
         </ion-item>
         <ion-item text-wrap>
-          <button ion-button small onclick="window.open('https://bmlt.magshare.net/', '_system', 'location=yes')"><ion-icon name="globe" item-left></ion-icon>&nbsp;{{'VISIT_WEBSITE' | translate}}</button>
+          <button ion-button small  (click)="openLink('https://bmlt.magshare.net/')"><ion-icon name="globe" item-left></ion-icon>&nbsp;{{'VISIT_WEBSITE' | translate}}</button>
         </ion-item>
       </ion-list>
     </ion-card-content>

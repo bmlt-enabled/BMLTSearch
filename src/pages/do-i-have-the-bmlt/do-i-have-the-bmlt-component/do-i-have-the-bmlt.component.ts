@@ -9,6 +9,7 @@ import { TranslateService }      from '@ngx-translate/core';
 import { IonicPage,
          NavController,
          NavParams }             from 'ionic-angular';
+import { InAppBrowser }          from '@ionic-native/in-app-browser';
 
 
 @Component({
@@ -31,7 +32,8 @@ export class DoIHaveTheBmltComponent {
                 private loadingCtrl:           LoadingController,
                 private translate:             TranslateService,
                 private storage:               Storage,
-                private geolocation:           Geolocation ) {
+                private geolocation:           Geolocation,
+                private iab:                   InAppBrowser ) {
 
     console.log("getServiceGroupNames");
     this.ServiceGroupsProvider.getAllServiceGroups().subscribe((serviceGroupData)=>{
@@ -119,6 +121,13 @@ export class DoIHaveTheBmltComponent {
       this.currentAddress = "Location not found";
       this.dismissLoader();
     });
+  }
+
+  public openLink(url) {
+    window.open(url , '_system');
+    const browser = this.iab.create(url);
+    browser.show()
+
   }
 
 }
