@@ -10,6 +10,7 @@ import { MouseEvent,
          AgmCircle  }                 from '@agm/core';
 import { MeetingListProvider }        from '../../../providers/meeting-list/meeting-list';
 import { TranslateService }           from '@ngx-translate/core';
+import { InAppBrowser }               from '@ionic-native/in-app-browser';
 
 declare const google: any;
 
@@ -38,7 +39,8 @@ export class MapSearchComponent {
               private geolocation         : Geolocation,
               private toastCtrl           : ToastController,
               private storage             : Storage,
-              private translate           : TranslateService  ) {
+              private translate           : TranslateService,
+              private iab                 : InAppBrowser   ) {
 
     console.log("MapSearchComponent: constructor:");
 
@@ -172,8 +174,10 @@ export class MapSearchComponent {
   }
 
   public openMapsLink(destLatitude, destLongitude) {
-    window.open('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
+    const browser = this.iab.create('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
+    browser.show()
   }
+
 
   presentLoader(loaderText) {
     if (!this.loader) {

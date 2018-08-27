@@ -6,6 +6,7 @@ import { Geolocation }           from '@ionic-native/geolocation';
 import { GeolocateProvider }     from '../../../providers/geolocate/geolocate';
 import { firstBy }               from 'thenby';
 import { TranslateService }      from '@ngx-translate/core';
+import { InAppBrowser }          from '@ionic-native/in-app-browser';
 
 @Component({
   templateUrl: 'location-search.html'
@@ -38,9 +39,10 @@ export class LocationSearchComponent {
   constructor(private MeetingListProvider   : MeetingListProvider,
               private loadingCtrl           : LoadingController,
               private storage               : Storage,
-              private translate           : TranslateService,
+              private translate             : TranslateService,
               private GeolocateProvider     : GeolocateProvider,
-              private geolocation           : Geolocation )
+              private geolocation           : Geolocation,
+              private iab                   : InAppBrowser  )
   {
     this.meetingsListGrouping = 'weekday_tinyint';
 
@@ -96,7 +98,8 @@ export class LocationSearchComponent {
   }
 
   public openMapsLink(destLatitude, destLongitude) {
-    window.open('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
+    const browser = this.iab.create('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
+    browser.show()
   }
 
   getAllMeetings() {
