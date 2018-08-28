@@ -125,7 +125,6 @@ export class DoIHaveTheBmltComponent {
 
   public openLink(url) {
     const browser = this.iab.create(url, '_system');
-    browser.show()
 
   }
 

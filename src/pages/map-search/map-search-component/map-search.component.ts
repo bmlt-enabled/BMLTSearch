@@ -175,7 +175,7 @@ export class MapSearchComponent {
 
   public openMapsLink(destLatitude, destLongitude) {
     const browser = this.iab.create('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
-    browser.show()
+
   }
 
 
