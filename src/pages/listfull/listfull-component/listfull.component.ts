@@ -6,6 +6,7 @@ import { ServiceGroupsProvider } from '../../../providers/service-groups/service
 import { MeetingListProvider }   from '../../../providers/meeting-list/meeting-list';
 import { TranslateService }      from '@ngx-translate/core';
 import { firstBy }               from 'thenby';
+import { InAppBrowser }          from '@ionic-native/in-app-browser';
 
 @Component({
   selector: 'page-listfull',
@@ -37,7 +38,8 @@ export class ListfullComponent {
                private ServiceGroupsProvider : ServiceGroupsProvider,
                private loadingCtrl           : LoadingController,
                private translate             : TranslateService,
-               private storage               : Storage  ) {
+               private storage               : Storage,
+               private iab                   : InAppBrowser  ) {
 
     this.translate.get('FINDING_MTGS').subscribe(value => {this.presentLoader(value);})
 
@@ -195,7 +197,8 @@ export class ListfullComponent {
   }
 
   public openMapsLink(destLatitude, destLongitude) {
-      window.open('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
+    const browser = this.iab.create('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
+
   }
 
   public isToday(dayOfWeek) {

@@ -14,6 +14,7 @@ import { MouseEvent,
          MapsAPILoader  }             from '@agm/core';
 import { MeetingListProvider }        from '../../../providers/meeting-list/meeting-list';
 import { TranslateService }           from '@ngx-translate/core';
+import { InAppBrowser }               from '@ionic-native/in-app-browser';
 
 declare const google: any;
 
@@ -52,7 +53,8 @@ export class AddressSearchComponent {
               private storage             : Storage,
               private translate           : TranslateService,
               private MapsAPIloader       : MapsAPILoader,
-              private zone                : NgZone  ) {
+              private zone                : NgZone,
+              private iab                 : InAppBrowser  ) {
 
      console.log("AddressSearchComponent: constructor");
   }
@@ -244,7 +246,7 @@ export class AddressSearchComponent {
   }
 
   public openMapsLink(destLatitude, destLongitude) {
-    window.open('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
+    const browser = this.iab.create('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
   }
 
 }
