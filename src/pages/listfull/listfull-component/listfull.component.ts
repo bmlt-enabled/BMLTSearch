@@ -46,7 +46,6 @@ export class ListfullComponent {
     this.storage.get('timeDisplay')
     .then(timeDisplay => {
         if(timeDisplay) {
-          console.log("Setting timeDisplay to ", timeDisplay);
           this.timeDisplay = timeDisplay;
         } else {
           this.timeDisplay = "24hr";

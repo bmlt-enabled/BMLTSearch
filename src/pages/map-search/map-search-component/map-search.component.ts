@@ -42,18 +42,14 @@ export class MapSearchComponent {
               private translate           : TranslateService,
               private iab                 : InAppBrowser   ) {
 
-    console.log("MapSearchComponent: constructor:");
-
   }
 
   mapReady(event: any) {
-    console.log("mapReady : event");
     this.map = event;
 
     this.storage.get('timeDisplay')
     .then(timeDisplay => {
         if(timeDisplay) {
-          console.log("Setting timeDisplay to ", timeDisplay);
           this.timeDisplay = timeDisplay;
         } else {
           this.timeDisplay = "24hr";
@@ -67,23 +63,19 @@ export class MapSearchComponent {
             }
           this.storage.get('savedLat').then(value => {
             if(value) {
-              console.log("mapLatitude was saved previously : ", value);
               this.mapLatitude = value;
               this.storage.get('savedLng').then(value => {
                 if(value) {
-                  console.log("mapLongitude was saved previously : ", value);
                   this.mapLongitude = value;
 
                   this.mapLatitude = parseFloat(this.mapLatitude);
                   this.mapLongitude = parseFloat(this.mapLongitude);
                   this.getMeetings();
                 } else {
-                  console.log("No mapLongitude previously saved");
                   this.locatePhone();
                 }
               });
             } else {
-              console.log("No mapLatitude previously saved");
               this.locatePhone();
             }
           });
@@ -92,17 +84,13 @@ export class MapSearchComponent {
   }
 
   getMeetings(){
-    console.log("getMeetings:");
     this.translate.get('LOADINGMAP').subscribe(value => {this.presentLoader(value);})
 
     this.MeetingListProvider.getAutoRadiusMeetings(this.mapLatitude, this.mapLongitude, this.autoRadius).subscribe((data)=>{
-      console.log("getMeetings: subscribe data results");
 
       if (JSON.stringify(data) == "{}") {  // empty result set!
-        console.log("getMeetings: empty result set");
         this.meetingList = JSON.parse("[]");
       } else {
-        console.log("getMeetings: non-empty result set", data);
         this.meetingList  = data;
         this.meetingList  = this.meetingList.filter(meeting => meeting.latitude = parseFloat(meeting.latitude));
         this.meetingList  = this.meetingList.filter(meeting => meeting.longitude = parseFloat(meeting.longitude));
@@ -153,7 +141,6 @@ export class MapSearchComponent {
     var tempMapBounds = new google.maps.LatLngBounds();
 
     this.circle.getBounds().then( value => {
-      console.log("GetBounds retuned!!", value);
 
       tempMapBounds.extend(value.getNorthEast());
       tempMapBounds.extend(value.getSouthWest());
@@ -164,7 +151,6 @@ export class MapSearchComponent {
   }
 
   markerDragEnd($event: MouseEvent) {
-    console.log("markerDragEnd:");
 
     this.mapLatitude = $event.coords.lat;
     this.mapLongitude = $event.coords.lng;
@@ -212,7 +198,6 @@ export class MapSearchComponent {
       this.dismissLoader();
       this.getMeetings();
     }).catch((error) => {
-      console.log('Error getting location', error);
       this.dismissLoader();
     });
   }

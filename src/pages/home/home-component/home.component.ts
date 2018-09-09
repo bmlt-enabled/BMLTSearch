@@ -43,28 +43,22 @@ export class HomeComponent {
 
 		this.storage.get('savedLat').then(value => {
 				if(value) {
-					console.log("Latitude was saved previously : ", value);
 					this.savedLat = value;
 					this.storage.get('savedLng').then(value => {
 							if(value) {
-								console.log("Longitude was saved previously : ", value);
 								this.savedLng = value;
 								this.storage.get('savedAddress').then(value => {
 										if(value) {
-											console.log("Address was saved previously : ", value);
 											this.savedLat = value;
 										} else {
-											console.log("No Address previously saved");
 											this.locatePhone();
 										}
 								});
 							} else {
-								console.log("No longitude previously saved");
 								this.locatePhone();
 							}
 					});
 				} else {
-					console.log("No latitude previously saved");
 					this.locatePhone();
 				}
 		});
@@ -75,9 +69,7 @@ export class HomeComponent {
 	}
 
 	locatePhone() {
-		console.log('Try to get location...');
     this.geolocation.getCurrentPosition({timeout: 10000}).then((resp) => {
-      console.log('Got location ok');
 
       this.savedLat = resp.coords.latitude;
       this.savedLng = resp.coords.longitude;
@@ -85,17 +77,13 @@ export class HomeComponent {
 			this.storage.set('savedLat', this.savedLat);
 			this.storage.set('savedLng', this.savedLng);
 
-      console.log("Try to getAddressFromLocation");
       this.GeolocateProvider.convertLatLong(this.savedLat, this.savedLng).subscribe((json)=>{
-				console.log("Result retrieved from getAddressFromLocation");
 
         this.savedAddress = json;
         if (this.savedAddress.results[0]) {
-					console.log("Address as : ", this.savedAddress.results[0].formatted_address);
           this.savedAddress = this.savedAddress.results[0].formatted_address;
 					this.storage.set('savedAddress', this.savedAddress);
         } else {
-					console.log("No good address retrieved");
           this.savedAddress = "Location not found";
 					this.storage.set('savedAddress', "Location not found");
         }
