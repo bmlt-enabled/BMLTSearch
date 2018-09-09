@@ -29,4 +29,4 @@ ionic cordova prepare browser
 ionic cordova resources ios
 ionic cordova resources android
 
-ionic build --prod
+ionic build --prod  --minifyjs   --minifycss  --optimizejs	

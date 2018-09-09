@@ -7,7 +7,6 @@ export class MeetingListProvider {
   tomatoBMLT : string = "https://tomato.na-bmlt.org/main_server/client_interface/json/";
 
   constructor(public http: HttpClient) {
-    console.log('Hello MeetingListProvider Provider');
   }
 
   getAutoRadiusMeetings(lat, long, radius) {

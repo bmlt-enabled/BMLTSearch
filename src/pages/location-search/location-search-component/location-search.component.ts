@@ -49,7 +49,6 @@ export class LocationSearchComponent {
     this.storage.get('searchRange')
     .then(searchValue => {
         if(searchValue) {
-          console.log("Setting radius to ", searchValue);
           this.radius = searchValue;
         } else {
           this.radius = 25;
@@ -59,7 +58,6 @@ export class LocationSearchComponent {
     this.storage.get('timeDisplay')
     .then(timeDisplay => {
         if(timeDisplay) {
-          console.log("Setting timeDisplay to ", timeDisplay);
           this.timeDisplay = timeDisplay;
         } else {
           this.timeDisplay = "24hr";
@@ -67,29 +65,23 @@ export class LocationSearchComponent {
 
         this.storage.get('savedAddressLat').then(value => {
     			if(value) {
-    				console.log("addressLatitude was saved previously : ", value);
     				this.addressLatitude = value;
     				this.storage.get('savedAddressLng').then(value => {
     						if(value) {
-    							console.log("addressLongitude was saved previously : ", value);
     							this.addressLongitude = value;
     							this.storage.get('savedAddress').then(value => {
     									if(value) {
-    										console.log("Address was saved previously : ", value);
     										this.currentAddress = value;
                         this.getAllMeetings();
     									} else {
-    										console.log("No Address previously saved");
     										this.locatePhone();
     									}
     							});
     						} else {
-    							console.log("No addressLongitude previously saved");
     							this.locatePhone();
     						}
     				});
     			} else {
-    				console.log("No addressLatitude previously saved");
     				this.locatePhone();
     			}
     		});
@@ -103,8 +95,6 @@ export class LocationSearchComponent {
   }
 
   getAllMeetings() {
-    console.log("getAllMeetings - radius of ", this.radius, " around " , this.addressLatitude, this.addressLongitude);
-
     this.translate.get('FINDING_MTGS').subscribe(value => {this.presentLoader(value);})
     this.MeetingListProvider.getAddressMeetings(this.addressLatitude , this.addressLongitude, this.radius).subscribe((data)=>{
       this.addressMeetingList = data;
@@ -186,7 +176,6 @@ export class LocationSearchComponent {
   locatePhone() {
     this.translate.get('LOCATING').subscribe(value => {this.presentLoader(value);})
     this.geolocation.getCurrentPosition({timeout: 10000}).then((resp) => {
-      console.log('Got location ok');
 
       this.addressLatitude = resp.coords.latitude;
       this.addressLongitude = resp.coords.longitude;
@@ -194,7 +183,6 @@ export class LocationSearchComponent {
       this.storage.set('savedAddressLat', this.addressLatitude);
       this.storage.set('savedAddressLng', this.addressLongitude);
 
-      console.log("getAddressFromLocation");
       this.GeolocateProvider.convertLatLong(this.addressLatitude, this.addressLongitude).subscribe((json)=>{
         this.currentAddress = json;
         if (this.currentAddress.results[0]) {
@@ -210,7 +198,6 @@ export class LocationSearchComponent {
       });
 
     }).catch((error) => {
-      console.log('Error getting location', error);
       this.currentAddress = "Location not found";
       this.dismissLoader();
     });

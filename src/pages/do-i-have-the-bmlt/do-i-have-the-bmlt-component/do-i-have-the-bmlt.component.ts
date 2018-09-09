@@ -35,26 +35,20 @@ export class DoIHaveTheBmltComponent {
                 private geolocation:           Geolocation,
                 private iab:                   InAppBrowser ) {
 
-    console.log("getServiceGroupNames");
     this.ServiceGroupsProvider.getAllServiceGroups().subscribe((serviceGroupData)=>{
       this.serviceGroupNames = serviceGroupData;
-      console.log("getServiceGroupNames were found");
       this.storage.get('savedAddressLat').then(value => {
         if (value) {
-          console.log("addressLatitude was saved previously : ", value);
           this.addressLatitude = value;
           this.storage.get('savedAddressLng').then(value => {
             if (value) {
-              console.log("addressLongitude was saved previously : ", value);
               this.addressLongitude = value;
               this.findNearestMeeting();
             } else {
-              console.log("No addressLongitude previously saved");
               this.locatePhone();
             }
           });
         } else {
-          console.log("No addressLatitude previously saved");
           this.locatePhone();
         }
   		});
@@ -74,8 +68,6 @@ export class DoIHaveTheBmltComponent {
       this.nearestMeeting = this.nearestMeeting.filter(meeting => meeting.service_body_bigint = this.getServiceNameFromID(meeting.service_body_bigint));
 
       this.dismissLoader();
-      console.log(this.nearestMeeting);
-      console.log("Nearest meeting is ", this.nearestMeeting[0].distance_in_miles);
       if ( this.nearestMeeting[0].distance_in_miles < 100 ) {
         this.bmltEnabled = "true";
       } else {
@@ -107,7 +99,6 @@ export class DoIHaveTheBmltComponent {
     this.translate.get('LOCATING').subscribe(value => {this.presentLoader(value);})
 
     this.geolocation.getCurrentPosition({ timeout: 10000 }).then((resp) => {
-      console.log('Got location ok');
 
       this.addressLatitude = resp.coords.latitude;
       this.addressLongitude = resp.coords.longitude;
@@ -117,7 +108,6 @@ export class DoIHaveTheBmltComponent {
       this.findNearestMeeting();
 
     }).catch((error) => {
-      console.log('Error getting location', error);
       this.currentAddress = "Location not found";
       this.dismissLoader();
     });
