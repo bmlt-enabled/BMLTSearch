@@ -31,3 +31,9 @@ $ ionic serve --lab
 To build for app store distribution, I have found that the best thing to do is to run the re-plugin.sh script.
 
 After this, a platforms directory will be created with folder for android that contains an Android Studio project, and a folder for ios that contains an xcode project.
+
+Apple iphone/ipad app link
+https://itunes.apple.com/us/app/bmlt-search/id1370165741?mt=8
+
+Android phone/tablet link
+https://play.google.com/store/apps/details?id=ie.nasouth.bmltsearch&hl=en
