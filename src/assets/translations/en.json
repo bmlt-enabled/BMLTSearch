@@ -24,6 +24,7 @@
     "ENGLISH"           : "English",
     "ITALIAN"           : "Italian",
     "SPANISH"           : "Spanish",
+    "DANISH"            : "Danish", 
     "ADDRESSSEARCH"     : "Address Search",
     "DOIHAVETHEBMLT"    : "Do I have the BMLT?",
     "MAPRANGE"          : "Default Search Range",
