@@ -13,7 +13,7 @@ ionic cordova plugin rm cordova-plugin-geolocation
 ionic cordova plugin rm cordova-plugin-inappbrowser
 
 ionic cordova platform add ios
-ionic cordova platform add android
+ionic cordova platform add android@7.1.4
 ionic cordova platform add browser
 
 ionic cordova plugin add cordova-plugin-splashscreen
@@ -29,4 +29,4 @@ ionic cordova prepare browser
 ionic cordova resources ios
 ionic cordova resources android
 
-ionic build --prod  --minifyjs   --minifycss  --optimizejs	
+ionic build --prod  --minifyjs   --minifycss  --optimizejs
