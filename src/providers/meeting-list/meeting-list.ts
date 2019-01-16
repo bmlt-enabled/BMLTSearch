@@ -22,6 +22,18 @@ export class MeetingListProvider {
     return this.http.get(getAutoRadiusMeetingsURL);
   }
 
+  getRadiusMeetings(lat, long, radius) {
+    var getRadiusMeetingsURL : string = this.tomatoBMLT
+                                      + "?switcher=GetSearchResults&geo_width_km="
+                                      + radius
+                                      + "&long_val="
+                                      + long
+                                      + "&lat_val="
+                                      + lat
+                                      + "&sort_keys=longitude,latitude&callingApp=ionic-bmltapp";
+    return this.http.get(getRadiusMeetingsURL);
+  }
+
   getAddressMeetings(lat, long, radius) {
     var getAddressMeetingsURL : string = this.tomatoBMLT
                                       + "?switcher=GetSearchResults&geo_width_km="

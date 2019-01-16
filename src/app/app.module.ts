@@ -20,6 +20,8 @@ import { ListfullModule }        from '../pages/listfull/listfull.module';
 import { MeetingListProvider }   from '../providers/meeting-list/meeting-list';
 import { ServiceGroupsProvider } from '../providers/service-groups/service-groups';
 import { GeolocateProvider }     from '../providers/geolocate/geolocate';
+import { BrowserModule }         from '@angular/platform-browser';
+import { GoogleMaps }            from "@ionic-native/google-maps";
 
 
 @NgModule({
@@ -49,7 +51,8 @@ import { GeolocateProvider }     from '../providers/geolocate/geolocate';
     ToastController,
     MeetingListProvider,
     ServiceGroupsProvider,
-    GeolocateProvider
+    GeolocateProvider,
+    GoogleMaps
     ]
 })
 export class AppModule {}

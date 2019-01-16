@@ -2,9 +2,7 @@ import { NgModule }             from '@angular/core';
 import { CommonModule }         from '@angular/common';
 import { SharedModule }         from '../../app/shared/shared.module';
 import { MapSearchComponent }   from './map-search-component/map-search.component';
-import { AgmCoreModule }        from '@agm/core';
-import { AgmJsMarkerClustererModule } from '@agm/js-marker-clusterer';
-import { Geolocation }          from '@ionic-native/geolocation';
+import { IonicPageModule }      from 'ionic-angular';
 import { PipesModule }          from '../../pipes/pipes.module';
 
 @NgModule({
@@ -12,13 +10,10 @@ import { PipesModule }          from '../../pipes/pipes.module';
     MapSearchComponent
   ],
   imports: [
-  	CommonModule,
+    CommonModule,
   	SharedModule,
-    PipesModule,
-    AgmCoreModule.forRoot({
-      apiKey: 'AIzaSyAtwUjsIB14f0aHgdLk_JYnUrI0jvczMXw'
-    }),
-    AgmJsMarkerClustererModule
+    PipesModule,    
+    IonicPageModule.forChild(MapSearchComponent),
   ],
   exports: [
     MapSearchComponent

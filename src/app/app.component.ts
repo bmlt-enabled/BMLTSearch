@@ -24,7 +24,7 @@ import { ContactComponent }        from '../pages/contact/contact-component/cont
 export class MyApp {
 	@ViewChild(Nav) nav: Nav;
 
-	rootPage = HomeComponent;
+	rootPage: any;
 	pages: Array<{title: string, component: any, icon: string}>;
 
 
@@ -63,6 +63,7 @@ export class MyApp {
 
 	initializeApp() {
 		this.platform.ready().then(() => {
+			this.rootPage = HomeComponent;
 			this.statusBar.styleLightContent()
 			this.splashScreen.hide();
 		});

@@ -31,3 +31,15 @@ video, audio {
 	box-sizing: border-box;
 	display: inline-block;
 }
+
+#map_canvas, #pano_canvas {
+  height: 100%;
+}
+
+.smallPanel {
+  margin: 10px;
+  padding: 10px;
+  background-color:rgba(255,255,255,0.5);
+  z-index: 2 !important;
+  font-size: 25px;
+}
