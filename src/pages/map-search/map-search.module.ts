@@ -4,6 +4,7 @@ import { SharedModule }         from '../../app/shared/shared.module';
 import { MapSearchComponent }   from './map-search-component/map-search.component';
 import { IonicPageModule }      from 'ionic-angular';
 import { PipesModule }          from '../../pipes/pipes.module';
+import { ModalComponent } from "../modal/modal-component/modal.component";
 
 @NgModule({
   declarations: [
@@ -12,7 +13,7 @@ import { PipesModule }          from '../../pipes/pipes.module';
   imports: [
     CommonModule,
   	SharedModule,
-    PipesModule,    
+    PipesModule,
     IonicPageModule.forChild(MapSearchComponent),
   ],
   exports: [
@@ -20,6 +21,9 @@ import { PipesModule }          from '../../pipes/pipes.module';
   ],
   entryComponents:[
   	MapSearchComponent
+  ],
+  providers: [
+    ModalComponent
   ]
 })
 export class MapSearchModule {}

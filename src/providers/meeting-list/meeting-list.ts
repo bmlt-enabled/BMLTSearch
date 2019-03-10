@@ -24,13 +24,16 @@ export class MeetingListProvider {
 
   getRadiusMeetings(lat, long, radius) {
     var getRadiusMeetingsURL : string = this.tomatoBMLT
-                                      + "?switcher=GetSearchResults&geo_width_km="
+                                      + "?switcher=GetSearchResults"
+                                      + "&data_field_key=longitude,latitude,id_bigint"
+                                      + "&geo_width_km="
                                       + radius
                                       + "&long_val="
                                       + long
                                       + "&lat_val="
                                       + lat
                                       + "&sort_keys=longitude,latitude&callingApp=ionic-bmltapp";
+    console.log("Semantic query : ", getRadiusMeetingsURL);
     return this.http.get(getRadiusMeetingsURL);
   }
 
@@ -66,6 +69,14 @@ export class MeetingListProvider {
                                       + "&sort_keys=weekday_tinyint,start_time&callingApp=ionic-bmltapp";
     return this.http.get(getMeetingsByAreaURL);
 
+  }
+
+  getSingleMeetingByID(id){
+    var getSingleMeetingByIDURL : string = this.tomatoBMLT
+                                        + "?switcher=GetSearchResults&meeting_ids[]="
+                                        + id;
+   console.log(" Search URL is : ", getSingleMeetingByIDURL);
+    return this.http.get(getSingleMeetingByIDURL);
   }
 
 }

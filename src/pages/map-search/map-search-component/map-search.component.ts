@@ -1,7 +1,16 @@
-import { Component, ViewChild } from '@angular/core';
-import { LoadingController } from 'ionic-angular';
+import {
+  Component,
+  ViewChild
+} from '@angular/core';
 import { Storage } from '@ionic/storage';
-import { ToastController } from 'ionic-angular';
+import {
+  LoadingController,
+  Platform,
+  Modal,
+  ModalController,
+  ModalOptions,
+  ViewController
+} from 'ionic-angular';
 import { Geolocation } from '@ionic-native/geolocation';
 import {
   GoogleMaps,
@@ -10,16 +19,22 @@ import {
   GoogleMapsEvent,
   MarkerCluster,
   Marker,
+  MarkerLabel,
+  MarkerOptions,
+  MarkerClusterIcon,
+  MarkerClusterOptions,
   ILatLng,
   LatLng,
   VisibleRegion,
-  Environment,
   CameraPosition,
-  Spherical
+  Spherical,
+  Environment
 } from "@ionic-native/google-maps";
 import { MeetingListProvider } from '../../../providers/meeting-list/meeting-list';
 import { TranslateService } from '@ngx-translate/core';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
+import { ModalComponent } from "../../modal/modal-component/modal.component";
+
 
 declare const google: any;
 
@@ -39,15 +54,21 @@ export class MapSearchComponent {
   map: GoogleMap;
   markerCluster: MarkerCluster;
   visibleRegion: VisibleRegion;
+  marker: Marker;
   markers = [];
+  meeting: any;
+  ids: string;
+  data: any;
 
 
-  constructor(private MeetingListProvider: MeetingListProvider,
+  constructor(
+    private MeetingListProvider: MeetingListProvider,
     public loadingCtrl: LoadingController,
-    private toastCtrl: ToastController,
+    private platform: Platform,
     private storage: Storage,
     private translate: TranslateService,
-    private iab: InAppBrowser) {
+    private iab: InAppBrowser,
+    private modal: ModalController) {
 
   }
 
@@ -69,9 +90,12 @@ export class MapSearchComponent {
   loadMap() {
 
     // This code is necessary for browser
-    Environment.setEnv({
-      'API_KEY_FOR_BROWSER_RELEASE': 'AIzaSyAiowBMk_xPfnzaq7wZzcbyuCDpKqzZkyA',
-      'API_KEY_FOR_BROWSER_DEBUG': 'AIzaSyAiowBMk_xPfnzaq7wZzcbyuCDpKqzZkyA'
+    this.platform.ready().then(() => {
+      Environment.setEnv({
+        'API_KEY_FOR_BROWSER_RELEASE': 'AIzaSyAiowBMk_xPfnzaq7wZzcbyuCDpKqzZkyA',
+        'API_KEY_FOR_BROWSER_DEBUG': 'AIzaSyAiowBMk_xPfnzaq7wZzcbyuCDpKqzZkyA'
+      });
+
     });
 
     let center: ILatLng = { "lat": this.mapLatitude, "lng": this.mapLongitude };
@@ -103,7 +127,14 @@ export class MapSearchComponent {
 
     this.map = GoogleMaps.create('map_canvas', options);
 
+    this.map.one(GoogleMapsEvent.MAP_READY).then(this.onMapReady.bind(this));
+  }
+
+  onMapReady() {
+    console.log('map is ready!');
+
     this.addCluster();
+    this.getMeetings();
 
     this.map.on(GoogleMapsEvent.MAP_DRAG_END).subscribe((params: any[]) => {
       console.log("MAP_DRAG_END")
@@ -116,72 +147,44 @@ export class MapSearchComponent {
       let cameraPosition: CameraPosition<ILatLng> = params[0];
       this.mapLatitude = cameraPosition.target.lat;
       this.mapLongitude = cameraPosition.target.lng;
-      console.log("Latitude   : ", this.mapLatitude);
-      console.log("Longitude  : ", this.mapLongitude);
 
       this.visibleRegion = this.map.getVisibleRegion();
 
-      this.autoRadius = Spherical.computeDistanceBetween(cameraPosition.target, this.visibleRegion.northeast) / 1000;
-      console.log("autoRadius : ", this.autoRadius);
+      this.autoRadius = Spherical.computeDistanceBetween(cameraPosition.target, this.visibleRegion.farLeft) / 1000;
 
       this.getMeetings();
-      console.log(JSON.stringify(this.markers, null, 4));
     });
   }
 
   addCluster() {
     console.log("addCluster");
-    this.markerCluster = this.map.addMarkerClusterSync({
+
+    let labelOptions: MarkerLabel = {
+      bold: true,
+      fontSize: 15,
+      color: "white",
+      italic: false
+    };
+
+    let clusterIcons: MarkerClusterIcon[] = [
+      { min: 3, max: 10, url: "./assets/markercluster/m1.png", anchor: { x: 16, y: 16 }, label: labelOptions },
+      { min: 11, max: 50, url: "./assets/markercluster/m2.png", anchor: { x: 16, y: 16 }, label: labelOptions },
+      { min: 51, max: 100, url: "./assets/markercluster/m3.png", anchor: { x: 24, y: 24 }, label: labelOptions },
+      { min: 101, max: 500, url: "./assets/markercluster/m4.png", anchor: { x: 24, y: 24 }, label: labelOptions },
+      { min: 501, url: "./assets/markercluster/m5.png", anchor: { x: 32, y: 32 }, label: labelOptions }
+    ];
+
+    let options: MarkerClusterOptions = {
       markers: this.markers,
-      icons: [
-        {
-          min: 3,
-          max: 9,
-          url: "./assets/markercluster/m1.png",
-          label: {
-            color: "white"
-          }
-        },
-        {
-          min: 10,
-          max: 50,
-          url: "./assets/markercluster/m2.png",
-          label: {
-            color: "white"
-          }
-        },
-        {
-          min: 51,
-          max: 100,
-          url: "./assets/markercluster/m3.png",
-          label: {
-            color: "white"
-          }
-        },
-        {
-          min: 101,
-          max: 500,
-          url: "./assets/markercluster/m4.png",
-          label: {
-            color: "white"
-          }
-        },
-        {
-          min: 501,
-          url: "./assets/markercluster/m5.png",
-          label: {
-            color: "white"
-          }
-        }
-      ]
-    });
+      icons: clusterIcons,
+      boundsDraw: false
+    };
+
+    this.markerCluster = this.map.addMarkerClusterSync(options);
 
     this.markerCluster.on(GoogleMapsEvent.MARKER_CLICK).subscribe((params) => {
       let marker: Marker = params[1];
-      marker.setDisableAutoPan(true);
-      marker.setTitle(marker.get("name"));
-      marker.setSnippet(marker.get("address"));
-      marker.showInfoWindow();
+      this.openModal(marker.get("ID"));
     });
   }
 
@@ -201,10 +204,7 @@ export class MapSearchComponent {
         this.meetingList = data;
         this.meetingList = this.meetingList.filter(meeting => meeting.latitude = parseFloat(meeting.latitude));
         this.meetingList = this.meetingList.filter(meeting => meeting.longitude = parseFloat(meeting.longitude));
-        this.meetingList.filter(i => i.start_time = this.convertTo12Hr(i.start_time));
       }
-
-      this.setLatLngOffsets();
 
       this.populateMarkers();
 
@@ -214,69 +214,73 @@ export class MapSearchComponent {
     });
   }
 
+  meetingsAreCoLocated(i, j) {
+    if (((Math.round(i.latitude * 1000) / 1000) != (Math.round(j.latitude * 1000) / 1000)) ||
+       ((Math.round(i.longitude * 1000) / 1000) != (Math.round(j.longitude * 1000) / 1000)))  {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   populateMarkers() {
     console.log("populateMarkers");
     this.markers = [];
     let i: number;
     for (i = 0; i < this.meetingList.length - 1; i++) {
-      console.log("Meeting number : ", i);
-      console.log("Lat  : ", this.meetingList[i].latitude);
-      console.log("Lng  : ", this.meetingList[i].longitude);
       let meetingLocation = {
         "lat": this.meetingList[i].latitude,
         "lng": this.meetingList[i].longitude
       };
-      console.log("MeetingLocation  :", JSON.stringify(meetingLocation));
       if (this.visibleRegion.contains(<LatLng>(meetingLocation))) {
-        console.log("Adding this meeting");
-        let data = {
-          "position": {
-            "lat": this.meetingList[i].latitude,
-            "lng": this.meetingList[i].longitude
-          },
-          "name": this.meetingList[i].meeting_name,
-          "address": this.meetingList[i].location_street,
-          "icon": "assets/markercluster/marker.png"
-        };
-
-        console.log(JSON.stringify(data, null, 4));
-        this.markers.push(data);
+        if (!this.meetingsAreCoLocated(this.meetingList[i], this.meetingList[i + 1])) {
+          console.log("Adding a non-collocated meeting");
+          this.data = {
+            "position": {
+              "lat": this.meetingList[i].latitude,
+              "lng": this.meetingList[i].longitude
+            },
+            "ID": this.meetingList[i].id_bigint,
+            "disableAutoPan": true,
+            "icon": "assets/markercluster/MarkerBlue_universal@3x.png"
+          };
+          this.markers.push(this.data);
+        } else {
+          console.log("Adding a non-collocated meeting");
+          console.log("First ID : ", this.meetingList[i].id_bigint);
+          this.ids = this.meetingList[i].id_bigint;
+          while (this.meetingsAreCoLocated(this.meetingList[i], this.meetingList[i + 1])) {
+            console.log("Next  ID : ", this.meetingList[i + 1].id_bigint);
+            this.ids += "&meeting_ids[]=" + this.meetingList[i + 1].id_bigint;
+            i++;
+            if (i == (this.meetingList.length - 1)) {
+              break;
+            } else {
+              this.data = {
+                "position": {
+                  "lat": this.meetingList[i].latitude,
+                  "lng": this.meetingList[i].longitude
+                },
+                "icon": "assets/markercluster/FFFFFF-0.png"
+              };
+              this.markers.push(this.data);
+            }
+          }
+          this.data = {
+            "position": {
+              "lat": this.meetingList[i].latitude,
+              "lng": this.meetingList[i].longitude
+            },
+            "ID": this.ids,
+            "disableAutoPan": true,
+            "icon": "assets/markercluster/MarkerRed_universal@3x.png"
+          };
+          this.markers.push(this.data);
+        }
       } else {
-        console.log("Not adding this meeting");
+        // Meeting is not on the visible map area
       }
     }
-  }
-
-  setLatLngOffsets() {
-    console.log("setLatLngOffsets");
-    var i: any;
-    var dist: number = 0;
-    for (i = 0; i < this.meetingList.length - 1; i++) {
-      if (parseFloat(this.meetingList[i].distance_in_km) > dist) {
-        dist = parseFloat(this.meetingList[i].distance_in_km);
-      }
-      var longOffset: any = 0;
-      var latOffset: any = 0;
-      var Offset: any = 0.00002;
-      // maybe use :- https://github.com/TopicFriends/TopicFriends/commit/d6c61ae976eb1473b314bd804cebacd5106dac37
-      while ((this.meetingList[i].longitude == this.meetingList[i + 1].longitude) &&
-        (this.meetingList[i].latitude == this.meetingList[i + 1].latitude)) {
-        if ((i % 2) === 1) {
-          longOffset += Offset;
-          this.meetingList[i].longitude = this.meetingList[i].longitude + longOffset;
-        } else {
-          latOffset += Offset;
-          this.meetingList[i].latitude = this.meetingList[i].latitude + latOffset;
-        }
-        i++;
-        if (i == (this.meetingList.length - 1)) {
-          longOffset = 0;
-          latOffset = 0;
-          break;
-        }
-      } // while
-
-    } // for
   }
 
   presentLoader(loaderText) {
@@ -307,6 +311,31 @@ export class MapSearchComponent {
     }
   }
 
+  public openModal(meetingID) {
 
+    this.MeetingListProvider.getSingleMeetingByID(meetingID).subscribe((meeting) => {
+      this.meeting = meeting;
+      this.meeting.filter(i => i.start_time_set = this.convertTo12Hr(i.start_time));
+
+      const myModalOptions: ModalOptions = {
+        enableBackdropDismiss: false,
+        showBackdrop: false
+      };
+
+      const myModal: Modal = this.modal.create(ModalComponent, { data: this.meeting }, myModalOptions);
+
+      myModal.onDidDismiss((data) => {
+        console.log("I have dismissed.");
+        console.log(data);
+      });
+
+      myModal.onWillDismiss((data) => {
+        console.log("I'm about to dismiss");
+        console.log(data);
+      });
+
+      myModal.present();
+    });
+  }
 
 }

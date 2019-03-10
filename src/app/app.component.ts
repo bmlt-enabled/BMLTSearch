@@ -1,22 +1,22 @@
 import { Component,
-	       ViewChild }               from '@angular/core';
+	       ViewChild }                from '@angular/core';
 import { Nav,
 	       Platform,
-				 MenuController }          from 'ionic-angular';
-import { StatusBar }               from '@ionic-native/status-bar';
-import { SplashScreen }            from '@ionic-native/splash-screen';
-import { Storage }                 from '@ionic/storage';
-import { TranslateService }        from '@ngx-translate/core';
-import { Config }                  from './app.config';
-import { HomeComponent }           from '../pages/home/home-component/home.component';
-import { SettingsComponent }       from '../pages/settings/settings-component/settings.component';
-import { MapSearchComponent }      from '../pages/map-search/map-search-component/map-search.component';
-import { FullMapComponent }        from '../pages/fullmap/fullmap-component/fullmap.component';
-import { LocationSearchComponent } from '../pages/location-search/location-search-component/location-search.component';
-import { ListfullComponent }       from '../pages/listfull/listfull-component/listfull.component';
-import { AddressSearchComponent}   from '../pages/address-search/address-search-component/address-search.component';
-import { DoIHaveTheBmltComponent } from '../pages/do-i-have-the-bmlt/do-i-have-the-bmlt-component/do-i-have-the-bmlt.component';
-import { ContactComponent }        from '../pages/contact/contact-component/contact.component';
+				 MenuController }           from 'ionic-angular';
+import { StatusBar }                from '@ionic-native/status-bar';
+import { SplashScreen }             from '@ionic-native/splash-screen';
+import { Storage }                  from '@ionic/storage';
+import { TranslateService }         from '@ngx-translate/core';
+import { Config }                   from './app.config';
+import { HomeComponent }            from '../pages/home/home-component/home.component';
+import { SettingsComponent }        from '../pages/settings/settings-component/settings.component';
+import { MapSearchComponent }       from '../pages/map-search/map-search-component/map-search.component';
+import { FullMapComponent }         from '../pages/fullmap/fullmap-component/fullmap.component';
+import { LocationSearchComponent }  from '../pages/location-search/location-search-component/location-search.component';
+import { ListfullComponent }        from '../pages/listfull/listfull-component/listfull.component';
+import { AddressSearchComponent}    from '../pages/address-search/address-search-component/address-search.component';
+import { DoIHaveTheBmltComponent }  from '../pages/do-i-have-the-bmlt/do-i-have-the-bmlt-component/do-i-have-the-bmlt.component';
+import { ContactComponent }         from '../pages/contact/contact-component/contact.component';
 
 @Component({
 	templateUrl: './app.html'

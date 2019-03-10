@@ -7,6 +7,7 @@ import { Geolocation }          from '@ionic-native/geolocation';
 import { PipesModule }          from '../../pipes/pipes.module';
 
 import { AddressSearchComponent } from './address-search-component/address-search.component';
+import { ModalModule }          from "../modal/modal.module";
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { AddressSearchComponent } from './address-search-component/address-searc
       apiKey: 'AIzaSyAtwUjsIB14f0aHgdLk_JYnUrI0jvczMXw',
       libraries: ['places']
     }),
-    AgmJsMarkerClustererModule
+    AgmJsMarkerClustererModule,
+    ModalModule
     ],
     exports: [
       AddressSearchComponent
