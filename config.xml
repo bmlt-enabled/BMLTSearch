@@ -3,7 +3,7 @@
     <name>BMLT Search</name>
     <description>BMLT Meeting Search</description>
     <author email="paulnagle@gmail.com" href="https://bmlt.app/">Paul Nagle</author>
-    <content original-src="index.html" src="http://192.168.1.107:8100" />
+    <content src="index.html" />
     <access origin="*" />
     <content original-src="index.html" />
     <allow-navigation href="*" />
@@ -100,7 +100,7 @@
         <variable name="GEOLOCATION_USAGE_DESCRIPTION" value="To locate you" />
     </plugin>
     <plugin name="cordova-plugin-inappbrowser" spec="3.0.0" />
-    <plugin name="cordova-plugin-googlemaps" spec="2.5.2">
+    <plugin name="cordova-plugin-googlemaps" spec="2.5.3">
         <variable name="API_KEY_FOR_ANDROID" value="AIzaSyDwPqrrBYFrtCIJ0IUL81tiIVwYJqUMKCw" />
         <variable name="API_KEY_FOR_IOS" value="AIzaSyCeHYVhVc8bf3siRXIyU5dOaUfctEjzGlA" />
         <variable name="PLAY_SERVICES_VERSION" value="15.0.1" />
@@ -108,7 +108,6 @@
         <variable name="LOCATION_WHEN_IN_USE_DESCRIPTION" value="This app wants to get your location while this app runs only." />
         <variable name="LOCATION_ALWAYS_USAGE_DESCRIPTION" value="This app wants to get your location always, even this app runs in background." />
     </plugin>
-    <allow-navigation href="http://192.168.1.107:8100" sessionid="60ddf2d6" />
     <engine name="ios" spec="4.5.5" />
     <engine name="android" spec="7.1.4" />
     <engine name="browser" spec="5.0.4" />

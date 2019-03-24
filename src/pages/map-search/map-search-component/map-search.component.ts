@@ -52,13 +52,13 @@ export class MapSearchComponent {
   mapLongitude: number = -8.754;
   autoRadius: number = 5;
   map: GoogleMap;
-  markerCluster: MarkerCluster;
   visibleRegion: VisibleRegion;
   marker: Marker;
   markers = [];
   meeting: any;
   ids: string;
   data: any;
+  mapEventInProgress: boolean = false;
 
 
   constructor(
@@ -73,8 +73,6 @@ export class MapSearchComponent {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad MarkerClusterPage');
-
     this.storage.get('timeDisplay')
       .then(timeDisplay => {
         if (timeDisplay) {
@@ -131,8 +129,6 @@ export class MapSearchComponent {
   }
 
   onMapReady() {
-    console.log('map is ready!');
-
     this.addCluster();
     this.getMeetings();
 
@@ -141,18 +137,24 @@ export class MapSearchComponent {
     });
 
     this.map.on(GoogleMapsEvent.CAMERA_MOVE_END).subscribe((params: any[]) => {
-      console.log("CAMERA_MOVE_END");
-      this.deleteCluster();
+      if (this.mapEventInProgress == false) {
+        this.mapEventInProgress = true;
 
-      let cameraPosition: CameraPosition<ILatLng> = params[0];
-      this.mapLatitude = cameraPosition.target.lat;
-      this.mapLongitude = cameraPosition.target.lng;
+        console.log("CAMERA_MOVE_END");
+        this.deleteCluster();
 
-      this.visibleRegion = this.map.getVisibleRegion();
+        let cameraPosition: CameraPosition<ILatLng> = params[0];
+        this.mapLatitude = cameraPosition.target.lat;
+        this.mapLongitude = cameraPosition.target.lng;
 
-      this.autoRadius = Spherical.computeDistanceBetween(cameraPosition.target, this.visibleRegion.farLeft) / 1000;
+        this.visibleRegion = this.map.getVisibleRegion();
 
-      this.getMeetings();
+        this.autoRadius = Spherical.computeDistanceBetween(cameraPosition.target, this.visibleRegion.farLeft) / 1000;
+
+        //      this.getMeetings();
+      } else {
+        console.log("not processing second event")
+      }
     });
   }
 
@@ -180,20 +182,25 @@ export class MapSearchComponent {
       boundsDraw: false
     };
 
-    this.markerCluster = this.map.addMarkerClusterSync(options);
+    let markerCluster: MarkerCluster = this.map.addMarkerClusterSync(options);
 
-    this.markerCluster.on(GoogleMapsEvent.MARKER_CLICK).subscribe((params) => {
+    markerCluster.on(GoogleMapsEvent.MARKER_CLICK).subscribe((params) => {
       let marker: Marker = params[1];
       this.openModal(marker.get("ID"));
     });
   }
 
   deleteCluster() {
-    this.markerCluster.remove();
+    this.markers = [];
+    this.markers.length = 0;
+    this.meetingList = [];
+    this.meetingList.length = 0;
+    this.map.clear().then(() => {
+      this.getMeetings();
+    });
   }
 
   getMeetings() {
-    console.log("getMeetings");
     this.translate.get('LOADINGMAP').subscribe(value => { this.presentLoader(value); })
 
     this.MeetingListProvider.getRadiusMeetings(this.mapLatitude, this.mapLongitude, this.autoRadius).subscribe((data) => {
@@ -211,74 +218,82 @@ export class MapSearchComponent {
       this.addCluster();
 
       this.dismissLoader();
+      this.mapEventInProgress = false;
+
     });
   }
 
   meetingsAreCoLocated(i, j) {
+    let areColocated: boolean = false;
     if (((Math.round(i.latitude * 1000) / 1000) != (Math.round(j.latitude * 1000) / 1000)) ||
-       ((Math.round(i.longitude * 1000) / 1000) != (Math.round(j.longitude * 1000) / 1000)))  {
-      return false;
+      ((Math.round(i.longitude * 1000) / 1000) != (Math.round(j.longitude * 1000) / 1000))) {
+      areColocated = false;
     } else {
-      return true;
+      areColocated = true;
     }
+    return areColocated;
   }
 
+  pushStandaloneMeeting(i) {
+    this.data = {
+      "position": { "lat": this.meetingList[i].latitude, "lng": this.meetingList[i].longitude },
+      "ID": this.meetingList[i].id_bigint,
+      "disableAutoPan": true,
+      "icon": "assets/markercluster/MarkerBlue_universal@3x.png"
+    };
+    this.markers.push(this.data);
+
+  }
   populateMarkers() {
-    console.log("populateMarkers");
     this.markers = [];
     let i: number;
-    for (i = 0; i < this.meetingList.length - 1; i++) {
+    let areColocated: boolean = false;
+
+    for (i = 0; i < this.meetingList.length; i++) {
       let meetingLocation = {
         "lat": this.meetingList[i].latitude,
         "lng": this.meetingList[i].longitude
       };
       if (this.visibleRegion.contains(<LatLng>(meetingLocation))) {
-        if (!this.meetingsAreCoLocated(this.meetingList[i], this.meetingList[i + 1])) {
-          console.log("Adding a non-collocated meeting");
-          this.data = {
-            "position": {
-              "lat": this.meetingList[i].latitude,
-              "lng": this.meetingList[i].longitude
-            },
-            "ID": this.meetingList[i].id_bigint,
-            "disableAutoPan": true,
-            "icon": "assets/markercluster/MarkerBlue_universal@3x.png"
-          };
-          this.markers.push(this.data);
+        if (i == (this.meetingList.length - 1)) {
+          // Last meeting on the list
+          this.pushStandaloneMeeting(i);
         } else {
-          console.log("Adding a non-collocated meeting");
-          console.log("First ID : ", this.meetingList[i].id_bigint);
-          this.ids = this.meetingList[i].id_bigint;
-          while (this.meetingsAreCoLocated(this.meetingList[i], this.meetingList[i + 1])) {
-            console.log("Next  ID : ", this.meetingList[i + 1].id_bigint);
-            this.ids += "&meeting_ids[]=" + this.meetingList[i + 1].id_bigint;
-            i++;
-            if (i == (this.meetingList.length - 1)) {
-              break;
-            } else {
+          // Not the last meeting in the list
+
+          // Is this meeting in the same location as the next meeting on the list?
+          areColocated = this.meetingsAreCoLocated(this.meetingList[i], this.meetingList[i + 1]);
+
+          if (areColocated == false) {
+            this.pushStandaloneMeeting(i);
+          } else {
+            // We have the start of some co-located meetings on the list
+            this.ids = this.meetingList[i].id_bigint;
+            do {
+              this.ids += "&meeting_ids[]=" + this.meetingList[i + 1].id_bigint;
+
               this.data = {
-                "position": {
-                  "lat": this.meetingList[i].latitude,
-                  "lng": this.meetingList[i].longitude
-                },
-                "icon": "assets/markercluster/FFFFFF-0.png"
+                "position": { "lat": this.meetingList[i].latitude, "lng": this.meetingList[i].longitude },
+                "icon": null
               };
               this.markers.push(this.data);
-            }
+
+              i++;
+              // Is this the end of the list?
+              if (i == (this.meetingList.length - 1)) {
+                break;
+              }
+            } while (this.meetingsAreCoLocated(this.meetingList[i], this.meetingList[i + 1]))
+
+            this.data = {
+              "position": { "lat": this.meetingList[i].latitude, "lng": this.meetingList[i].longitude },
+              "ID": this.ids,
+              "disableAutoPan": true,
+              "icon": "assets/markercluster/MarkerRed_universal@3x.png"
+            };
+            this.markers.push(this.data);
           }
-          this.data = {
-            "position": {
-              "lat": this.meetingList[i].latitude,
-              "lng": this.meetingList[i].longitude
-            },
-            "ID": this.ids,
-            "disableAutoPan": true,
-            "icon": "assets/markercluster/MarkerRed_universal@3x.png"
-          };
-          this.markers.push(this.data);
         }
-      } else {
-        // Meeting is not on the visible map area
       }
     }
   }
@@ -325,12 +340,12 @@ export class MapSearchComponent {
       const myModal: Modal = this.modal.create(ModalComponent, { data: this.meeting }, myModalOptions);
 
       myModal.onDidDismiss((data) => {
-        console.log("I have dismissed.");
+        //        console.log("I have dismissed.");
         console.log(data);
       });
 
       myModal.onWillDismiss((data) => {
-        console.log("I'm about to dismiss");
+        //        console.log("I'm about to dismiss");
         console.log(data);
       });
 
