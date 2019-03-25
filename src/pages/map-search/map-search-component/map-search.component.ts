@@ -239,7 +239,7 @@ export class MapSearchComponent {
       "position": { "lat": this.meetingList[i].latitude, "lng": this.meetingList[i].longitude },
       "ID": this.meetingList[i].id_bigint,
       "disableAutoPan": true,
-      "icon": "assets/markercluster/MarkerBlue_universal@3x.png"
+      "icon": "assets/markercluster/MarkerBlue.png"
     };
     this.markers.push(this.data);
 
@@ -274,7 +274,7 @@ export class MapSearchComponent {
 
               this.data = {
                 "position": { "lat": this.meetingList[i].latitude, "lng": this.meetingList[i].longitude },
-                "icon": null
+                "icon": "assets/markercluster/FFFFFF-0.png"
               };
               this.markers.push(this.data);
 
@@ -289,7 +289,7 @@ export class MapSearchComponent {
               "position": { "lat": this.meetingList[i].latitude, "lng": this.meetingList[i].longitude },
               "ID": this.ids,
               "disableAutoPan": true,
-              "icon": "assets/markercluster/MarkerRed_universal@3x.png"
+              "icon": "assets/markercluster/MarkerRed.png"
             };
             this.markers.push(this.data);
           }
