@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="ie.nasouth.bmltsearch" version="2.0.4" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="ie.nasouth.bmltsearch" version="2.0.7" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>BMLT Search</name>
     <description>BMLT Meeting Search</description>
     <author email="paulnagle@gmail.com" href="https://bmlt.app/">Paul Nagle</author>
-    <content src="index.html" />
+    <content original-src="index.html" src="http://192.168.1.107:8100" />
     <access origin="*" />
     <content original-src="index.html" />
     <allow-navigation href="*" />
@@ -108,6 +108,7 @@
         <variable name="LOCATION_WHEN_IN_USE_DESCRIPTION" value="This app wants to get your location while this app runs only." />
         <variable name="LOCATION_ALWAYS_USAGE_DESCRIPTION" value="This app wants to get your location always, even this app runs in background." />
     </plugin>
+    <allow-navigation href="http://192.168.1.107:8100" sessionid="14216f51" />
     <engine name="ios" spec="4.5.5" />
     <engine name="android" spec="7.1.4" />
     <engine name="browser" spec="5.0.4" />
