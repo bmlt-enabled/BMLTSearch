@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ViewController, NavParams } from "ionic-angular";
 import { MeetingListProvider } from "../../../providers/meeting-list/meeting-list";
 import { TranslateService } from "@ngx-translate/core";
-import { Storage }               from '@ionic/storage';
+import { Storage } from '@ionic/storage';
 import { InAppBrowser } from "@ionic-native/in-app-browser";
 
 /**
@@ -20,16 +20,16 @@ export class ModalComponent {
   title: string;
   meetingList: any;
 
-  constructor( private view: ViewController,
-               private translate : TranslateService,
-               private navParams: NavParams,
-               private storage               : Storage,
-               private iab                   : InAppBrowser ,
-               private MeetingListProvider : MeetingListProvider) {
+  constructor(private view: ViewController,
+    private translate: TranslateService,
+    private navParams: NavParams,
+    private storage: Storage,
+    private iab: InAppBrowser,
+    private MeetingListProvider: MeetingListProvider) {
     console.log('Hello ModalComponent Component');
     this.storage.get('timeDisplay')
-    .then(timeDisplay => {
-        if(timeDisplay) {
+      .then(timeDisplay => {
+        if (timeDisplay) {
           this.timeDisplay = timeDisplay;
         } else {
           this.timeDisplay = "24hr";
@@ -38,13 +38,12 @@ export class ModalComponent {
     this.meetingList = this.navParams.get('data');
   }
 
-  private dismiss(){
+  private dismiss() {
     this.view.dismiss();
   }
 
   public openMapsLink(destLatitude, destLongitude) {
-  const browser = this.iab.create('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
-
-}
+    const browser = this.iab.create('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
+  }
 
 }
