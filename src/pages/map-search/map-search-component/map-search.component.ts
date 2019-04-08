@@ -28,7 +28,9 @@ import {
   VisibleRegion,
   CameraPosition,
   Spherical,
-  Environment
+  Environment,
+  LocationService,
+  MyLocation
 } from "@ionic-native/google-maps";
 import { MeetingListProvider } from '../../../providers/meeting-list/meeting-list';
 import { TranslateService } from '@ngx-translate/core';
@@ -86,6 +88,7 @@ export class MapSearchComponent {
   }
 
   loadMap() {
+    this.translate.get('LOADINGMAP').subscribe(value => { this.presentLoader(value); })
 
     // This code is necessary for browser
     this.platform.ready().then(() => {
@@ -96,36 +99,43 @@ export class MapSearchComponent {
 
     });
 
-    let center: ILatLng = { "lat": this.mapLatitude, "lng": this.mapLongitude };
 
-    let options: GoogleMapOptions = {
 
-      controls: {
-        'compass': true,
-        'myLocationButton': true,
-        'myLocation': true,   // (blue dot)
-        'zoom': true,          // android only
-        'mapToolbar': true     // android only
-      },
+    LocationService.getMyLocation().then((myLocation: MyLocation) => {
 
-      gestures: {
-        scroll: true,
-        tilt: true,
-        zoom: true,
-        rotate: true
-      },
-      camera: {
-        target: {
-          "lat": this.mapLatitude,
-          "lng": this.mapLongitude
+      this.mapLatitude = myLocation.latLng.lat;
+      this.mapLongitude = myLocation.latLng.lng;
+
+      let options: GoogleMapOptions = {
+        building: true,
+        controls: {
+          'compass': true,
+          'myLocationButton': true,
+          'myLocation': true,   // (blue dot)
+          'zoom': true,          // android only
+          'mapToolbar': true     // android only
         },
-        zoom: 10
+        gestures: {
+          scroll: true,
+          tilt: true,
+          zoom: true,
+          rotate: true
+        },
+        camera: {
+          target: {
+            "lat": this.mapLatitude,
+            "lng": this.mapLongitude
+          },
+          zoom: 10
+        }
       }
-    }
 
-    this.map = GoogleMaps.create('map_canvas', options);
+      this.map = GoogleMaps.create('map_canvas', options);
+      this.map.one(GoogleMapsEvent.MAP_READY).then(this.onMapReady.bind(this));
+      this.dismissLoader();
 
-    this.map.one(GoogleMapsEvent.MAP_READY).then(this.onMapReady.bind(this));
+    });
+
   }
 
   onMapReady() {
