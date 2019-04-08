@@ -99,8 +99,6 @@ export class MapSearchComponent {
 
     });
 
-
-
     LocationService.getMyLocation().then((myLocation: MyLocation) => {
 
       this.mapLatitude = myLocation.latLng.lat;
@@ -133,7 +131,6 @@ export class MapSearchComponent {
       this.map = GoogleMaps.create('map_canvas', options);
       this.map.one(GoogleMapsEvent.MAP_READY).then(this.onMapReady.bind(this));
       this.dismissLoader();
-
     });
 
   }
@@ -211,7 +208,7 @@ export class MapSearchComponent {
   }
 
   getMeetings() {
-    this.translate.get('LOADINGMAP').subscribe(value => { this.presentLoader(value); })
+    this.translate.get('FINDING_MTGS').subscribe(value => { this.presentLoader(value); })
 
     this.MeetingListProvider.getRadiusMeetings(this.mapLatitude, this.mapLongitude, this.autoRadius).subscribe((data) => {
 
