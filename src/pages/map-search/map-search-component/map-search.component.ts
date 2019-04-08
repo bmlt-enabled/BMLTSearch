@@ -343,8 +343,9 @@ export class MapSearchComponent {
       this.meeting.filter(i => i.start_time_set = this.convertTo12Hr(i.start_time));
 
       const myModalOptions: ModalOptions = {
-        enableBackdropDismiss: false,
-        showBackdrop: false
+        enableBackdropDismiss: true,
+        showBackdrop: true,
+        cssClass: "mymodal"
       };
 
       const myModal: Modal = this.modal.create(ModalComponent, { data: this.meeting }, myModalOptions);

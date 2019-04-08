@@ -12,7 +12,7 @@
 
 
 <ion-content>
-<ion-list *ngFor="let meeting of meetingList; let j = index">
+<ion-list  *ngFor="let meeting of meetingList; let j = index">
   <ion-card text-wrap>
     <ion-card-header>
       <div ngSwitch="{{ meeting.weekday_tinyint }}">

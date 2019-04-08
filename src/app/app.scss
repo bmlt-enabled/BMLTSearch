@@ -1,6 +1,4 @@
 // http://ionicframework.com/docs/v2/theming/
-
-
 // App Global Sass
 // --------------------------------------------------
 // Put style rules here that you want to apply globally. These
@@ -15,7 +13,6 @@
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
 // @import url('https://fonts.googleapis.com/css?family=Lato');
-
 // * {
 // 	font-family: Lato;
 // }
@@ -25,21 +22,37 @@ img {
 	height: auto;
 }
 
-video, audio {
-	width:100%;
-	max-width:100%;
+audio,
+video {
+	width: 100%;
+	max-width: 100%;
 	box-sizing: border-box;
 	display: inline-block;
 }
 
-#map_canvas, #pano_canvas {
-  height: 100%;
+#map_canvas,
+#pano_canvas {
+	height: 100%;
 }
 
 .smallPanel {
-  margin: 10px;
-  padding: 10px;
-  background-color:rgba(255,255,255,0.5);
-  z-index: 2 !important;
-  font-size: 25px;
+	margin: 10px;
+	padding: 10px;
+	background-color: rgba(255,255,255,0.5);
+	z-index: 2 !important;
+	font-size: 25px;
+}
+
+.mymodal {
+	position: absolute !important;
+	width: 95% !important;
+	height: 95% !important;
+	top: 2.5% !important;
+	left: 2.5% !important;
+	// background: linear-gradient(to bottom, #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%);
+}
+
+.mymodal .modal-wrapper {
+	border-radius: 25px;
+	border: 1px solid grey;
 }
