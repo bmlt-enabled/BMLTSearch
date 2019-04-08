@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="ie.nasouth.bmltsearch" version="2.0.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="ie.nasouth.bmltsearch" version="2.0.4" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>BMLT Search</name>
     <description>BMLT Meeting Search</description>
     <author email="paulnagle@gmail.com" href="https://bmlt.app/">Paul Nagle</author>
-    <content src="index.html" />
+    <content original-src="index.html" src="http://192.168.1.107:8101" />
     <access origin="*" />
     <content original-src="index.html" />
     <allow-navigation href="*" />
@@ -93,6 +93,7 @@
     <preference name="SplashShowOnlyFirstTime" value="false" />
     <preference name="loadUrlTimeoutValue" value="100000" />
     <allow-navigation href="http://192.168.1.9:8100" />
+    <allow-navigation href="http://192.168.1.107:8100" sessionid="9606b002" />
     <plugin name="cordova-plugin-splashscreen" spec="5.0.2" />
     <plugin name="cordova-plugin-statusbar" spec="2.4.2" />
     <plugin name="cordova-plugin-whitelist" spec="1.3.3" />
@@ -108,6 +109,7 @@
         <variable name="LOCATION_WHEN_IN_USE_DESCRIPTION" value="This app wants to get your location while this app runs only." />
         <variable name="LOCATION_ALWAYS_USAGE_DESCRIPTION" value="This app wants to get your location always, even this app runs in background." />
     </plugin>
+    <allow-navigation href="http://192.168.1.107:8101" sessionid="1523f482" />
     <engine name="ios" spec="4.5.5" />
     <engine name="android" spec="7.1.4" />
     <engine name="browser" spec="5.0.4" />
