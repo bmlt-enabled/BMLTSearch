@@ -61,7 +61,7 @@ export class MapSearchComponent {
   ids: string;
   data: any;
   mapEventInProgress: boolean = false;
-
+  markerCluster: MarkerCluster;
 
   constructor(
     private MeetingListProvider: MeetingListProvider,
@@ -88,7 +88,7 @@ export class MapSearchComponent {
   }
 
   loadMap() {
-    this.translate.get('LOADINGMAP').subscribe(value => { this.presentLoader(value); })
+    this.translate.get('LOCATING').subscribe(value => { this.presentLoader(value); })
 
     // This code is necessary for browser
     this.platform.ready().then(() => {
@@ -129,40 +129,39 @@ export class MapSearchComponent {
       }
 
       this.map = GoogleMaps.create('map_canvas', options);
-      this.map.one(GoogleMapsEvent.MAP_READY).then(this.onMapReady.bind(this));
+
+      this.map.on(GoogleMapsEvent.MAP_DRAG_END).subscribe((params: any[]) => {
+        console.log("MAP_DRAG_END");
+        if (this.mapEventInProgress == false) {
+          this.mapEventInProgress = true;
+          this.getMeetings(params);
+        } else {
+          console.log("not processing second event - MAP_DRAG_END")
+        }
+      });
+
+      this.map.on(GoogleMapsEvent.CAMERA_MOVE_END).subscribe((params: any[]) => {
+        console.log("CAMERA_MOVE_END");
+        if (this.mapEventInProgress == false) {
+          this.mapEventInProgress = true;
+          this.getMeetings(params);
+        } else {
+          console.log("not processing second event - CAMERA_MOVE_END")
+        }
+      });
+
+      this.map.on(GoogleMapsEvent.MAP_READY).subscribe((params: any[]) => {
+        console.log("MAP_READY");
+        // if (this.mapEventInProgress == false) {
+        //   this.mapEventInProgress = true;
+        //   this.getMeetings(params);
+        // } else {
+        //   console.log("not processing second event - CAMERA_MOVE_END")
+        // }
+      });
       this.dismissLoader();
     });
 
-  }
-
-  onMapReady() {
-    this.addCluster();
-    this.getMeetings();
-
-    this.map.on(GoogleMapsEvent.MAP_DRAG_END).subscribe((params: any[]) => {
-      console.log("MAP_DRAG_END")
-    });
-
-    this.map.on(GoogleMapsEvent.CAMERA_MOVE_END).subscribe((params: any[]) => {
-      if (this.mapEventInProgress == false) {
-        this.mapEventInProgress = true;
-
-        console.log("CAMERA_MOVE_END");
-        this.deleteCluster();
-
-        let cameraPosition: CameraPosition<ILatLng> = params[0];
-        this.mapLatitude = cameraPosition.target.lat;
-        this.mapLongitude = cameraPosition.target.lng;
-
-        this.visibleRegion = this.map.getVisibleRegion();
-
-        this.autoRadius = Spherical.computeDistanceBetween(cameraPosition.target, this.visibleRegion.farLeft) / 1000;
-
-        //      this.getMeetings();
-      } else {
-        console.log("not processing second event")
-      }
-    });
   }
 
   addCluster() {
@@ -189,9 +188,9 @@ export class MapSearchComponent {
       boundsDraw: false
     };
 
-    let markerCluster: MarkerCluster = this.map.addMarkerClusterSync(options);
+    this.markerCluster = this.map.addMarkerClusterSync(options);
 
-    markerCluster.on(GoogleMapsEvent.MARKER_CLICK).subscribe((params) => {
+    this.markerCluster.on(GoogleMapsEvent.MARKER_CLICK).subscribe((params) => {
       let marker: Marker = params[1];
       this.openModal(marker.get("ID"));
     });
@@ -202,16 +201,33 @@ export class MapSearchComponent {
     this.markers.length = 0;
     this.meetingList = [];
     this.meetingList.length = 0;
-    this.map.clear().then(() => {
-      this.getMeetings();
-    });
+    this.map.clear();
+
+
+
   }
 
-  getMeetings() {
-    this.translate.get('FINDING_MTGS').subscribe(value => { this.presentLoader(value); })
+  getMeetings(params) {
+  this.translate.get('FINDING_MTGS').subscribe(value => { this.presentLoader(value); })
+
+  this.deleteCluster();
+
+  this.map.clear().then(() => {
+    let cameraPosition: CameraPosition<ILatLng> = params[0];
+    this.mapLatitude = cameraPosition.target.lat;
+    this.mapLongitude = cameraPosition.target.lng;
+
+    this.visibleRegion = this.map.getVisibleRegion();
+
+    this.autoRadius = Spherical.computeDistanceBetween(cameraPosition.target, this.visibleRegion.farLeft) / 1000;
+
+    console.log("Calling getRadiusMeetings")
+    console.log("this.mapLatitude ", this.mapLatitude)
+    console.log("this.mapLongitude", this.mapLongitude)
+    console.log("this.autoRadius", this.autoRadius)
 
     this.MeetingListProvider.getRadiusMeetings(this.mapLatitude, this.mapLongitude, this.autoRadius).subscribe((data) => {
-
+      console.log("Response from getRadiusMeetings")
       if (JSON.stringify(data) == "{}") {  // empty result set!
         this.meetingList = JSON.parse("[]");
       } else {
@@ -228,7 +244,8 @@ export class MapSearchComponent {
       this.mapEventInProgress = false;
 
     });
-  }
+  });
+}
 
   meetingsAreCoLocated(i, j) {
     let areColocated: boolean = false;
@@ -251,6 +268,7 @@ export class MapSearchComponent {
     this.markers.push(this.data);
 
   }
+
   populateMarkers() {
     this.markers = [];
     let i: number;
