@@ -63,27 +63,6 @@ export class MapSearchComponent {
   mapEventInProgress: boolean = false;
   markerCluster;
 
-  markerLabelOptions: MarkerLabel = {
-    bold: true,
-    fontSize: 15,
-    color: "white",
-    italic: false
-  };
-
-  clusterIcons: MarkerClusterIcon[] = [
-    { min: 3, max: 10, url: "./assets/markercluster/m1.png", anchor: { x: 16, y: 16 }, label: labelOptions },
-    { min: 11, max: 50, url: "./assets/markercluster/m2.png", anchor: { x: 16, y: 16 }, label: labelOptions },
-    { min: 51, max: 100, url: "./assets/markercluster/m3.png", anchor: { x: 24, y: 24 }, label: labelOptions },
-    { min: 101, max: 500, url: "./assets/markercluster/m4.png", anchor: { x: 24, y: 24 }, label: labelOptions },
-    { min: 501, url: "./assets/markercluster/m5.png", anchor: { x: 32, y: 32 }, label: labelOptions }
-  ];
-
-  let options: MarkerClusterOptions = {
-    markers: this.markers,
-    icons: clusterIcons,
-    boundsDraw: false
-  };
-
   constructor(
     private MeetingListProvider: MeetingListProvider,
     public loadingCtrl: LoadingController,
@@ -180,15 +159,33 @@ export class MapSearchComponent {
       }
     });
 
-//    this.map.trigger("GoogleMapsEvent.CAMERA_MOVE_END");
+    //    this.map.trigger("GoogleMapsEvent.CAMERA_MOVE_END");
   }
 
   addCluster() {
     console.log("In addCluster()");
 
+    let markerLabelOptions: MarkerLabel = {
+      bold: true,
+      fontSize: 15,
+      color: "white",
+      italic: false
+    };
 
+    let markerClusterIconOptions: MarkerClusterIcon[] = [
+      { min: 3, max: 10, url: "./assets/markercluster/m1.png", anchor: { x: 16, y: 16 }, label: markerLabelOptions },
+      { min: 11, max: 50, url: "./assets/markercluster/m2.png", anchor: { x: 16, y: 16 }, label: markerLabelOptions },
+      { min: 51, max: 100, url: "./assets/markercluster/m3.png", anchor: { x: 24, y: 24 }, label: markerLabelOptions },
+      { min: 101, max: 500, url: "./assets/markercluster/m4.png", anchor: { x: 24, y: 24 }, label: markerLabelOptions },
+      { min: 501, url: "./assets/markercluster/m5.png", anchor: { x: 32, y: 32 }, label: markerLabelOptions }
+    ];
 
-    this.markerCluster = this.map.addMarkerClusterSync(options);
+    let markerClusterOptions: MarkerClusterOptions = {
+      markers: this.markers,
+      icons: markerClusterIconOptions,
+      boundsDraw: false
+    };
+    this.markerCluster = this.map.addMarkerClusterSync(markerClusterOptions);
 
     this.markerCluster.on(GoogleMapsEvent.MARKER_CLICK).subscribe((params) => {
       let marker: Marker = params[1];
@@ -204,7 +201,7 @@ export class MapSearchComponent {
     this.markers.length = 0;
     this.meetingList = [];
     this.meetingList.length = 0;
-    if (typeof this.markerCluster != "undefined"){
+    if (typeof this.markerCluster != "undefined") {
       this.markerCluster.remove();
       this.markerCluster.empty();
       this.markerCluster.destroy();
@@ -241,10 +238,10 @@ export class MapSearchComponent {
         this.meetingList = this.meetingList.filter(meeting => meeting.latitude = parseFloat(meeting.latitude));
         this.meetingList = this.meetingList.filter(meeting => meeting.longitude = parseFloat(meeting.longitude));
       }
-        this.populateMarkers();
-        this.addCluster();
-        this.dismissLoader();
-        this.mapEventInProgress = false;
+      this.populateMarkers();
+      this.addCluster();
+      this.dismissLoader();
+      this.mapEventInProgress = false;
     });
     console.log("Leaving getMeetings()");
 
