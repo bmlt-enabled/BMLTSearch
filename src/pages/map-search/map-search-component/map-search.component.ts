@@ -61,7 +61,28 @@ export class MapSearchComponent {
   ids: string;
   data: any;
   mapEventInProgress: boolean = false;
-  markerCluster: MarkerCluster;
+  markerCluster;
+
+  markerLabelOptions: MarkerLabel = {
+    bold: true,
+    fontSize: 15,
+    color: "white",
+    italic: false
+  };
+
+  clusterIcons: MarkerClusterIcon[] = [
+    { min: 3, max: 10, url: "./assets/markercluster/m1.png", anchor: { x: 16, y: 16 }, label: labelOptions },
+    { min: 11, max: 50, url: "./assets/markercluster/m2.png", anchor: { x: 16, y: 16 }, label: labelOptions },
+    { min: 51, max: 100, url: "./assets/markercluster/m3.png", anchor: { x: 24, y: 24 }, label: labelOptions },
+    { min: 101, max: 500, url: "./assets/markercluster/m4.png", anchor: { x: 24, y: 24 }, label: labelOptions },
+    { min: 501, url: "./assets/markercluster/m5.png", anchor: { x: 32, y: 32 }, label: labelOptions }
+  ];
+
+  let options: MarkerClusterOptions = {
+    markers: this.markers,
+    icons: clusterIcons,
+    boundsDraw: false
+  };
 
   constructor(
     private MeetingListProvider: MeetingListProvider,
@@ -130,63 +151,42 @@ export class MapSearchComponent {
 
       this.map = GoogleMaps.create('map_canvas', options);
 
-      this.map.on(GoogleMapsEvent.MAP_DRAG_END).subscribe((params: any[]) => {
-        console.log("MAP_DRAG_END");
-        if (this.mapEventInProgress == false) {
-          this.mapEventInProgress = true;
-          this.getMeetings(params);
-        } else {
-          console.log("not processing second event - MAP_DRAG_END")
-        }
-      });
-
-      this.map.on(GoogleMapsEvent.CAMERA_MOVE_END).subscribe((params: any[]) => {
-        console.log("CAMERA_MOVE_END");
-        if (this.mapEventInProgress == false) {
-          this.mapEventInProgress = true;
-          this.getMeetings(params);
-        } else {
-          console.log("not processing second event - CAMERA_MOVE_END")
-        }
-      });
-
-      this.map.on(GoogleMapsEvent.MAP_READY).subscribe((params: any[]) => {
-        console.log("MAP_READY");
-        // if (this.mapEventInProgress == false) {
-        //   this.mapEventInProgress = true;
-        //   this.getMeetings(params);
-        // } else {
-        //   console.log("not processing second event - CAMERA_MOVE_END")
-        // }
-      });
+      this.map.one(GoogleMapsEvent.MAP_READY).then(this.onMapReady.bind(this));
       this.dismissLoader();
     });
 
   }
 
+  onMapReady() {
+    console.log("In onMapReady()");
+
+    this.map.on(GoogleMapsEvent.MAP_DRAG_END).subscribe((params: any[]) => {
+      console.log("MAP_DRAG_END");
+      // if (this.mapEventInProgress == false) {
+      //   this.mapEventInProgress = true;
+      //   this.getMeetings(params);
+      // } else {
+      //   console.log("not processing second event - MAP_DRAG_END")
+      // }
+    });
+
+    this.map.on(GoogleMapsEvent.CAMERA_MOVE_END).subscribe((params: any[]) => {
+      console.log("CAMERA_MOVE_END");
+      if (this.mapEventInProgress == false) {
+        this.mapEventInProgress = true;
+        this.getMeetings(params);
+      } else {
+        console.log("not processing second event - CAMERA_MOVE_END")
+      }
+    });
+
+//    this.map.trigger("GoogleMapsEvent.CAMERA_MOVE_END");
+  }
+
   addCluster() {
-    console.log("addCluster");
+    console.log("In addCluster()");
 
-    let labelOptions: MarkerLabel = {
-      bold: true,
-      fontSize: 15,
-      color: "white",
-      italic: false
-    };
 
-    let clusterIcons: MarkerClusterIcon[] = [
-      { min: 3, max: 10, url: "./assets/markercluster/m1.png", anchor: { x: 16, y: 16 }, label: labelOptions },
-      { min: 11, max: 50, url: "./assets/markercluster/m2.png", anchor: { x: 16, y: 16 }, label: labelOptions },
-      { min: 51, max: 100, url: "./assets/markercluster/m3.png", anchor: { x: 24, y: 24 }, label: labelOptions },
-      { min: 101, max: 500, url: "./assets/markercluster/m4.png", anchor: { x: 24, y: 24 }, label: labelOptions },
-      { min: 501, url: "./assets/markercluster/m5.png", anchor: { x: 32, y: 32 }, label: labelOptions }
-    ];
-
-    let options: MarkerClusterOptions = {
-      markers: this.markers,
-      icons: clusterIcons,
-      boundsDraw: false
-    };
 
     this.markerCluster = this.map.addMarkerClusterSync(options);
 
@@ -194,27 +194,33 @@ export class MapSearchComponent {
       let marker: Marker = params[1];
       this.openModal(marker.get("ID"));
     });
+    console.log("Leaving addCluster()");
+
   }
 
   deleteCluster() {
+    console.log("In deleteCluster()");
     this.markers = [];
     this.markers.length = 0;
     this.meetingList = [];
     this.meetingList.length = 0;
-    this.map.clear();
-
-
-
+    if (typeof this.markerCluster != "undefined"){
+      this.markerCluster.remove();
+      this.markerCluster.empty();
+      this.markerCluster.destroy();
+    }
+    console.log("Leaving deleteCluster()");
   }
 
   getMeetings(params) {
-  this.translate.get('FINDING_MTGS').subscribe(value => { this.presentLoader(value); })
+    console.log("In getMeetings()");
+    this.translate.get('FINDING_MTGS').subscribe(value => { this.presentLoader(value); })
 
-  this.deleteCluster();
-
-  this.map.clear().then(() => {
+    this.deleteCluster();
     let cameraPosition: CameraPosition<ILatLng> = params[0];
+
     this.mapLatitude = cameraPosition.target.lat;
+
     this.mapLongitude = cameraPosition.target.lng;
 
     this.visibleRegion = this.map.getVisibleRegion();
@@ -235,17 +241,14 @@ export class MapSearchComponent {
         this.meetingList = this.meetingList.filter(meeting => meeting.latitude = parseFloat(meeting.latitude));
         this.meetingList = this.meetingList.filter(meeting => meeting.longitude = parseFloat(meeting.longitude));
       }
-
-      this.populateMarkers();
-
-      this.addCluster();
-
-      this.dismissLoader();
-      this.mapEventInProgress = false;
-
+        this.populateMarkers();
+        this.addCluster();
+        this.dismissLoader();
+        this.mapEventInProgress = false;
     });
-  });
-}
+    console.log("Leaving getMeetings()");
+
+  }
 
   meetingsAreCoLocated(i, j) {
     let areColocated: boolean = false;
@@ -270,6 +273,7 @@ export class MapSearchComponent {
   }
 
   populateMarkers() {
+    console.log("In populateMarkers()");
     this.markers = [];
     let i: number;
     let areColocated: boolean = false;
@@ -321,6 +325,7 @@ export class MapSearchComponent {
         }
       }
     }
+    console.log("Leaving populateMarkers()")
   }
 
   presentLoader(loaderText) {
