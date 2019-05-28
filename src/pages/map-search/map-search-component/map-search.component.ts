@@ -185,6 +185,7 @@ export class MapSearchComponent {
       icons: markerClusterIconOptions,
       boundsDraw: false
     };
+    this.deleteCluster();
     this.markerCluster = this.map.addMarkerClusterSync(markerClusterOptions);
 
     this.markerCluster.on(GoogleMapsEvent.MARKER_CLICK).subscribe((params) => {
