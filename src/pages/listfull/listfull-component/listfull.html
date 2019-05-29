@@ -23,7 +23,7 @@
       <div *ngIf="L1.childServiceGroup;else L1_no_children">
         <ion-item-divider color="blue1" (click)="toggleL1Group(i)" [ngClass]="{active: isL1GroupShown(i)}">
           <h3>{{ L1.name }}</h3>
-          <ion-icon color="white" item-left [name]="isL1GroupShown(i) ? 'ios-close-circle' : 'ios-add-circle'"></ion-icon>
+          <ion-icon color="white" item-left [name]="isL1GroupShown(i) ? 'close-circle' : 'add-circle'"></ion-icon>
         </ion-item-divider>
       </div>
       <ng-template #L1_no_children>
@@ -42,7 +42,7 @@
                 <div *ngIf="L2.childServiceGroup;else L2_no_children">
                   <ion-item-divider color="blue2" (click)="toggleL2Group(j)" [ngClass]="{active: isL2GroupShown(j)}">
                     <h3>{{ L2.name }}</h3>
-                    <ion-icon color="white" item-left [name]="isL2GroupShown(j) ? 'ios-close-circle' : 'ios-add-circle'"></ion-icon>
+                    <ion-icon color="white" item-left [name]="isL2GroupShown(j) ? 'close-circle' : 'add-circle'"></ion-icon>
                   </ion-item-divider>
                 </div>
                 <ng-template #L2_no_children>
@@ -64,7 +64,7 @@
                     <div *ngIf="L3.childServiceGroup;else L3_no_children">
                       <ion-item-divider color="blue3" (click)="toggleL3Group(k)" [ngClass]="{active: isL3GroupShown(k)}">
                         <h3>{{ L3.name }}</h3>
-                        <ion-icon color="white" item-left [name]="isL3GroupShown(k) ? 'ios-close-circle' : 'ios-add-circle'"></ion-icon>
+                        <ion-icon color="white" item-left [name]="isL3GroupShown(k) ? 'close-circle' : 'add-circle'"></ion-icon>
                       </ion-item-divider>
                     </div>
                     <ng-template #L3_no_children>
@@ -86,7 +86,7 @@
                         <div *ngIf="L4.childServiceGroup;else L4_no_children">
                           <ion-item-divider color="blue4">
                             <h3>{{ L4.name }}</h3>
-                            <ion-icon color="white" item-left [name]="isL1GroupShown(i) ? 'ios-close-circle' : 'ios-add-circle'"></ion-icon>
+                            <ion-icon color="white" item-left [name]="isL1GroupShown(i) ? 'close-circle' : 'add-circle'"></ion-icon>
                           </ion-item-divider>
                         </div>
                         <ng-template #L4_no_children>
@@ -107,7 +107,7 @@
                           <div *ngIf="L5.childServiceGroup;else L5_no_children">
                             <ion-item-divider color="Teal">
                               <h3>{{ L5.name }}</h3>
-                              <ion-icon color="white" item-left [name]="isL1GroupShown(i) ? 'ios-close-circle' : 'ios-add-circle'"></ion-icon>
+                              <ion-icon color="white" item-left [name]="isL1GroupShown(i) ? 'close-circle' : 'add-circle'"></ion-icon>
                             </ion-item-divider>
                           </div>
                           <ng-template #L5_no_children>
@@ -149,7 +149,7 @@
             <h3>{{'SATURDAY' | translate}} ({{satCount}})</h3></div>
           <div *ngSwitchDefault>Nothing Found.</div>
         </div>
-        <ion-icon color="white" item-left [name]="isDayShown(i) ? 'ios-close-circle' : 'ios-add-circle'"></ion-icon>
+        <ion-icon color="white" item-left [name]="isDayShown(i) ? 'close-circle' : 'add-circle'"></ion-icon>
       </ion-item-divider>
       <div *ngIf="isDayShown(i)">
         <ion-list *ngFor="let group2 of group1; let j = index">
