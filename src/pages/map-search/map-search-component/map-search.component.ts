@@ -214,7 +214,7 @@ export class MapSearchComponent {
     console.log("In getMeetings()");
     this.translate.get('FINDING_MTGS').subscribe(value => { this.presentLoader(value); })
 
-    this.deleteCluster();
+//    this.deleteCluster();
     let cameraPosition: CameraPosition<ILatLng> = params[0];
 
     this.mapLatitude = cameraPosition.target.lat;
