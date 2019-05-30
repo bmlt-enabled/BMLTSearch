@@ -14,7 +14,6 @@ import { MapSearchComponent }       from '../pages/map-search/map-search-compone
 import { FullMapComponent }         from '../pages/fullmap/fullmap-component/fullmap.component';
 import { LocationSearchComponent }  from '../pages/location-search/location-search-component/location-search.component';
 import { ListfullComponent }        from '../pages/listfull/listfull-component/listfull.component';
-import { AddressSearchComponent}    from '../pages/address-search/address-search-component/address-search.component';
 import { DoIHaveTheBmltComponent }  from '../pages/do-i-have-the-bmlt/do-i-have-the-bmlt-component/do-i-have-the-bmlt.component';
 import { ContactComponent }         from '../pages/contact/contact-component/contact.component';
 
@@ -53,7 +52,6 @@ export class MyApp {
 		  { title: 'HOME',           component: HomeComponent,           icon: 'home' },
 			{ title: 'MAP_SEARCH',     component: MapSearchComponent,      icon: 'map'},
 			{ title: 'LOCATIONSEARCH', component: LocationSearchComponent, icon: 'pin' },
-			{ title: 'ADDRESSSEARCH',  component: AddressSearchComponent,  icon: 'compass' },
 			{ title: 'LISTFULL',       component: ListfullComponent,       icon: 'globe' },
 			{ title: 'DOIHAVETHEBMLT', component: DoIHaveTheBmltComponent, icon: 'cloud-done' },
 	    { title: 'SETTINGS',       component: SettingsComponent,       icon: 'settings'},

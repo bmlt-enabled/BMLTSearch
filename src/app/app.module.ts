@@ -15,7 +15,6 @@ import { MapSearchModule }           from '../pages/map-search/map-search.module
 import { SettingsModule }            from '../pages/settings/settings.module';
 import { ContactModule }             from '../pages/contact/contact.module';
 import { LocationSearchModule }      from '../pages/location-search/location-search.module';
-import { AddressSearchModule }       from '../pages/address-search/address-search.module';
 import { DoIHaveTheBmltModule }      from '../pages/do-i-have-the-bmlt/do-i-have-the-bmlt.module';
 import { ListfullModule }            from '../pages/listfull/listfull.module';
 import { MeetingListProvider }       from '../providers/meeting-list/meeting-list';
@@ -37,7 +36,6 @@ import { GoogleMaps }                from "@ionic-native/google-maps";
     SettingsModule,
     ContactModule,
     ListfullModule,
-    AddressSearchModule,
     DoIHaveTheBmltModule,
     LocationSearchModule
   ],

@@ -1,7 +1,10 @@
 import {
   Component,
-  ViewChild
+  ViewChild,
+  ElementRef,
+  NgZone
 } from '@angular/core';
+import { Config } from '../../../app/app.config';
 import { Storage } from '@ionic/storage';
 import {
   LoadingController,
@@ -9,8 +12,10 @@ import {
   Modal,
   ModalController,
   ModalOptions,
-  ViewController
-} from 'ionic-angular';
+  ViewController} from 'ionic-angular';
+import { MeetingListProvider } from '../../../providers/meeting-list/meeting-list';
+import { TranslateService } from '@ngx-translate/core';
+import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { Geolocation } from '@ionic-native/geolocation';
 import {
   GoogleMaps,
@@ -30,11 +35,10 @@ import {
   Spherical,
   Environment,
   LocationService,
-  MyLocation
+  MyLocation,
+  Geocoder,
+  GeocoderResult
 } from "@ionic-native/google-maps";
-import { MeetingListProvider } from '../../../providers/meeting-list/meeting-list';
-import { TranslateService } from '@ngx-translate/core';
-import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { ModalComponent } from "../../modal/modal-component/modal.component";
 
 
@@ -50,8 +54,18 @@ export class MapSearchComponent {
   meetingList: any = [];
   loader = null;
   zoom: number = 8;
-  mapLatitude: number = 51.899;
-  mapLongitude: number = -8.754;
+  mapLatitude: any = 51.899;
+  mapLongitude: any = -8.474;
+
+  formattedAddress: string = '';
+
+  GoogleAutocomplete;
+  autocompleteItems;
+  autocomplete;
+
+  latitude: number = 0;
+  longitude: number = 0;
+
   autoRadius: number = 5;
   map: GoogleMap;
   visibleRegion: VisibleRegion;
@@ -63,15 +77,20 @@ export class MapSearchComponent {
   mapEventInProgress: boolean = false;
   markerCluster;
 
-  constructor(
-    private MeetingListProvider: MeetingListProvider,
+
+  constructor(private MeetingListProvider: MeetingListProvider,
     public loadingCtrl: LoadingController,
-    private platform: Platform,
     private storage: Storage,
+    private platform: Platform,
     private translate: TranslateService,
     private iab: InAppBrowser,
+    public viewCtrl: ViewController,
+    private zone: NgZone,
     private modal: ModalController) {
 
+    this.GoogleAutocomplete = new google.maps.places.AutocompleteService();
+    this.autocomplete = { input: '' };
+    this.autocompleteItems = [];
   }
 
   ionViewDidLoad() {
@@ -86,6 +105,7 @@ export class MapSearchComponent {
 
     this.loadMap();
   }
+
 
   loadMap() {
     this.translate.get('LOCATING').subscribe(value => { this.presentLoader(value); })
@@ -136,6 +156,7 @@ export class MapSearchComponent {
 
   }
 
+
   onMapReady() {
     console.log("In onMapReady()");
 
@@ -161,6 +182,7 @@ export class MapSearchComponent {
 
     //    this.map.trigger("GoogleMapsEvent.CAMERA_MOVE_END");
   }
+
 
   addCluster() {
     console.log("In addCluster()");
@@ -248,27 +270,6 @@ export class MapSearchComponent {
 
   }
 
-  meetingsAreCoLocated(i, j) {
-    let areColocated: boolean = false;
-    if (((Math.round(i.latitude * 1000) / 1000) != (Math.round(j.latitude * 1000) / 1000)) ||
-      ((Math.round(i.longitude * 1000) / 1000) != (Math.round(j.longitude * 1000) / 1000))) {
-      areColocated = false;
-    } else {
-      areColocated = true;
-    }
-    return areColocated;
-  }
-
-  pushStandaloneMeeting(i) {
-    this.data = {
-      "position": { "lat": this.meetingList[i].latitude, "lng": this.meetingList[i].longitude },
-      "ID": this.meetingList[i].id_bigint,
-      "disableAutoPan": true,
-      "icon": "assets/markercluster/MarkerBlue.png"
-    };
-    this.markers.push(this.data);
-
-  }
 
   populateMarkers() {
     console.log("In populateMarkers()");
@@ -326,6 +327,74 @@ export class MapSearchComponent {
     console.log("Leaving populateMarkers()")
   }
 
+  meetingsAreCoLocated(i, j) {
+    let areColocated: boolean = false;
+    if (((Math.round(i.latitude * 1000) / 1000) != (Math.round(j.latitude * 1000) / 1000)) ||
+      ((Math.round(i.longitude * 1000) / 1000) != (Math.round(j.longitude * 1000) / 1000))) {
+      areColocated = false;
+    } else {
+      areColocated = true;
+    }
+    return areColocated;
+  }
+
+  pushStandaloneMeeting(i) {
+    this.data = {
+      "position": { "lat": this.meetingList[i].latitude, "lng": this.meetingList[i].longitude },
+      "ID": this.meetingList[i].id_bigint,
+      "disableAutoPan": true,
+      "icon": "assets/markercluster/MarkerBlue.png"
+    };
+    this.markers.push(this.data);
+
+  }
+
+
+  updateSearchResults() {
+    if (this.autocomplete.input == '') {
+      this.autocompleteItems = [];
+      return;
+    }
+    this.GoogleAutocomplete.getPlacePredictions({ input: this.autocomplete.input },
+      (predictions, status) => {
+        this.autocompleteItems = [];
+        this.zone.run(() => {
+          predictions.forEach((prediction) => {
+            this.autocompleteItems.push(prediction);
+          });
+        });
+      });
+  }
+
+  selectSearchResult(item) {
+    console.log(item);
+    this.autocompleteItems = [];
+    this.autocomplete.input = item.description;
+
+    // Address -> latitude,longitude
+Geocoder.geocode({
+  "address": item.description
+}).then((results: GeocoderResult[]) => {
+  console.log(results);
+
+
+
+  // Add a marker
+  let marker: Marker = this.map.addMarkerSync({
+    'position': results[0].position,
+    'title':  item.description
+  });
+
+  // Move to the position
+  this.map.animateCamera({
+    'target': results[0].position,
+    'zoom': 10
+  }).then(() => {
+    marker.showInfoWindow();
+  });
+});
+  }
+
   presentLoader(loaderText) {
     if (!this.loader) {
       this.loader = this.loadingCtrl.create({
@@ -380,6 +449,10 @@ export class MapSearchComponent {
 
       myModal.present();
     });
+  }
+
+  public openMapsLink(destLatitude, destLongitude) {
+    const browser = this.iab.create('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
   }
 
 }
