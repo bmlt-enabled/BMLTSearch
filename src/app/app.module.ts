@@ -17,6 +17,7 @@ import { ContactModule }             from '../pages/contact/contact.module';
 import { LocationSearchModule }      from '../pages/location-search/location-search.module';
 import { DoIHaveTheBmltModule }      from '../pages/do-i-have-the-bmlt/do-i-have-the-bmlt.module';
 import { ListfullModule }            from '../pages/listfull/listfull.module';
+import { ModalModule }               from '../pages/modal/modal.module';
 import { MeetingListProvider }       from '../providers/meeting-list/meeting-list';
 import { ServiceGroupsProvider }     from '../providers/service-groups/service-groups';
 import { GeolocateProvider }         from '../providers/geolocate/geolocate';
@@ -37,7 +38,8 @@ import { GoogleMaps }                from "@ionic-native/google-maps";
     ContactModule,
     ListfullModule,
     DoIHaveTheBmltModule,
-    LocationSearchModule
+    LocationSearchModule,
+    ModalModule
   ],
   bootstrap: [
     IonicApp

@@ -14,6 +14,7 @@ import {
   ModalOptions,
   ViewController} from 'ionic-angular';
 import { MeetingListProvider } from '../../../providers/meeting-list/meeting-list';
+import { ModalComponent }      from "../../modal/modal-component/modal.component";
 import { TranslateService } from '@ngx-translate/core';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { Geolocation } from '@ionic-native/geolocation';
@@ -39,7 +40,6 @@ import {
   Geocoder,
   GeocoderResult
 } from "@ionic-native/google-maps";
-import { ModalComponent } from "../../modal/modal-component/modal.component";
 
 
 declare const google: any;
