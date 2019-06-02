@@ -1,22 +1,21 @@
 import { Component,
-	       ViewChild }               from '@angular/core';
+	       ViewChild }                from '@angular/core';
 import { Nav,
 	       Platform,
-				 MenuController }          from 'ionic-angular';
-import { StatusBar }               from '@ionic-native/status-bar';
-import { SplashScreen }            from '@ionic-native/splash-screen';
-import { Storage }                 from '@ionic/storage';
-import { TranslateService }        from '@ngx-translate/core';
-import { Config }                  from './app.config';
-import { HomeComponent }           from '../pages/home/home-component/home.component';
-import { SettingsComponent }       from '../pages/settings/settings-component/settings.component';
-import { MapSearchComponent }      from '../pages/map-search/map-search-component/map-search.component';
-import { FullMapComponent }        from '../pages/fullmap/fullmap-component/fullmap.component';
-import { LocationSearchComponent } from '../pages/location-search/location-search-component/location-search.component';
-import { ListfullComponent }       from '../pages/listfull/listfull-component/listfull.component';
-import { AddressSearchComponent}   from '../pages/address-search/address-search-component/address-search.component';
-import { DoIHaveTheBmltComponent } from '../pages/do-i-have-the-bmlt/do-i-have-the-bmlt-component/do-i-have-the-bmlt.component';
-import { ContactComponent }        from '../pages/contact/contact-component/contact.component';
+				 MenuController }           from 'ionic-angular';
+import { StatusBar }                from '@ionic-native/status-bar';
+import { SplashScreen }             from '@ionic-native/splash-screen';
+import { Storage }                  from '@ionic/storage';
+import { TranslateService }         from '@ngx-translate/core';
+import { Config }                   from './app.config';
+import { HomeComponent }            from '../pages/home/home-component/home.component';
+import { SettingsComponent }        from '../pages/settings/settings-component/settings.component';
+import { MapSearchComponent }       from '../pages/map-search/map-search-component/map-search.component';
+import { FullMapComponent }         from '../pages/fullmap/fullmap-component/fullmap.component';
+import { LocationSearchComponent }  from '../pages/location-search/location-search-component/location-search.component';
+import { ListfullComponent }        from '../pages/listfull/listfull-component/listfull.component';
+import { DoIHaveTheBmltComponent }  from '../pages/do-i-have-the-bmlt/do-i-have-the-bmlt-component/do-i-have-the-bmlt.component';
+import { ContactComponent }         from '../pages/contact/contact-component/contact.component';
 
 @Component({
 	templateUrl: './app.html'
@@ -24,7 +23,7 @@ import { ContactComponent }        from '../pages/contact/contact-component/cont
 export class MyApp {
 	@ViewChild(Nav) nav: Nav;
 
-	rootPage = HomeComponent;
+	rootPage: any;
 	pages: Array<{title: string, component: any, icon: string}>;
 
 
@@ -53,7 +52,6 @@ export class MyApp {
 		  { title: 'HOME',           component: HomeComponent,           icon: 'home' },
 			{ title: 'MAP_SEARCH',     component: MapSearchComponent,      icon: 'map'},
 			{ title: 'LOCATIONSEARCH', component: LocationSearchComponent, icon: 'pin' },
-			{ title: 'ADDRESSSEARCH',  component: AddressSearchComponent,  icon: 'compass' },
 			{ title: 'LISTFULL',       component: ListfullComponent,       icon: 'globe' },
 			{ title: 'DOIHAVETHEBMLT', component: DoIHaveTheBmltComponent, icon: 'cloud-done' },
 	    { title: 'SETTINGS',       component: SettingsComponent,       icon: 'settings'},
@@ -63,6 +61,7 @@ export class MyApp {
 
 	initializeApp() {
 		this.platform.ready().then(() => {
+			this.rootPage = HomeComponent;
 			this.statusBar.styleLightContent()
 			this.splashScreen.hide();
 		});
