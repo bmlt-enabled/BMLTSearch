@@ -62,8 +62,12 @@ export class MapSearchComponent {
 
   eagerMapLat;
   eagerMapLng;
-  origLocation = {lat: 51.899, lng: -8.474}
-  targLocation = {lat: 51.899, lng: -8.474}
+
+  origLocation = { lat: 51.899, lng: -8.474 }
+  origZoom = 10;
+
+  targLocation = { lat: 51.899, lng: -8.474 }
+  targZoom = 10;
 
   formattedAddress: string = '';
 
@@ -180,23 +184,23 @@ export class MapSearchComponent {
       if (this.mapEventInProgress == false) {
         this.mapEventInProgress = true;
 
-        // if the map has only moved by less than 10%, then we dont get nore meetings,
+        // if the map has only moved by less than 10%, then we dont get more meetings,
         // those will have been eagerly lodaed earlier
         this.origLocation.lat = this.eagerMapLat;
         this.origLocation.lng = this.eagerMapLng;
+
         this.targLocation.lat = params[0].target.lat;
         this.targLocation.lng = params[0].target.lng;
-
+        this.targZoom = params[0].zoom;
 
         let mapMovementDist = Spherical.computeDistanceBetween(this.origLocation, this.targLocation) / 1000;
         let newSearchTriggerDistance = this.autoRadius / 11;
-        if (mapMovementDist < newSearchTriggerDistance) {
-          this.mapEventInProgress = false;
-        } else {
-          this.getMeetings(params);
-        }
-      } else {
 
+        if ((mapMovementDist > newSearchTriggerDistance) || (this.targZoom < this.origZoom)) {
+          this.getMeetings(params);
+        } else {
+          this.mapEventInProgress = false;
+        }
       }
     });
 
@@ -254,6 +258,8 @@ export class MapSearchComponent {
 
     this.mapLongitude = params[0].target.lng;
     this.eagerMapLng = this.mapLongitude;
+
+    this.origZoom = params[0].zoom;
 
     this.autoRadius = Spherical.computeDistanceBetween(params[0].target, params[0].farLeft) / 1000;
     // Eagerly load 10% around screen area
