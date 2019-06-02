@@ -30,14 +30,8 @@ $ ionic state restore
 ```
 Test your app on multiple screen sizes and platform types by starting a local development server
 ```
-$ ionic serve
-```
-or
-```
-$ ionic serve --lab
+$ ionic cordova run -l
 ```
 To build for app store distribution, I have found that the best thing to do is to run the re-plugin.sh script.
 
 After this, a platforms directory will be created with folder for android that contains an Android Studio project, and a folder for ios that contains an xcode project.
-
-
