@@ -167,10 +167,7 @@ export class MapSearchComponent {
 
 
   onMapReady() {
-    console.log("In onMapReady()");
-
     this.map.on(GoogleMapsEvent.MAP_DRAG_END).subscribe((params: any[]) => {
-      console.log("MAP_DRAG_END");
       // if (this.mapEventInProgress == false) {
       //   this.mapEventInProgress = true;
       //   this.getMeetings(params);
@@ -180,10 +177,8 @@ export class MapSearchComponent {
     });
 
     this.map.on(GoogleMapsEvent.CAMERA_MOVE_END).subscribe((params: any[]) => {
-      console.log("CAMERA_MOVE_END");
       if (this.mapEventInProgress == false) {
         this.mapEventInProgress = true;
-        console.log("CAMERA_MOVE_END event : " + (JSON.stringify(params)));
 
         // if the map has only moved by less than 10%, then we dont get nore meetings,
         // those will have been eagerly lodaed earlier
@@ -196,14 +191,12 @@ export class MapSearchComponent {
         let mapMovementDist = Spherical.computeDistanceBetween(this.origLocation, this.targLocation) / 1000;
         let newSearchTriggerDistance = this.autoRadius / 11;
         if (mapMovementDist < newSearchTriggerDistance) {
-          console.log("Eagerly loaded maps displayed. Map moved " , mapMovementDist);
           this.mapEventInProgress = false;
         } else {
-          console.log("Need to load more meetings. Map moved " , mapMovementDist);
           this.getMeetings(params);
         }
       } else {
-        console.log("not processing second event - CAMERA_MOVE_END")
+
       }
     });
 
@@ -212,8 +205,6 @@ export class MapSearchComponent {
 
 
   addCluster() {
-    console.log("In addCluster()");
-
     let markerLabelOptions: MarkerLabel = {
       bold: true,
       fontSize: 15,
@@ -241,12 +232,9 @@ export class MapSearchComponent {
       let marker: Marker = params[1];
       this.openModal(marker.get("ID"));
     });
-    console.log("Leaving addCluster()");
-
   }
 
   deleteCluster() {
-    console.log("In deleteCluster()");
     this.markers = [];
     this.markers.length = 0;
     this.meetingList = [];
@@ -256,11 +244,9 @@ export class MapSearchComponent {
       this.markerCluster.empty();
       this.markerCluster.destroy();
     }
-    console.log("Leaving deleteCluster()");
   }
 
   getMeetings(params) {
-    console.log("In getMeetings()");
     this.translate.get('FINDING_MTGS').subscribe(value => { this.presentLoader(value); })
 
     this.mapLatitude = params[0].target.lat;
@@ -274,7 +260,6 @@ export class MapSearchComponent {
     this.autoRadius = this.autoRadius * 1.1;
 
     this.MeetingListProvider.getRadiusMeetings(this.mapLatitude, this.mapLongitude, this.autoRadius).subscribe((data) => {
-      console.log("Response from getRadiusMeetings")
       if (JSON.stringify(data) == "{}") {  // empty result set!
         this.meetingList = JSON.parse("[]");
       } else {
@@ -287,12 +272,9 @@ export class MapSearchComponent {
       this.dismissLoader();
       this.mapEventInProgress = false;
     });
-    console.log("Leaving getMeetings()");
-
   }
 
   populateMarkers() {
-    console.log("In populateMarkers()");
     this.markers = [];
     let i: number;
     let areColocated: boolean = false;
@@ -345,7 +327,6 @@ export class MapSearchComponent {
         }
       }
     }
-    console.log("Leaving populateMarkers()")
   }
 
   meetingsAreCoLocated(i, j) {
@@ -387,7 +368,6 @@ export class MapSearchComponent {
   }
 
   selectSearchResult(item) {
-    console.log(item);
     this.autocompleteItems = [];
     this.autocomplete.input = item.description;
 
@@ -395,7 +375,6 @@ export class MapSearchComponent {
     Geocoder.geocode({
       "address": item.description
     }).then((results: GeocoderResult[]) => {
-      console.log(results);
 
       // Add a marker
       let marker: Marker = this.map.addMarkerSync({
@@ -457,12 +436,10 @@ export class MapSearchComponent {
 
       myModal.onDidDismiss((data) => {
         //        console.log("I have dismissed.");
-        console.log(data);
       });
 
       myModal.onWillDismiss((data) => {
         //        console.log("I'm about to dismiss");
-        console.log(data);
       });
 
       myModal.present();

@@ -33,7 +33,6 @@ export class MeetingListProvider {
                                       + "&lat_val="
                                       + lat
                                       + "&sort_keys=longitude,latitude&callingApp=ionic-bmltapp";
-    console.log("Semantic query : ", getRadiusMeetingsURL);
     return this.http.get(getRadiusMeetingsURL);
   }
 
@@ -75,7 +74,6 @@ export class MeetingListProvider {
     var getSingleMeetingByIDURL : string = this.tomatoBMLT
                                         + "?switcher=GetSearchResults&meeting_ids[]="
                                         + id;
-   console.log(" Search URL is : ", getSingleMeetingByIDURL);
     return this.http.get(getSingleMeetingByIDURL);
   }
 

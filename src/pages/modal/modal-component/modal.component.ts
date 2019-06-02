@@ -26,7 +26,6 @@ export class ModalComponent {
     private storage: Storage,
     private iab: InAppBrowser,
     private MeetingListProvider: MeetingListProvider) {
-    console.log('Hello ModalComponent Component');
     this.storage.get('timeDisplay')
       .then(timeDisplay => {
         if (timeDisplay) {
