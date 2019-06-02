@@ -12,9 +12,10 @@ import {
   Modal,
   ModalController,
   ModalOptions,
-  ViewController} from 'ionic-angular';
+  ViewController
+} from 'ionic-angular';
 import { MeetingListProvider } from '../../../providers/meeting-list/meeting-list';
-import { ModalComponent }      from "../../modal/modal-component/modal.component";
+import { ModalComponent } from "../../modal/modal-component/modal.component";
 import { TranslateService } from '@ngx-translate/core';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { Geolocation } from '@ionic-native/geolocation';
@@ -44,9 +45,11 @@ import {
 
 declare const google: any;
 
+
 @Component({
   templateUrl: 'map-search.html'
 })
+
 
 export class MapSearchComponent {
 
@@ -56,6 +59,11 @@ export class MapSearchComponent {
   zoom: number = 8;
   mapLatitude: any = 51.899;
   mapLongitude: any = -8.474;
+
+  eagerMapLat;
+  eagerMapLng;
+  origLocation = {lat: 51.899, lng: -8.474}
+  targLocation = {lat: 51.899, lng: -8.474}
 
   formattedAddress: string = '';
 
@@ -93,6 +101,7 @@ export class MapSearchComponent {
     this.autocompleteItems = [];
   }
 
+
   ionViewDidLoad() {
     this.storage.get('timeDisplay')
       .then(timeDisplay => {
@@ -121,8 +130,8 @@ export class MapSearchComponent {
 
     LocationService.getMyLocation().then((myLocation: MyLocation) => {
 
-      this.mapLatitude = myLocation.latLng.lat;
-      this.mapLongitude = myLocation.latLng.lng;
+      this.mapLatitude = this.eagerMapLat = myLocation.latLng.lat;
+      this.mapLongitude = this.eagerMapLng = myLocation.latLng.lng;
 
       let options: GoogleMapOptions = {
         building: true,
@@ -175,7 +184,24 @@ export class MapSearchComponent {
       if (this.mapEventInProgress == false) {
         this.mapEventInProgress = true;
         console.log("CAMERA_MOVE_END event : " + (JSON.stringify(params)));
-        this.getMeetings(params);
+
+        // if the map has only moved by less than 10%, then we dont get nore meetings,
+        // those will have been eagerly lodaed earlier
+        this.origLocation.lat = this.eagerMapLat;
+        this.origLocation.lng = this.eagerMapLng;
+        this.targLocation.lat = params[0].target.lat;
+        this.targLocation.lng = params[0].target.lng;
+
+
+        let mapMovementDist = Spherical.computeDistanceBetween(this.origLocation, this.targLocation) / 1000;
+        let newSearchTriggerDistance = this.autoRadius / 11;
+        if (mapMovementDist < newSearchTriggerDistance) {
+          console.log("Eagerly loaded maps displayed. Map moved " , mapMovementDist);
+          this.mapEventInProgress = false;
+        } else {
+          console.log("Need to load more meetings. Map moved " , mapMovementDist);
+          this.getMeetings(params);
+        }
       } else {
         console.log("not processing second event - CAMERA_MOVE_END")
       }
@@ -237,19 +263,15 @@ export class MapSearchComponent {
     console.log("In getMeetings()");
     this.translate.get('FINDING_MTGS').subscribe(value => { this.presentLoader(value); })
 
-//    this.deleteCluster();
-//    let cameraPosition: CameraPosition<ILatLng> = params[0];
-
     this.mapLatitude = params[0].target.lat;
+    this.eagerMapLat = this.mapLatitude;
 
     this.mapLongitude = params[0].target.lng;
+    this.eagerMapLng = this.mapLongitude;
 
     this.autoRadius = Spherical.computeDistanceBetween(params[0].target, params[0].farLeft) / 1000;
-
-    console.log("Calling getRadiusMeetings")
-    console.log("this.mapLatitude ", this.mapLatitude)
-    console.log("this.mapLongitude", this.mapLongitude)
-    console.log("this.autoRadius", this.autoRadius)
+    // Eagerly load 10% around screen area
+    this.autoRadius = this.autoRadius * 1.1;
 
     this.MeetingListProvider.getRadiusMeetings(this.mapLatitude, this.mapLongitude, this.autoRadius).subscribe((data) => {
       console.log("Response from getRadiusMeetings")
@@ -268,7 +290,6 @@ export class MapSearchComponent {
     console.log("Leaving getMeetings()");
 
   }
-
 
   populateMarkers() {
     console.log("In populateMarkers()");
@@ -349,7 +370,6 @@ export class MapSearchComponent {
 
   }
 
-
   updateSearchResults() {
     if (this.autocomplete.input == '') {
       this.autocompleteItems = [];
@@ -372,27 +392,25 @@ export class MapSearchComponent {
     this.autocomplete.input = item.description;
 
     // Address -> latitude,longitude
-Geocoder.geocode({
-  "address": item.description
-}).then((results: GeocoderResult[]) => {
-  console.log(results);
+    Geocoder.geocode({
+      "address": item.description
+    }).then((results: GeocoderResult[]) => {
+      console.log(results);
 
+      // Add a marker
+      let marker: Marker = this.map.addMarkerSync({
+        'position': results[0].position,
+        'title': item.description
+      });
 
-
-  // Add a marker
-  let marker: Marker = this.map.addMarkerSync({
-    'position': results[0].position,
-    'title':  item.description
-  });
-
-  // Move to the position
-  this.map.animateCamera({
-    'target': results[0].position,
-    'zoom': 10
-  }).then(() => {
-    marker.showInfoWindow();
-  });
-});
+      // Move to the position
+      this.map.animateCamera({
+        'target': results[0].position,
+        'zoom': 10
+      }).then(() => {
+        marker.showInfoWindow();
+      });
+    });
   }
 
   presentLoader(loaderText) {
