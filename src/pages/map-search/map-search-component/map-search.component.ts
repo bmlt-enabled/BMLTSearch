@@ -174,6 +174,7 @@ export class MapSearchComponent {
       console.log("CAMERA_MOVE_END");
       if (this.mapEventInProgress == false) {
         this.mapEventInProgress = true;
+        console.log("CAMERA_MOVE_END event : " + (JSON.stringify(params)));
         this.getMeetings(params);
       } else {
         console.log("not processing second event - CAMERA_MOVE_END")
@@ -237,15 +238,13 @@ export class MapSearchComponent {
     this.translate.get('FINDING_MTGS').subscribe(value => { this.presentLoader(value); })
 
 //    this.deleteCluster();
-    let cameraPosition: CameraPosition<ILatLng> = params[0];
+//    let cameraPosition: CameraPosition<ILatLng> = params[0];
 
-    this.mapLatitude = cameraPosition.target.lat;
+    this.mapLatitude = params[0].target.lat;
 
-    this.mapLongitude = cameraPosition.target.lng;
+    this.mapLongitude = params[0].target.lng;
 
-    this.visibleRegion = this.map.getVisibleRegion();
-
-    this.autoRadius = Spherical.computeDistanceBetween(cameraPosition.target, this.visibleRegion.farLeft) / 1000;
+    this.autoRadius = Spherical.computeDistanceBetween(params[0].target, params[0].farLeft) / 1000;
 
     console.log("Calling getRadiusMeetings")
     console.log("this.mapLatitude ", this.mapLatitude)
@@ -276,6 +275,7 @@ export class MapSearchComponent {
     this.markers = [];
     let i: number;
     let areColocated: boolean = false;
+    this.visibleRegion = this.map.getVisibleRegion();
 
     for (i = 0; i < this.meetingList.length; i++) {
       let meetingLocation = {
