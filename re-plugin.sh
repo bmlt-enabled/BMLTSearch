@@ -13,22 +13,24 @@ ionic cordova plugin rm cordova-plugin-geolocation
 ionic cordova plugin rm cordova-plugin-inappbrowser
 ionic cordova plugin rm cordova-plugin-googlemaps
 
-ionic cordova platform add ios@5.0.0
-ionic cordova platform add android@7.1.4
-ionic cordova platform add browser@6.0.0
+rm -rf platform/*
+
+ionic cordova platform add ios@latest
+ionic cordova platform add android@latest
+ionic cordova platform add browser@latest
 
 ionic cordova plugin add cordova-plugin-splashscreen
 ionic cordova plugin add cordova-plugin-statusbar
 ionic cordova plugin add cordova-plugin-whitelist
 ionic cordova plugin add cordova-plugin-geolocation --variable GEOLOCATION_USAGE_DESCRIPTION="To locate you"
 ionic cordova plugin add cordova-plugin-inappbrowser
-ionic cordova plugin add cordova-plugin-googlemaps
+ionic cordova plugin add cordova-plugin-googlemaps@latest  --variable API_KEY_FOR_ANDROID="AIzaSyDwPqrrBYFrtCIJ0IUL81tiIVwYJqUMKCw" --variable API_KEY_FOR_IOS="AIzaSyCeHYVhVc8bf3siRXIyU5dOaUfctEjzGlA"
 
-ionic cordova prepare ios
-ionic cordova prepare android
-ionic cordova prepare browser
+ionic cordova prepare ios --prod
+ionic cordova prepare android --prod
+ionic cordova prepare browser --prod
 
 ionic cordova resources ios
 ionic cordova resources android
 
-ionic build --prod  --minifyjs   --minifycss  --optimizejs
+#ionic build --prod  --minifyjs   --minifycss  --optimizejs
