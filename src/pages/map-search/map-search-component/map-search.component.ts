@@ -204,14 +204,32 @@ export class MapSearchComponent {
       }
     });
 
-    // Trigger the event
-    this.map.animateCamera({
-      'target': {
-        "lat": this.mapLatitude,
-        "lng": this.mapLongitude
-      },
-      'zoom': 10
+    this.map.on('trigger_initial_search_changed').subscribe((params: any[]) => {
+      if (this.mapEventInProgress == false) {
+        this.mapEventInProgress = true;
+
+        let mapPositionTarget : ILatLng = this.map.getCameraTarget();
+        let mapPositionZoom = this.map.getCameraZoom();
+        let mapVisiblePosition = this.map.getVisibleRegion();
+
+        params[0] = {
+          target: {
+            lat: mapPositionTarget.lat,
+            lng: mapPositionTarget.lng
+          },
+          zoom: mapPositionZoom,
+          farLeft: mapVisiblePosition.farLeft
+        }
+
+        this.getMeetings(params);
+      } else {
+        this.mapEventInProgress = false;
+      }
+
     });
+
+
+    this.map.set("trigger_initial_search", "go");
 
   }
 
