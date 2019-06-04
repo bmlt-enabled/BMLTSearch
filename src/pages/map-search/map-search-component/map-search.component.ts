@@ -204,7 +204,15 @@ export class MapSearchComponent {
       }
     });
 
-    //    this.map.trigger("GoogleMapsEvent.CAMERA_MOVE_END");
+    // Trigger the event
+    this.map.animateCamera({
+      'target': {
+        "lat": this.mapLatitude,
+        "lng": this.mapLongitude
+      },
+      'zoom': 10
+    });
+
   }
 
 
