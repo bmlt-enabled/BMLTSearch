@@ -89,6 +89,8 @@ export class MapSearchComponent {
   mapEventInProgress: boolean = false;
   markerCluster;
 
+  searchMarker: Marker;
+
 
   constructor(private MeetingListProvider: MeetingListProvider,
     public loadingCtrl: LoadingController,
@@ -208,7 +210,7 @@ export class MapSearchComponent {
       if (this.mapEventInProgress == false) {
         this.mapEventInProgress = true;
 
-        let mapPositionTarget : ILatLng = this.map.getCameraTarget();
+        let mapPositionTarget: ILatLng = this.map.getCameraTarget();
         let mapPositionZoom = this.map.getCameraZoom();
         let mapVisiblePosition = this.map.getVisibleRegion();
 
@@ -409,20 +411,33 @@ export class MapSearchComponent {
     }).then((results: GeocoderResult[]) => {
 
       // Add a marker
-      let marker: Marker = this.map.addMarkerSync({
+      this.searchMarker = this.map.addMarkerSync({
         'position': results[0].position,
         'title': item.description
       });
+
+      this.searchMarker.on(GoogleMapsEvent.MARKER_CLICK).subscribe(this.onMarkerClick);
+      this.searchMarker.on(GoogleMapsEvent.INFO_CLICK).subscribe(this.onMarkerClick);
 
       // Move to the position
       this.map.animateCamera({
         'target': results[0].position,
         'zoom': 10
       }).then(() => {
-        marker.showInfoWindow();
+        this.searchMarker.showInfoWindow();
       });
     });
   }
+
+  onMarkerClick() {
+    if (!this.searchMarker.isInfoWindowShown()) {
+      this.searchMarker.showInfoWindow();
+    }
+    else {
+      this.searchMarker.hideInfoWindow();
+    }
+  }
+
 
   presentLoader(loaderText) {
     if (!this.loader) {
