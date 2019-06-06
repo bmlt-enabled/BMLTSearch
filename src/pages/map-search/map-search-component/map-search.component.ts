@@ -91,7 +91,6 @@ export class MapSearchComponent {
 
   searchMarker: Marker;
 
-
   constructor(private MeetingListProvider: MeetingListProvider,
     public loadingCtrl: LoadingController,
     private storage: Storage,
@@ -159,7 +158,7 @@ export class MapSearchComponent {
             "lat": this.mapLatitude,
             "lng": this.mapLongitude
           },
-          zoom: 10
+          zoom: 8
         }
       }
 
@@ -258,12 +257,15 @@ export class MapSearchComponent {
       boundsDraw: false
     };
     this.deleteCluster();
-    this.markerCluster = this.map.addMarkerClusterSync(markerClusterOptions);
+    this.map.addMarkerCluster(markerClusterOptions).then((markerCluster: MarkerCluster) => {
+      this.markerCluster = markerCluster;
+      this.markerCluster.on(GoogleMapsEvent.MARKER_CLICK).subscribe((params) => {
+        let marker: Marker = params[1];
+        this.openModal(marker.get("ID"));
+      });
+      this.dismissLoader();
+    }) ;
 
-    this.markerCluster.on(GoogleMapsEvent.MARKER_CLICK).subscribe((params) => {
-      let marker: Marker = params[1];
-      this.openModal(marker.get("ID"));
-    });
   }
 
   deleteCluster() {
@@ -303,7 +305,6 @@ export class MapSearchComponent {
       }
       this.populateMarkers();
       this.addCluster();
-      this.dismissLoader();
       this.mapEventInProgress = false;
     });
   }
@@ -411,6 +412,10 @@ export class MapSearchComponent {
     }).then((results: GeocoderResult[]) => {
 
       // Add a marker
+      if (this.searchMarker) {
+        this.searchMarker.remove();
+      }
+
       this.searchMarker = this.map.addMarkerSync({
         'position': results[0].position,
         'title': item.description
@@ -429,12 +434,15 @@ export class MapSearchComponent {
     });
   }
 
-  onMarkerClick() {
-    if (!this.searchMarker.isInfoWindowShown()) {
-      this.searchMarker.showInfoWindow();
+  public onMarkerClick(params: any) {
+    let searchMarkerClicked: Marker = <Marker>params[1];
+    let isSearchMarkerClicked : any = searchMarkerClicked.get('isInfoWindowVisible');
+
+    if (searchMarkerClicked.isInfoWindowShown() == true) {
+      searchMarkerClicked.hideInfoWindow();
     }
     else {
-      this.searchMarker.hideInfoWindow();
+      searchMarkerClicked.showInfoWindow();
     }
   }
 
