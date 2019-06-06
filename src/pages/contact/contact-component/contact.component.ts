@@ -8,9 +8,9 @@ import { InAppBrowser }     from '@ionic-native/in-app-browser';
 })
 export class ContactComponent {
 
-  sourceCodeLink    : string = "https://github.com/paulnagle/BMLTSearch";
-  sourceBugs        : string = "https://github.com/paulnagle/BMLTSearch/issues";
-  bmltLink          : string = "https://bmlt.magshare.net/";
+  sourceCodeLink    : string = "https://github.com/bmlt-enabled/BMLTSearch";
+  sourceBugs        : string = "https://github.com/bmlt-enabled/BMLTSearch/issues";
+  bmltLink          : string = "https://bmlt.app/";
 
   constructor( private config       : Config,
                private iab          : InAppBrowser) {
