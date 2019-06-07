@@ -185,9 +185,8 @@ export class MapSearchComponent {
     });
 
     this.map.on(GoogleMapsEvent.CAMERA_MOVE_END).subscribe((params: any[]) => {
-      console.log("===> Caught EVENT  CAMERA_MOVE_END ")
+
       if (this.mapEventInProgress == false) {
-        console.log("===> mapEventInpProgress isfalse")
         this.mapEventInProgress = true;
 
         // if the map has only moved by less than 10%, then we dont get more meetings,
@@ -201,10 +200,6 @@ export class MapSearchComponent {
 
         let mapMovementDist = Spherical.computeDistanceBetween(this.origLocation, this.targLocation) / 1000;
         let newSearchTriggerDistance = this.autoRadius / 11;
-        console.log("===> origLocation " + JSON.stringify(this.origLocation));
-        console.log("===> targLocation " + JSON.stringify(this.targLocation));
-        console.log("===> mapMovementDist = " + mapMovementDist);
-        console.log("===> newSearchTriggerDistance = " + newSearchTriggerDistance);
         if ((mapMovementDist > newSearchTriggerDistance) || (this.targZoom < this.origZoom)) {
 
           this.getMeetings(params);
@@ -300,8 +295,6 @@ export class MapSearchComponent {
     this.autoRadius = Spherical.computeDistanceBetween(params[0].target, params[0].farLeft) / 1000;
     // Eagerly load 10% around screen area
     this.autoRadius = this.autoRadius * 1.1;
-    console.log("===> getMeetings  params[0].farLeft = " + JSON.stringify(params[0].farLeft));
-    console.log("===> getMeetings  autoRadius = " + this.autoRadius);
 
     this.MeetingListProvider.getRadiusMeetings(this.mapLatitude, this.mapLongitude, this.autoRadius).subscribe((data) => {
       if (JSON.stringify(data) == "{}") {  // empty result set!
