@@ -30,7 +30,7 @@ ionic cordova prepare ios --prod
 ionic cordova prepare android --prod
 ionic cordova prepare browser --prod
 
-ionic cordova resources ios
-ionic cordova resources android
+#ionic cordova resources ios
+#ionic cordova resources android
 
 #ionic build --prod  --minifyjs   --minifycss  --optimizejs
