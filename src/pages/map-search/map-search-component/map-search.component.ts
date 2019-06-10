@@ -86,7 +86,8 @@ export class MapSearchComponent {
   meeting: any;
   ids: string;
   data: any;
-  mapEventInProgress: boolean = false;
+  mapDragInProgress: boolean = false;
+  cameraMoveInProgress: boolean = false;
   markerCluster;
 
   searchMarker: Marker;
@@ -184,22 +185,25 @@ export class MapSearchComponent {
   }
 
   onMapReady() {
+    this.map.on(GoogleMapsEvent.MAP_DRAG_START).subscribe((params: any[]) => {
+      this.mapDragInProgress = true;
+    });
+
     this.map.on(GoogleMapsEvent.MAP_DRAG_END).subscribe((params: any[]) => {
-      // if (this.mapEventInProgress == false) {
-      //   this.mapEventInProgress = true;
-      //   this.getMeetings(params);
-      // } else {
-      //   console.log("not processing second event - MAP_DRAG_END")
-      // }
+      this.mapDragInProgress = false;
+    });
+
+    this.map.on(GoogleMapsEvent.CAMERA_MOVE_START).subscribe((params: any[]) => {
+      this.cameraMoveInProgress = true;
     });
 
     this.map.on(GoogleMapsEvent.CAMERA_MOVE_END).subscribe((params: any[]) => {
-
-      if (this.mapEventInProgress == false) {
-        this.mapEventInProgress = true;
+      this.cameraMoveInProgress = false;
+      if (this.mapDragInProgress == false) {
+        this.translate.get('FINDING_MTGS').subscribe(value => { this.presentLoader(value); })
 
         // if the map has only moved by less than 10%, then we dont get more meetings,
-        // those will have been eagerly lodaed earlier
+        // those will have been eagerly loaded earlier
         this.origLocation.lat = this.eagerMapLat;
         this.origLocation.lng = this.eagerMapLng;
 
@@ -210,16 +214,15 @@ export class MapSearchComponent {
         let mapMovementDist = Spherical.computeDistanceBetween(this.origLocation, this.targLocation) / 1000;
         let newSearchTriggerDistance = this.autoRadius / 11;
         if ((mapMovementDist > newSearchTriggerDistance) || (this.targZoom < this.origZoom)) {
-
           this.getMeetings(params);
         } else {
-          this.mapEventInProgress = false;
+          this.dismissLoader();
         }
       }
     });
 
     this.map.on('trigger_initial_search_changed').subscribe((params: any[]) => {
-
+      this.translate.get('FINDING_MTGS').subscribe(value => { this.presentLoader(value); })
       let mapPositionTarget: ILatLng = this.map.getCameraTarget();
       let mapPositionZoom = this.map.getCameraZoom();
       let mapVisiblePosition = this.map.getVisibleRegion();
@@ -235,7 +238,6 @@ export class MapSearchComponent {
           lng: mapVisiblePosition.farLeft.lng
         }
       }
-      this.dismissLoader();
       this.getMeetings(params);
     });
 
@@ -264,7 +266,9 @@ export class MapSearchComponent {
       icons: markerClusterIconOptions,
       boundsDraw: false
     };
+
     this.deleteCluster();
+
     this.map.addMarkerCluster(markerClusterOptions).then((markerCluster: MarkerCluster) => {
       this.markerCluster = markerCluster;
       this.markerCluster.on(GoogleMapsEvent.MARKER_CLICK).subscribe((params) => {
@@ -291,8 +295,6 @@ export class MapSearchComponent {
 
 
   getMeetings(params) {
-    this.translate.get('FINDING_MTGS').subscribe(value => { this.presentLoader(value); })
-
     this.mapLatitude = params[0].target.lat;
     this.eagerMapLat = this.mapLatitude;
 
@@ -315,7 +317,6 @@ export class MapSearchComponent {
       }
       this.populateMarkers();
       this.addCluster();
-      this.mapEventInProgress = false;
     });
   }
 
