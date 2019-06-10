@@ -198,8 +198,8 @@ export class MapSearchComponent {
     });
 
     this.map.on(GoogleMapsEvent.CAMERA_MOVE_END).subscribe((params: any[]) => {
-      this.cameraMoveInProgress = false;
       if (this.mapDragInProgress == false) {
+        this.cameraMoveInProgress = false;
         this.translate.get('FINDING_MTGS').subscribe(value => { this.presentLoader(value); })
 
         // if the map has only moved by less than 10%, then we dont get more meetings,
@@ -211,9 +211,10 @@ export class MapSearchComponent {
         this.targLocation.lng = params[0].target.lng;
         this.targZoom = params[0].zoom;
 
-        let mapMovementDist = Spherical.computeDistanceBetween(this.origLocation, this.targLocation) / 1000;
+        let mapMovementDistance = Spherical.computeDistanceBetween(this.origLocation, this.targLocation) / 1000;
         let newSearchTriggerDistance = this.autoRadius / 11;
-        if ((mapMovementDist > newSearchTriggerDistance) || (this.targZoom < this.origZoom)) {
+        if ((mapMovementDistance > newSearchTriggerDistance) || (this.targZoom < this.origZoom)) {
+          this.deleteCluster();
           this.getMeetings(params);
         } else {
           this.dismissLoader();
@@ -267,8 +268,6 @@ export class MapSearchComponent {
       boundsDraw: false
     };
 
-    this.deleteCluster();
-
     this.map.addMarkerCluster(markerClusterOptions).then((markerCluster: MarkerCluster) => {
       this.markerCluster = markerCluster;
       this.markerCluster.on(GoogleMapsEvent.MARKER_CLICK).subscribe((params) => {
@@ -277,7 +276,6 @@ export class MapSearchComponent {
       });
       this.dismissLoader();
     });
-
   }
 
 
