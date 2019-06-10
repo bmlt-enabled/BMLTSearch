@@ -57,8 +57,8 @@ export class MapSearchComponent {
   meetingList: any = [];
   loader = null;
   zoom: number = 8;
-  mapLatitude: any = 51.899;
-  mapLongitude: any = -8.474;
+  mapLatitude: any = 34.2359855;
+  mapLongitude: any = -118.5656689;
 
   eagerMapLat;
   eagerMapLng;
@@ -133,46 +133,55 @@ export class MapSearchComponent {
 
       if (LocationService.hasPermission()) {
         LocationService.getMyLocation().then((myLocation: MyLocation) => {
+          console.log("Location found");
           this.mapLatitude = this.eagerMapLat = myLocation.latLng.lat;
           this.mapLongitude = this.eagerMapLng = myLocation.latLng.lng;
+          this.drawMap();
+        }, (reason) => {
+          console.log("Location error : ", JSON.stringify(reason));
+          this.eagerMapLat = this.mapLatitude;
+          this.eagerMapLng = this.mapLongitude;
+          this.drawMap();
         });
       } else {
         this.eagerMapLat = this.mapLatitude;
         this.eagerMapLng = this.mapLongitude;
+        this.drawMap();
       }
-
-      let options: GoogleMapOptions = {
-        building: true,
-        controls: {
-          'compass': true,
-          'myLocationButton': true,
-          'myLocation': true,   // (blue dot)
-          'zoom': true,          // android only
-          'mapToolbar': true     // android only
-        },
-        gestures: {
-          scroll: true,
-          tilt: true,
-          zoom: true,
-          rotate: true
-        },
-        camera: {
-          target: {
-            "lat": this.mapLatitude,
-            "lng": this.mapLongitude
-          },
-          zoom: 8
-        }
-      }
-
-      this.map = GoogleMaps.create('map_canvas', options);
-
-      this.map.one(GoogleMapsEvent.MAP_READY).then(this.onMapReady.bind(this));
-
     });
-
   }
 
+
+  drawMap() {
+
+    let options: GoogleMapOptions = {
+      building: true,
+      controls: {
+        'compass': true,
+        'myLocationButton': true,
+        'myLocation': true,   // (blue dot)
+        'zoom': true,          // android only
+        'mapToolbar': true     // android only
+      },
+      gestures: {
+        scroll: true,
+        tilt: true,
+        zoom: true,
+        rotate: true
+      },
+      camera: {
+        target: {
+          "lat": this.mapLatitude,
+          "lng": this.mapLongitude
+        },
+        zoom: 8
+      }
+    }
+
+    this.map = GoogleMaps.create('map_canvas', options);
+
+    this.map.one(GoogleMapsEvent.MAP_READY).then(this.onMapReady.bind(this));
+  }
 
   onMapReady() {
     this.map.on(GoogleMapsEvent.MAP_DRAG_END).subscribe((params: any[]) => {
@@ -185,9 +194,8 @@ export class MapSearchComponent {
     });
 
     this.map.on(GoogleMapsEvent.CAMERA_MOVE_END).subscribe((params: any[]) => {
-      console.log("===> Caught EVENT  CAMERA_MOVE_END ")
+
       if (this.mapEventInProgress == false) {
-        console.log("===> mapEventInpProgress isfalse")
         this.mapEventInProgress = true;
 
         // if the map has only moved by less than 10%, then we dont get more meetings,
@@ -201,10 +209,6 @@ export class MapSearchComponent {
 
         let mapMovementDist = Spherical.computeDistanceBetween(this.origLocation, this.targLocation) / 1000;
         let newSearchTriggerDistance = this.autoRadius / 11;
-        console.log("===> origLocation " + JSON.stringify(this.origLocation));
-        console.log("===> targLocation " + JSON.stringify(this.targLocation));
-        console.log("===> mapMovementDist = " + mapMovementDist);
-        console.log("===> newSearchTriggerDistance = " + newSearchTriggerDistance);
         if ((mapMovementDist > newSearchTriggerDistance) || (this.targZoom < this.origZoom)) {
 
           this.getMeetings(params);
@@ -300,8 +304,6 @@ export class MapSearchComponent {
     this.autoRadius = Spherical.computeDistanceBetween(params[0].target, params[0].farLeft) / 1000;
     // Eagerly load 10% around screen area
     this.autoRadius = this.autoRadius * 1.1;
-    console.log("===> getMeetings  params[0].farLeft = " + JSON.stringify(params[0].farLeft));
-    console.log("===> getMeetings  autoRadius = " + this.autoRadius);
 
     this.MeetingListProvider.getRadiusMeetings(this.mapLatitude, this.mapLongitude, this.autoRadius).subscribe((data) => {
       if (JSON.stringify(data) == "{}") {  // empty result set!
