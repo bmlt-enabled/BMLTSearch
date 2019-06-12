@@ -439,7 +439,7 @@ export class MapSearchComponent {
       this.searchMarker.on(GoogleMapsEvent.INFO_CLICK).subscribe(this.onMarkerClick);
 
       // Move to the position
-      this.map.animateCamera({
+      this.map.moveCamera({
         'target': results[0].position,
         'zoom': 10
       }).then(() => {
