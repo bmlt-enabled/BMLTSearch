@@ -11,6 +11,7 @@ export class ContactComponent {
   sourceCodeLink: string = "https://github.com/bmlt-enabled/BMLTSearch";
   sourceBugs: string = "https://github.com/bmlt-enabled/BMLTSearch/issues";
   bmltLink: string = "https://bmlt.app/";
+  fbGroupLink: string = "https://www.facebook.com/groups/149214049107349/";
 
   constructor(private config: Config,
     private iab: InAppBrowser) {
