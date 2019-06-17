@@ -8,14 +8,14 @@ import { HomeComponent } from './home-component/home.component';
     HomeComponent
   ],
   imports: [
-  	CommonModule,
-  	SharedModule
+    CommonModule,
+    SharedModule
   ],
   exports: [
     HomeComponent
   ],
-  entryComponents:[
-  	HomeComponent
+  entryComponents: [
+    HomeComponent
   ]
 })
-export class HomeModule {}
+export class HomeModule { }

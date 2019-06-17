@@ -10,21 +10,21 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class GeolocateProvider {
 
+  googleAPIKey: string = "&key=AIzaSyDg5AKBNjMvoBBlLgXpy-dLxLAcVJYpOq8";
+  convertLatLongUrl: string = "https://maps.googleapis.com/maps/api/geocode/json?latlng=";
+  convertAddressUrl: string = "https://maps.googleapis.com/maps/api/geocode/json?address=";
+
   constructor(public http: HttpClient) {
   }
 
-  googleAPIKey : string = "&key=AIzaSyDg5AKBNjMvoBBlLgXpy-dLxLAcVJYpOq8";
-  convertLatLongUrl : string = "https://maps.googleapis.com/maps/api/geocode/json?latlng=";
-  convertAddressUrl : string = "https://maps.googleapis.com/maps/api/geocode/json?address=";
-
   convertLatLong(lat, long) {
-    var url = this.convertLatLongUrl + lat + "," + long + this.googleAPIKey;
+    let url = this.convertLatLongUrl + lat + "," + long + this.googleAPIKey;
 
     return this.http.get(url);
   }
 
   convertAddress(address) {
-    var url = this.convertAddressUrl + address + this.googleAPIKey;
+    let url = this.convertAddressUrl + address + this.googleAPIKey;
 
     return this.http.get(url);
   }

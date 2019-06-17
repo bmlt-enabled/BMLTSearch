@@ -3,7 +3,7 @@
     <name>BMLTSearch</name>
     <description>BMLT Meeting Search</description>
     <author email="paulnagle@gmail.com" href="https://bmlt.app/">Paul Nagle</author>
-    <content original-src="index.html" src="http://localhost:8100" />
+    <content src="index.html" />
     <access origin="*" />
     <content original-src="index.html" />
     <allow-navigation href="*" />

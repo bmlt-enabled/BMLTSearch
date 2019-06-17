@@ -198,7 +198,7 @@ export class MapSearchComponent {
     });
 
     this.map.on(GoogleMapsEvent.CAMERA_MOVE_END).subscribe((params: any[]) => {
-      if (this.mapDragInProgress == false) {
+      if (this.mapDragInProgress === false) {
         this.cameraMoveInProgress = false;
         this.translate.get('FINDING_MTGS').subscribe(value => { this.presentLoader(value); })
 
@@ -284,7 +284,7 @@ export class MapSearchComponent {
     this.markers.length = 0;
     this.meetingList = [];
     this.meetingList.length = 0;
-    if (typeof this.markerCluster != "undefined") {
+    if (typeof this.markerCluster !== "undefined") {
       this.markerCluster.remove();
       this.markerCluster.empty();
       this.markerCluster.destroy();
@@ -306,7 +306,7 @@ export class MapSearchComponent {
     this.autoRadius = this.autoRadius * 1.1;
 
     this.MeetingListProvider.getRadiusMeetings(this.mapLatitude, this.mapLongitude, this.autoRadius).subscribe((data) => {
-      if (JSON.stringify(data) == "{}") {  // empty result set!
+      if (JSON.stringify(data) === "{}") {  // empty result set!
         this.meetingList = JSON.parse("[]");
       } else {
         this.meetingList = data;
@@ -331,7 +331,7 @@ export class MapSearchComponent {
         "lng": this.meetingList[i].longitude
       };
       if (this.visibleRegion.contains(<LatLng>(meetingLocation))) {
-        if (i == (this.meetingList.length - 1)) {
+        if (i === (this.meetingList.length - 1)) {
           // Last meeting on the list
           this.pushStandaloneMeeting(i);
         } else {
@@ -340,7 +340,7 @@ export class MapSearchComponent {
           // Is this meeting in the same location as the next meeting on the list?
           areColocated = this.meetingsAreCoLocated(this.meetingList[i], this.meetingList[i + 1]);
 
-          if (areColocated == false) {
+          if (areColocated === false) {
             this.pushStandaloneMeeting(i);
           } else {
             // We have the start of some co-located meetings on the list
@@ -356,7 +356,7 @@ export class MapSearchComponent {
 
               i++;
               // Is this the end of the list?
-              if (i == (this.meetingList.length - 1)) {
+              if (i === (this.meetingList.length - 1)) {
                 break;
               }
             } while (this.meetingsAreCoLocated(this.meetingList[i], this.meetingList[i + 1]))
@@ -377,8 +377,8 @@ export class MapSearchComponent {
 
   meetingsAreCoLocated(i, j) {
     let areColocated: boolean = false;
-    if (((Math.round(i.latitude * 1000) / 1000) != (Math.round(j.latitude * 1000) / 1000)) ||
-      ((Math.round(i.longitude * 1000) / 1000) != (Math.round(j.longitude * 1000) / 1000))) {
+    if (((Math.round(i.latitude * 1000) / 1000) !== (Math.round(j.latitude * 1000) / 1000)) ||
+      ((Math.round(i.longitude * 1000) / 1000) !== (Math.round(j.longitude * 1000) / 1000))) {
       areColocated = false;
     } else {
       areColocated = true;
@@ -400,7 +400,7 @@ export class MapSearchComponent {
 
 
   updateSearchResults() {
-    if (this.autocomplete.input == '') {
+    if (this.autocomplete.input === '') {
       this.autocompleteItems = [];
       return;
     }
@@ -453,7 +453,7 @@ export class MapSearchComponent {
     let searchMarkerClicked: Marker = <Marker>params[1];
     let isSearchMarkerClicked: any = searchMarkerClicked.get('isInfoWindowVisible');
 
-    if (searchMarkerClicked.isInfoWindowShown() == true) {
+    if (searchMarkerClicked.isInfoWindowShown() === true) {
       searchMarkerClicked.hideInfoWindow();
     }
     else {
@@ -481,10 +481,10 @@ export class MapSearchComponent {
 
 
   public convertTo12Hr(timeString) {
-    if (this.timeDisplay == "12hr") {
-      var H = +timeString.substr(0, 2);
-      var h = H % 12 || 12;
-      var ampm = (H < 12 || H === 24) ? " AM" : " PM";
+    if (this.timeDisplay === "12hr") {
+      let H = +timeString.substr(0, 2);
+      let h = H % 12 || 12;
+      let ampm = (H < 12 || H === 24) ? " AM" : " PM";
       timeString = h + timeString.substr(2, 3) + ampm;
       return timeString;
     } else {

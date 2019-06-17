@@ -9,14 +9,14 @@ import { ContactComponent } from './contact-component/contact.component';
     ContactComponent
   ],
   imports: [
-  	CommonModule,
-  	SharedModule
+    CommonModule,
+    SharedModule
   ],
   exports: [
     ContactComponent
   ],
-  entryComponents:[
-  	ContactComponent
+  entryComponents: [
+    ContactComponent
   ]
 })
-export class ContactModule {}
+export class ContactModule { }

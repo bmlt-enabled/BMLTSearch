@@ -9,15 +9,15 @@ import { PipesModule } from '../../pipes/pipes.module';
     ListfullComponent
   ],
   imports: [
-  	CommonModule,
-  	SharedModule,
+    CommonModule,
+    SharedModule,
     PipesModule
   ],
   exports: [
     ListfullComponent
   ],
-  entryComponents:[
-  	ListfullComponent
+  entryComponents: [
+    ListfullComponent
   ]
 })
-export class ListfullModule {}
+export class ListfullModule { }

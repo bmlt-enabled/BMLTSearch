@@ -8,14 +8,14 @@ import { SettingsComponent } from './settings-component/settings.component';
     SettingsComponent
   ],
   imports: [
-  	CommonModule,
-  	SharedModule
+    CommonModule,
+    SharedModule
   ],
   exports: [
     SettingsComponent
   ],
-  entryComponents:[
-  	SettingsComponent
+  entryComponents: [
+    SettingsComponent
   ]
 })
-export class SettingsModule {}
+export class SettingsModule { }
