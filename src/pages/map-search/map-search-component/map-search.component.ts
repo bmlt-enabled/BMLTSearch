@@ -242,7 +242,11 @@ export class MapSearchComponent {
       this.getMeetings(params);
     });
 
-    this.map.set("trigger_initial_search", "go");
+
+    if (this.platform.is('ios')) {
+      this.map.set("trigger_initial_search", "go");
+    }
+
   }
 
 
