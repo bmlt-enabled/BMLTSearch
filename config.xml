@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="ie.nasouth.bmltsearch" version="2.8.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="ie.nasouth.bmltsearch" version="2.8.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>BMLTSearch</name>
     <description>BMLT Meeting Search</description>
     <author email="paulnagle@gmail.com" href="https://bmlt.app/">Paul Nagle</author>
-    <content original-src="index.html" src="http://localhost:8100" />
+    <content src="index.html" />
     <access origin="*" />
     <content original-src="index.html" />
     <allow-navigation href="*" />

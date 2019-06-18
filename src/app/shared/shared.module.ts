@@ -10,7 +10,7 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
-import { TranslateHttpLoader} from '@ngx-translate/http-loader';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { TruncatePipe } from './pipes/truncate.pipe';
 import { TrimHtmlPipe } from './pipes/trim-html.pipe';
@@ -18,7 +18,7 @@ import { TrimHtmlPipe } from './pipes/trim-html.pipe';
 import { Config } from '../app.config';
 
 export function createTranslateLoader(httpClient: HttpClient) {
-    return new TranslateHttpLoader(httpClient, './assets/translations/', '.json');
+  return new TranslateHttpLoader(httpClient, './assets/translations/', '.json');
 }
 
 @NgModule({
@@ -56,4 +56,4 @@ export function createTranslateLoader(httpClient: HttpClient) {
     Config
   ]
 })
-export class SharedModule {}
+export class SharedModule { }
