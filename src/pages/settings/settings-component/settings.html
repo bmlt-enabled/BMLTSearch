@@ -12,11 +12,12 @@
 
     <ion-item>
       <ion-label>{{'LANGUAGE' | translate}}</ion-label>
-      <ion-select [(ngModel)]="language" (ionChange)=selectLanguage()>
+      <ion-select [(ngModel)]="language" (ionChange)=selectLanguage() cancelText="{{'CANCEL' | translate}}">
         <ion-option value="en">{{'ENGLISH' | translate}}</ion-option>
         <ion-option value="it">{{'ITALIAN' | translate}}</ion-option>
         <ion-option value="es">{{'SPANISH' | translate}}</ion-option>
         <ion-option value="da">{{'DANISH'  | translate}}</ion-option>
+        <ion-option value="pl">{{'POLISH'  | translate}}</ion-option>
 
       </ion-select>
     </ion-item>
