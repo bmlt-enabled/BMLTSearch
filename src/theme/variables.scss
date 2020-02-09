@@ -25,11 +25,11 @@ $font-path: "../assets/fonts";
 // The "primary" color is the only required color in the map.
 
 $colors: (
-  primary:    #009,
+  primary:    #0a61ad,
   secondary:  #32db64,
-  danger:     #009,
+  danger:     #0a61ad,
   light:      #f4f4f4,
-  dark:       #009,
+  dark:       #0a61ad,
   today:      #009900,
   Purple:     #A200FF,
   Teal:       #00ABA9,
@@ -97,6 +97,10 @@ $grid-padding-width:	0px;
 .card-ios .item-ios {
       background: #dfdfdf !important;
     }
+
+ion-content{
+      --ion-background-color: #ffffff;
+  }   
 
 // Ionicons
 // --------------------------------------------------
