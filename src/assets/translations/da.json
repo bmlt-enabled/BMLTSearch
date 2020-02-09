@@ -25,6 +25,7 @@
     "ITALIAN"           : "Italiensk",
     "SPANISH"           : "Spansk",
     "DANISH"            : "Dansk",
+    "POLISH"            : "Polere",
     "ADDRESSSEARCH"     : "Adressesøgning",
     "DOIHAVETHEBMLT"    : "Har jeg BMLT?",
     "MAPRANGE"          : "Standard søge rækkevidde",
@@ -61,5 +62,8 @@
     "IS_BMLT_YES_2"     : "Så det ser ud som din lokale service enhed",
     "IS_BMLT_YES_3"     : "har implementeret BMLT for jeres mødeliste.",
     "IS_BMLT_NO_1"      : "På BMLT verdensomspændende DB ser det ud til, at nærmeste møde for din nuværende placering er ",
-    "IS_BMLT_NO_2"      : "Så det ser ud til, at din lokale service område ikke har implementeret BMLT for jeres mødeliste."
+    "IS_BMLT_NO_2"      : "Så det ser ud til, at din lokale service område ikke har implementeret BMLT for jeres mødeliste.",
+    "CLOSE"             : "Lukke",
+    "MEETING_DETAILS"   : "Mødedetaljer",
+    "CANCEL"            : "Cancel"
 }
