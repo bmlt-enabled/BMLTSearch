@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class MeetingListProvider {
 
-  tomatoBMLT: string = "https://tomato.na-bmlt.org/main_server/client_interface/json/";
+  tomatoBMLT: string = "https://tomato.bmltenabled.org/main_server/client_interface/json/";
 
   constructor(public http: HttpClient) {
   }
