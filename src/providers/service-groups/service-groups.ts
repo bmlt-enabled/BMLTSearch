@@ -10,7 +10,7 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class ServiceGroupsProvider {
 
-  getApiUrlServiceGroups: string = "https://tomato.na-bmlt.org/main_server/client_interface/json/?switcher=GetServiceBodies&callingApp=ionic-android";
+  getApiUrlServiceGroups: string = "https://tomato.bmltenabled.org/main_server/client_interface/json/?switcher=GetServiceBodies&callingApp=ionic-android";
 
   constructor(public http: HttpClient) {
   }

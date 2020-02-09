@@ -5,16 +5,22 @@
 	top: 2.5% !important;
 	left: 2.5% !important;
 
+
 }
 
 .mymodal .modal-wrapper {
   --border-radius: 25px !important;
 	border-radius: 25px !important;
-	border: 1px solid grey  !important;
+	border: 1px solid #0a61ad  !important;
 
 }
 
 ion-modal > div > ng-component > ion-content > div.scroll-content {
-	@include linear-gradient(top,$modal-gradient);
+	@include linear-gradient(top,$modal-page);
+
+}
+
+ion-modal > div > ng-component > ion-content > div.scroll-content > ion-card {
+	border: 1px solid #0a61ad  !important;
 
 }

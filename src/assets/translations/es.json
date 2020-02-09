@@ -25,6 +25,7 @@
     "ITALIAN"           : "Italiano",
     "SPANISH"           : "Español",
     "DANISH"            : "Danés", 
+    "POLISH"            : "Polaco",
     "ADDRESSSEARCH"     : "Búsqueda de dirección",
     "DOIHAVETHEBMLT"    : "¿Tengo el BMLT?",
     "MAPRANGE"          : "ango de búsqueda predeterminado",
@@ -61,5 +62,8 @@
     "IS_BMLT_YES_2"     : "Entonces parece que su cuerpo de servicio local",
     "IS_BMLT_YES_3"     : "ha implementado el BMLT para su lista de reuniones.",
     "IS_BMLT_NO_1"      : "En el DB mundial de BMLT, parece que la reunión más cercana a su ubicación actual es",
-    "IS_BMLT_NO_2"      : "Entonces, parece que su cuerpo de servicio local no ha implementado el BMLT para su lista de reuniones."
+    "IS_BMLT_NO_2"      : "Entonces, parece que su cuerpo de servicio local no ha implementado el BMLT para su lista de reuniones.",
+    "CLOSE"             : "Cerrar",
+    "MEETING_DETAILS"   : "Detalles de la reunión",
+    "CANCEL"            : "Cancel"
 }

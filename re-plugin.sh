@@ -17,7 +17,7 @@ rm -rf platform/*
 
 ionic cordova platform add ios@latest
 ionic cordova platform add android@latest
-ionic cordova platform add browser@latest
+# ionic cordova platform add browser@latest
 
 ionic cordova plugin add cordova-plugin-splashscreen
 ionic cordova plugin add cordova-plugin-statusbar
@@ -28,9 +28,9 @@ ionic cordova plugin add cordova-plugin-googlemaps@latest  --variable API_KEY_FO
 
 ionic cordova prepare ios --prod
 ionic cordova prepare android --prod
-ionic cordova prepare browser --prod
+# ionic cordova prepare browser --prod
 
-#ionic cordova resources ios
-#ionic cordova resources android
+# ionic cordova resources ios --force
+# ionic cordova resources android --force
 
-#ionic build --prod  --minifyjs   --minifycss  --optimizejs
+# ionic build --prod  --minifyjs   --minifycss  --optimizejs

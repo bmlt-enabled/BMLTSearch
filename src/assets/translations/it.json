@@ -25,6 +25,7 @@
     "ITALIAN"           : "Italiano",
     "SPANISH"           : "Spagnolo",
     "DANISH"            : "Danese",
+    "POLISH"            : "Polacco",
     "ADDRESSSEARCH"     : "Ricerca indirizzo",
     "DOIHAVETHEBMLT"    : "La tua area è nel BMLT?",
     "MAPRANGE"          : "Impostazione di ricerca",
@@ -61,5 +62,8 @@
     "IS_BMLT_YES_2"     : "Il tuo corpo di servizio",
     "IS_BMLT_YES_3"     : "ha inserito le vostre riunioni nel BMLT",
     "IS_BMLT_NO_1"      : "Nel Data Base mondiale del BMLT la riunione più vicina alla mia attuale posizione è distante: km  miglia",
-    "IS_BMLT_NO_2"      : "Il vostro corpo di servizio non ha inserito le vostre riunioni nel BMLT"
+    "IS_BMLT_NO_2"      : "Il vostro corpo di servizio non ha inserito le vostre riunioni nel BMLT",
+    "CLOSE"             : "Chiudere",
+    "MEETING_DETAILS"   : "Dettagli della riunione",
+    "CANCEL"            : "Cancel"
 }
