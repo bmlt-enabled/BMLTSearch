@@ -60,11 +60,15 @@
             <div *ngIf="meeting.contact_email_1">{{meeting.contact_email_1 | tidyDelimter }}<br></div>
             <div *ngIf="meeting.train_lines">{{'TRAIN' | translate}}: {{meeting.train_lines | tidyDelimter }}<br></div>
             <div *ngIf="meeting.bus_lines">{{'BUS' | translate}}: {{meeting.bus_lines | tidyDelimter }}<br></div>
+            <div *ngIf="meeting.phone_meeting_number">{{'PHONE_MEETING' | translate }}: {{meeting.phone_meeting_number | tidyDelimter }}<br></div>
             <div *ngIf="meeting.formats"><i>{{'FORMATS' | translate}}: {{meeting.formats | tidyDelimter }}</i><br></div>
           </ion-col>
           <ion-col>
             <button ion-button (click)="openMapsLink(meeting.latitude , meeting.longitude)">
               <ion-icon name="map"> </ion-icon>&nbsp;{{'MAP' | translate}}
+            </button>
+            <button ion-button  *ngIf="meeting.virtual_meeting_link" (click)="openLink(meeting.virtual_meeting_link)">
+              <ion-icon name="cloud"> </ion-icon>&nbsp;{{'VIRTUAL_LINK' | translate }}
             </button>
           </ion-col>
         </ion-row>

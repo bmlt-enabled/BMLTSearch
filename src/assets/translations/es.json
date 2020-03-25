@@ -66,5 +66,7 @@
     "IS_BMLT_NO_2"      : "Entonces, parece que su cuerpo de servicio local no ha implementado el BMLT para su lista de reuniones.",
     "CLOSE"             : "Cerrar",
     "MEETING_DETAILS"   : "Detalles de la reunión",
-    "CANCEL"            : "Cancel"
+    "CANCEL"            : "Cancel",
+    "VIRTUAL_LINK"      : "Virtual Link",
+    "PHONE_MEETING"     : "Phone Meeting Dial-in"
 }
