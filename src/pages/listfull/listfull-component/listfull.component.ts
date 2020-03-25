@@ -197,7 +197,10 @@ export class ListfullComponent {
 
   public openMapsLink(destLatitude, destLongitude) {
     const browser = this.iab.create('https://www.google.com/maps/search/?api=1&query=' + destLatitude + ',' + destLongitude, '_system');
+  }
 
+  public openLink(url) {
+    const browser = this.iab.create(url, '_system');
   }
 
   public isToday(dayOfWeek) {

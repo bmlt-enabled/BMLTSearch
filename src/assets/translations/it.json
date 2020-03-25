@@ -66,5 +66,7 @@
     "IS_BMLT_NO_2"      : "Il vostro corpo di servizio non ha inserito le vostre riunioni nel BMLT",
     "CLOSE"             : "Chiudere",
     "MEETING_DETAILS"   : "Dettagli della riunione",
-    "CANCEL"            : "Cancel"
+    "CANCEL"            : "Cancel",
+    "VIRTUAL_LINK"      : "Virtual Link",
+    "PHONE_MEETING"     : "Phone Meeting Dial-in"
 }

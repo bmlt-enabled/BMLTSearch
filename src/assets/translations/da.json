@@ -66,5 +66,7 @@
     "IS_BMLT_NO_2"      : "Så det ser ud til, at din lokale service område ikke har implementeret BMLT for jeres mødeliste.",
     "CLOSE"             : "Lukke",
     "MEETING_DETAILS"   : "Mødedetaljer",
-    "CANCEL"            : "Cancel"
+    "CANCEL"            : "Cancel",
+    "VIRTUAL_LINK"      : "Virtual Link",
+    "PHONE_MEETING"     : "Phone Meeting Dial-in"
 }

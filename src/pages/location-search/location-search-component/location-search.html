@@ -83,11 +83,13 @@
                       <div *ngIf="group2.contact_email_1">{{group2.contact_email_1 | tidyDelimter }}<br></div>
                       <div *ngIf="group2.train_lines">{{'TRAIN' | translate }}: {{group2.train_lines | tidyDelimter }}<br></div>
                       <div *ngIf="group2.bus_lines">{{'BUS' | translate }}: {{group2.bus_lines | tidyDelimter }}<br></div>
+                      <div *ngIf="group2.phone_meeting_number">{{'PHONE_MEETING' | translate }}: {{group2.phone_meeting_number | tidyDelimter }}<br></div>
                       <div>{{'DISTANCE' | translate}}: <i>{{ group2.distance_in_miles | number:'1.1-1'  }} {{'MILES' | translate}}, {{ group2.distance_in_km | number:'1.1-1'  }} {{'KMS' | translate}} </i><br></div>
                       <div *ngIf="group2.formats"><i>{{'FORMATS' | translate}}: {{group2.formats | tidyDelimter }}</i><br></div>
                     </ion-col>
                     <ion-col>
                       <button ion-button (click)="openMapsLink(group2.latitude , group2.longitude)"><ion-icon name="navigate"> </ion-icon>&nbsp;{{'DIRECTIONS' | translate}}</button>
+                      <button ion-button  *ngIf="group2.virtual_meeting_link" (click)="openLink(group2.virtual_meeting_link)"><ion-icon name="cloud"> </ion-icon>&nbsp;{{'VIRTUAL_LINK' | translate }}</button>
                     </ion-col>
                   </ion-row>
                 </ion-grid>
