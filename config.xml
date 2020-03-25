@@ -94,7 +94,6 @@
         <splash height="2436" src="resources/ios/splash/Default-2436h.png" width="1125" />
         <splash height="1125" src="resources/ios/splash/Default-Landscape-2436h.png" width="2436" />
     </platform>
-    <preference name="WKWebViewOnly" value="true" />
     <preference name="webviewbounce" value="false" />
     <preference name="UIWebViewBounce" value="false" />
     <preference name="DisallowOverscroll" value="true" />
@@ -113,5 +112,6 @@
     <preference name="loadUrlTimeoutValue" value="100000" />
     <preference name="GOOGLE_MAPS_ANDROID_API_KEY" value="AIzaSyDwPqrrBYFrtCIJ0IUL81tiIVwYJqUMKCw" />
     <preference name="GOOGLE_MAPS_IOS_API_KEY" value="AIzaSyCeHYVhVc8bf3siRXIyU5dOaUfctEjzGlA" />
+    <preference name="WKWebViewOnly" value="true" />
     <allow-navigation href="http://localhost:8100" sessionid="5b4cef7e" />
 </widget>
