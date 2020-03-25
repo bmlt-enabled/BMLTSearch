@@ -66,5 +66,7 @@
     "IS_BMLT_NO_2"      : "A więc Służby w Twoim regionie nie zaimplementowały BMLT.",
     "MEETING_DETAILS"   : "Szczegóły Mitingu",
     "CLOSE"             : "Zamknij",
-    "CANCEL"            : "Anuluj"
+    "CANCEL"            : "Anuluj",
+    "VIRTUAL_LINK"      : "Virtual Link",
+    "PHONE_MEETING"     : "Phone Meeting Dial-in"
 }
