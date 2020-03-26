@@ -96,6 +96,11 @@ export class LocationSearchComponent {
     const browser = this.iab.create(url, '_system');
   }
 
+  public dialNum(url) {
+    let telUrl = 'tel:' + url;
+    const browser = this.iab.create(telUrl, '_system');
+  }
+
   getAllMeetings() {
     this.translate.get('FINDING_MTGS').subscribe(value => { this.presentLoader(value); })
     this.MeetingListProvider.getAddressMeetings(this.addressLatitude, this.addressLongitude, this.radius).subscribe((data) => {
