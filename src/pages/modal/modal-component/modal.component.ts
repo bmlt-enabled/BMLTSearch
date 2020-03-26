@@ -49,4 +49,10 @@ export class ModalComponent {
     const browser = this.iab.create(url, '_system');
   }
 
+  public dialNum(url) {
+    let telUrl = 'tel:' + url;
+    const browser = this.iab.create(telUrl, '_system');
+  }
+
+
 }
