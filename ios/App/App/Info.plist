@@ -39,6 +39,15 @@
 	     says what the location is for rather than that one is needed. -->
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>BMLT Search uses your location to find Narcotics Anonymous meetings near you. Your location is never stored on a server or shared.</string>
+	<!-- Required by App Store Connect (ITMS-90683) even though the app never asks
+	     for always-authorization: it only ever calls getCurrentPosition(), a
+	     one-shot when-in-use request. The Google Maps iOS SDK links code that
+	     references the always-authorization APIs, and Apple requires the purpose
+	     string whenever any linked code does — used or not. iOS shows this string
+	     only if something actually requests always-authorization, so in practice
+	     it is never displayed; it still says something truthful in case it is. -->
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>BMLT Search uses your location only while you are using the app, to find Narcotics Anonymous meetings near you. It never tracks you in the background, and your location is never stored on a server or shared.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
