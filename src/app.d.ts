@@ -10,6 +10,19 @@
 // invisible for as long as it was.
 /// <reference types="google.maps" />
 
+// The Maps keys are read from import.meta.env, not $env/static/public, so their
+// types are declared here. All three are optional on purpose: a checkout with no
+// keys must still build. See src/lib/maps/keys.ts.
+interface ImportMetaEnv {
+  readonly PUBLIC_GOOGLE_MAPS_KEY_WEB?: string;
+  readonly PUBLIC_GOOGLE_MAPS_KEY_IOS?: string;
+  readonly PUBLIC_GOOGLE_MAPS_KEY_ANDROID?: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 declare global {
   namespace App {
     // interface Error {}

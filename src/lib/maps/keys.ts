@@ -1,4 +1,3 @@
-import { PUBLIC_GOOGLE_MAPS_KEY_ANDROID, PUBLIC_GOOGLE_MAPS_KEY_IOS, PUBLIC_GOOGLE_MAPS_KEY_WEB } from '$env/static/public';
 import { platform } from '../native';
 
 /**
@@ -19,24 +18,33 @@ import { platform } from '../native';
  *
  * So `webKey()` is used on every platform, and `mapKey()` varies.
  *
- * All three variables must exist at build time — `$env/static/public` fails the
- * build on a missing name rather than a missing value — but any of them may be
- * empty if you are not building for that platform.
+ * Read through `import.meta.env` rather than `$env/static/public`, which is a
+ * hard error when a variable *name* is absent — not merely unset. That made a
+ * fresh `git clone && npm run build` fail outright, broke `npm run check` in CI
+ * (which runs before the build step supplies the values), and failed the first
+ * Cloudflare Pages deploy before the project's environment variables existed.
+ * An absent key now degrades to an empty string, which is what every caller
+ * already handles: the map screen says it is unconfigured and the rest of the
+ * app is unaffected. See `envPrefix` in vite.config.ts.
  */
+
+const WEB = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY_WEB ?? '';
+const IOS = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY_IOS ?? '';
+const ANDROID = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY_ANDROID ?? '';
 
 /** Key for the Maps JS SDK: autocomplete and geocoding, on every platform. */
 export function webKey(): string {
-  return PUBLIC_GOOGLE_MAPS_KEY_WEB;
+  return WEB;
 }
 
 /** Key for `GoogleMap.create` — the native SDK on device, the JS SDK on the web. */
 export function mapKey(): string {
   switch (platform()) {
     case 'ios':
-      return PUBLIC_GOOGLE_MAPS_KEY_IOS || PUBLIC_GOOGLE_MAPS_KEY_WEB;
+      return IOS || WEB;
     case 'android':
-      return PUBLIC_GOOGLE_MAPS_KEY_ANDROID || PUBLIC_GOOGLE_MAPS_KEY_WEB;
+      return ANDROID || WEB;
     default:
-      return PUBLIC_GOOGLE_MAPS_KEY_WEB;
+      return WEB;
   }
 }

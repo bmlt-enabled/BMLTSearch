@@ -10,6 +10,18 @@ import tailwindcss from '@tailwindcss/vite';
 // there for why they can't be inline here.
 
 export default defineConfig({
+  // Vite only exposes VITE_-prefixed variables on `import.meta.env`; adding
+  // PUBLIC_ lets the Maps keys be read that way instead of through
+  // `$env/static/public`.
+  //
+  // The difference matters: `$env/static/public` is a hard build error when a
+  // variable *name* is absent, not merely unset. That made `git clone && npm
+  // run build` fail on a fresh checkout with an opaque MISSING_EXPORT, and it
+  // failed the first Cloudflare Pages deploy before the project's environment
+  // variables existed. `import.meta.env` yields undefined for an unset name, so
+  // an unconfigured build succeeds and only the map screen reports itself
+  // unavailable — which is the degradation the README always described.
+  envPrefix: ['VITE_', 'PUBLIC_'],
   plugins: [
     tailwindcss(),
     sveltekit(),

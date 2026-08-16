@@ -31,6 +31,13 @@ export function mapsAvailable(): boolean {
  * once — so the first caller's language is the language for the session. That
  * is acceptable here: changing language re-renders the app but does not reload
  * the SDK, and place names are a small part of the surface.
+ *
+ * On the **web** you will also see a console warning from the loader that
+ * `setOptions()` was called more than once. That is expected and harmless:
+ * `@capacitor/google-maps` renders the web map through this same shared loader
+ * and configures it too, so whichever of the two runs second is ignored. Both
+ * pass the web key on that platform, so the outcome is identical either way.
+ * (On iOS and Android the plugin uses the native SDK and never touches this.)
  */
 function configure(language: string): void {
   if (configured) return;
