@@ -13,14 +13,12 @@
 // The Maps keys are read from import.meta.env, not $env/static/public, so their
 // types are declared here. All three are optional on purpose: a checkout with no
 // keys must still build. See src/lib/maps/keys.ts.
+// Augments the interface Vite's own types already attach to `import.meta.env`,
+// so no `ImportMeta` declaration is needed here.
 interface ImportMetaEnv {
   readonly PUBLIC_GOOGLE_MAPS_KEY_WEB?: string;
   readonly PUBLIC_GOOGLE_MAPS_KEY_IOS?: string;
   readonly PUBLIC_GOOGLE_MAPS_KEY_ANDROID?: string;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
 }
 
 declare global {
