@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+		Apple's privacy manifest for the app target. Third-party SDKs ship their
+		own; Capacitor's declares nothing at all, and none of the Capacitor
+		plugins used here ship one, so this file speaks for the whole app.
+	-->
+
+	<!-- No tracking. The app has no advertising SDK, no analytics, no IDFA, and
+	     never links anything it sends to an identity. This matters more than
+	     usual for a Narcotics Anonymous meeting finder: anonymity is the point. -->
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array>
+		<!--
+			Coordinates are sent to the BMLT root servers to find nearby meetings
+			and to Google to turn a fix into a street address. Declared rather
+			than claimed under the real-time-request exemption: the request is
+			serviced immediately and nothing is retained by this app, but those
+			servers are not ours and we cannot warrant their logging. Nothing is
+			stored off-device by us — the last search location lives only in the
+			device's own local storage.
+		-->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypePreciseLocation</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+	</array>
+
+	<!--
+		Empty on purpose, not left unfilled. None of the app target's code calls a
+		required-reason API: the Swift sources are the stock Capacitor delegates,
+		state is kept in the webview's local storage rather than UserDefaults, and
+		nothing reads file timestamps, disk space, boot time, or active processor
+		count. Capacitor's own framework manifest likewise declares none.
+	-->
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array/>
+</dict>
+</plist>
