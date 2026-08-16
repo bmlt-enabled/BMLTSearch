@@ -1,0 +1,7 @@
+build/
+.svelte-kit/
+node_modules/
+ios/
+android/
+package-lock.json
+src/lib/i18n/locales/

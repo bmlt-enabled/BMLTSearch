@@ -1,0 +1,138 @@
+@import 'tailwindcss';
+
+/* BMLT Search design tokens.
+   The palette is carried over from the Ionic build's theme/variables.scss so the
+   rebuild is recognisably the same app: BMLT blue as the primary, and the seven
+   pastel weekday accents that colour every meeting's time badge. */
+@theme {
+  /* Primary — BMLT blue */
+  --color-bmlt: #0a61ad;
+  --color-bmlt-shade: #095598;
+  --color-bmlt-tint: #2371b5;
+  --color-bmlt-ink: #ffffff;
+
+  --color-accent: #3dc2ff;
+  --color-danger: #d33939;
+  --color-warning: #b57e00;
+  --color-success: #0e9f4f;
+
+  /* Weekday accents. Every one of these is a light wash carrying dark text, in
+     both themes — they are identity, not surface, and re-deriving them per
+     theme would break the "Tuesday is yellow" recognition the app trades on. */
+  --color-sunday: #ff7e79;
+  --color-monday: #ffd479;
+  --color-tuesday: #fffc79;
+  --color-wednesday: #d4fb79;
+  --color-thursday: #73fcd6;
+  --color-friday: #73fdff;
+  --color-saturday: #73fa79;
+
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Surfaces are CSS variables rather than @theme tokens so a single
+   prefers-color-scheme block can re-point all of them at once. */
+:root {
+  --surface: #f2f4f7;
+  --surface-raised: #ffffff;
+  --surface-sunken: #e4e8ee;
+  --border: #d3dae3;
+  --text: #14202b;
+  --text-muted: #5b6b7c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #12171d;
+    --surface-raised: #1b222b;
+    --surface-sunken: #0c1015;
+    --border: #2c3641;
+    --text: #e8edf3;
+    --text-muted: #97a6b6;
+  }
+}
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+}
+
+@layer base {
+  html,
+  body {
+    background-color: var(--surface);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    overflow-x: hidden;
+    /* Native shells only: kill the rubber-band scroll and the long-press
+       callout so the webview stops feeling like a browser. */
+    overscroll-behavior-y: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Text selection is a desktop affordance; on a phone it mostly fires by
+     accident while scrolling a meeting list. Re-enabled on the elements where
+     copying genuinely matters — addresses, phone numbers, dial-in details. */
+  body:not(.is-web) * {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .selectable,
+  .selectable * {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+  }
+
+  ::selection {
+    background-color: var(--color-bmlt);
+    color: #fff;
+  }
+
+  /* Safe-area insets are applied once, on the layout's app bar, main, and nav —
+     never on a page container that also carries a Tailwind padding utility.
+     Those utilities live in @layer utilities and beat anything declared here, so
+     an element with both `safe-top` and a top-padding utility silently loses its
+     notch inset and slides under the status bar. Keeping the insets on elements
+     with no competing padding utility is what makes this reliable. */
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .app-main {
+    /* Clears the fixed bottom nav (4rem) plus the home indicator. */
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Tap targets never show the grey flash rectangle. */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  /* The one shared focus ring. Applied by name so every interactive element in
+     the app agrees, including the ones built out of plain divs. */
+  .focusable {
+    @apply focus-visible:ring-bmlt outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--surface)];
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

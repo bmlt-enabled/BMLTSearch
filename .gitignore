@@ -1,0 +1,79 @@
+node_modules
+
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
+
+# Test and tooling output
+/coverage
+*.tsbuildinfo
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Signing material — belt and braces for a public repository.
+#
+# None of this belongs in git under any circumstances: a private key or an App
+# Store Connect key in a public repo is compromised the moment a scraper reaches
+# it, and Apple caps distribution certificates at three per team, so a leaked one
+# is expensive to replace. Keep it outside every repo and hand it to CI as a
+# secret. These patterns exist so an absent-minded `git add -A` cannot do the
+# wrong thing; the real defence is not putting the files here in the first place.
+*.p12
+*.p8
+*.cer
+*.certSigningRequest
+*.mobileprovision
+*.keystore
+*.jks
+keystore.properties
+android/keystore.properties
+
+# Env
+#
+# The Google Maps browser key is a PUBLIC_ var — it ships in the bundle and is
+# visible to anyone who opens devtools. It lives in .env rather than in source so
+# it can be rotated and restricted (HTTP referrer + bundle ID) without a code
+# change, and so forks bring their own key and their own billing.
+.env
+.env.*
+!.env.example
+!.env.test
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Native projects
+#
+# ios/ and android/ ARE committed. They hold hand-written configuration that
+# `npx cap add` does not regenerate — the Google Maps API key wiring, the
+# location-permission usage strings in Info.plist, and the ACCESS_FINE_LOCATION
+# permissions in AndroidManifest.xml. Ignoring them would silently discard that
+# setup on a fresh clone. Only the build products are ignored.
+ios/App/App/public/
+ios/App/Pods/
+ios/App/build/
+ios/App/output/
+ios/App/App/capacitor.config.json
+ios/DerivedData/
+ios/.build/
+*.xcuserdatad
+xcuserdata/
+
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+android/app/build/
+android/build/
+android/.gradle/
+android/.idea/
+android/local.properties
+android/capacitor-cordova-android-plugins/

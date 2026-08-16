@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- PNG rather than SVG: the BMLT mark is a detailed raster logo carried
+         over from the existing app, and a hand-drawn SVG stand-in would put a
+         different icon in the tab than the one on the home screen. -->
+    <link rel="icon" href="%sveltekit.assets%/icon-192.png" />
+    <link rel="apple-touch-icon" href="%sveltekit.assets%/apple-touch-icon.png" />
+    <!-- viewport-fit=cover lets the layout run under the notch; the safe-area
+         padding in app.css keeps content clear of it. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#0a61ad" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="BMLT Search" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Phone numbers are rendered as explicit dial buttons; leaving iOS to
+         autolink them turns arbitrary digits in a meeting comment into a link. -->
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="description" content="Find Narcotics Anonymous meetings worldwide — in person, hybrid, and online — from the BMLT." />
+    <!-- Declared by hand rather than left to vite-plugin-pwa: the plugin injects
+         this into its own index.html, which SvelteKit replaces with output built
+         from this template, so the injection never lands. Without this link the
+         app is not installable. -->
+    <link rel="manifest" href="%sveltekit.assets%/manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" />
+    %sveltekit.head%
+  </head>
+  <body data-sveltekit-preload-data="tap">
+    <div style="display: contents">%sveltekit.body%</div>
+  </body>
+</html>
