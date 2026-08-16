@@ -2,7 +2,6 @@
   import type { GoogleMap as GoogleMapType } from '@capacitor/google-maps';
   import { Search, X } from '@lucide/svelte';
   import { onMount } from 'svelte';
-  import { PUBLIC_GOOGLE_MAPS_KEY } from '$env/static/public';
   import { meetingsByIds, meetingsWithinRadius } from '$lib/api/bmlt';
   import { forwardGeocode } from '$lib/api/geocode';
   import AppBar from '$lib/components/AppBar.svelte';
@@ -12,7 +11,8 @@
   import { distanceKm, type LatLng } from '$lib/geo';
   import { i18n, t } from '$lib/i18n/index.svelte';
   import { currentPosition } from '$lib/location';
-  import { loadGoogleMaps, mapsAvailable, newSessionToken, placeLocation, suggestPlaces, type PlaceSuggestion } from '$lib/maps/loader';
+  import { mapKey } from '$lib/maps/keys';
+  import { mapsAvailable, newSessionToken, placeLocation, suggestPlaces, type PlaceSuggestion } from '$lib/maps/loader';
   import { buildMarkers, iconFor } from '$lib/maps/markers';
   import { loading } from '$lib/stores/loading.svelte';
   import { settings } from '$lib/stores/settings.svelte';
@@ -37,7 +37,7 @@
 
   let queryText = $state('');
   let suggestions = $state<PlaceSuggestion[]>([]);
-  let sessionToken: unknown;
+  let sessionToken: google.maps.places.AutocompleteSessionToken | undefined;
 
   let sheetOpen = $state(false);
   let sheetMeetings = $state<RawMeeting[]>([]);
@@ -79,15 +79,15 @@
   }
 
   async function start() {
-    if (!mapsAvailable()) {
-      error = 'Google Maps is not configured. Set PUBLIC_GOOGLE_MAPS_KEY in .env.';
+    if (!mapsAvailable() || !mapKey()) {
+      error = 'Google Maps is not configured. See .env.example for the three keys this needs.';
       return;
     }
 
     try {
-      // The Places SDK is only needed for the search box, so a failure there
-      // must not stop the map itself from rendering.
-      void loadGoogleMaps(i18n.locale).then(() => (sessionToken = newSessionToken()));
+      // Places is only needed for the search box, so a failure there must not
+      // stop the map itself from rendering.
+      void newSessionToken(i18n.locale).then((token) => (sessionToken = token));
 
       const centre = await openingCentre();
       await createMap(centre);
@@ -115,7 +115,8 @@
     map = await GoogleMap.create({
       id: 'bmlt-map',
       element: mapElement,
-      apiKey: PUBLIC_GOOGLE_MAPS_KEY,
+      // Platform key: the native Maps SDK on device, the web key in a browser.
+      apiKey: mapKey(),
       forceCreate: true,
       language: i18n.locale,
       config: { center: centre, zoom: 11 }
@@ -216,12 +217,12 @@
 
     await loading.during(t('LOCATING'), async () => {
       // Places first; if it cannot resolve the id, geocode the text instead.
-      const point = (await placeLocation(suggestion.placeId)) ?? (await forwardGeocode(suggestion.description, i18n.locale));
+      const point = (await placeLocation(suggestion.placeId, i18n.locale)) ?? (await forwardGeocode(suggestion.description, i18n.locale));
       if (!point || !map) return;
       await map.setCamera({ coordinate: point, zoom: 12 });
       // A new session token per completed search is what keeps Places billing
       // on the per-session rate rather than per-keystroke.
-      sessionToken = newSessionToken();
+      sessionToken = await newSessionToken(i18n.locale);
     });
   }
 

@@ -47,7 +47,15 @@ export async function currentPosition(timeoutMs = 10_000): Promise<LatLng> {
  * control needs.
  */
 export async function resolveSearchOrigin(forceRefresh = false): Promise<SavedLocation> {
-  if (!forceRefresh && settings.location) return settings.location;
+  if (!forceRefresh && settings.location) {
+    const saved = settings.location;
+    // A stored fix can legitimately have no address: the map screen saves bare
+    // coordinates, and an earlier geocoder failure leaves the field blank. Fill
+    // it in now rather than leaving the search permanently unlabelled. Not
+    // awaited — the coordinates are all the search itself needs.
+    if (!saved.address) void describe(saved);
+    return saved;
+  }
 
   const point = await currentPosition();
   const saved: SavedLocation = { ...point, address: '' };

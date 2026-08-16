@@ -77,7 +77,9 @@ jobs:
       # works without it, so an absent secret degrades rather than fails.
       - name: Build web bundle
         env:
-          PUBLIC_GOOGLE_MAPS_KEY: ${{ secrets.GOOGLE_MAPS_KEY }}
+          PUBLIC_GOOGLE_MAPS_KEY_WEB: ${{ secrets.GOOGLE_MAPS_KEY_WEB }}
+          PUBLIC_GOOGLE_MAPS_KEY_IOS: ${{ secrets.GOOGLE_MAPS_KEY_IOS }}
+          PUBLIC_GOOGLE_MAPS_KEY_ANDROID: ${{ secrets.GOOGLE_MAPS_KEY_ANDROID }}
         run: npm run build
 
       - name: Sync Capacitor iOS

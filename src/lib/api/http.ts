@@ -23,29 +23,6 @@ export class BmltError extends Error {
   }
 }
 
-/** GET and parse a JSON body of any shape. Throws `BmltError` on transport or status failure. */
-export async function getJson<T>(url: string): Promise<T> {
-  let response;
-  try {
-    response = await CapacitorHttp.get({ url, headers: { Accept: 'application/json' } });
-  } catch (cause) {
-    throw new BmltError(`Request failed: ${String(cause)}`, 0, url);
-  }
-
-  if (response.status < 200 || response.status >= 300) {
-    throw new BmltError(`Request returned ${response.status}`, response.status, url);
-  }
-
-  if (typeof response.data === 'string') {
-    try {
-      return JSON.parse(response.data) as T;
-    } catch {
-      throw new BmltError('Response body is not JSON', response.status, url);
-    }
-  }
-  return response.data as T;
-}
-
 /**
  * GET a BMLT endpoint and hand back a parsed array.
  *

@@ -13,11 +13,11 @@ stack underneath and a number of long-standing bugs, listed at the bottom.
 
 ```bash
 npm install
-cp .env.example .env      # then add a Google Maps browser key
+cp .env.example .env      # then add your Google Maps keys
 npm run dev               # http://localhost:5173
 ```
 
-Everything except the map screen works without a key.
+Everything except the map screen works without keys.
 
 ## Commands
 
@@ -90,26 +90,60 @@ permissive CORS headers, and an in-webview `fetch` is blocked outright on device
 that `npx cap add` does not regenerate — the Maps key wiring, the location
 permission strings, the manifest placeholders. Only build products are ignored.
 
-## The Google Maps key
+## The Google Maps keys
 
-The map screen, the place autocomplete, and the geocoder all need one.
+**Three of them**, because Google allows a key exactly one _application_
+restriction — Websites, or iOS apps, or Android apps, never a combination.
 
-`PUBLIC_GOOGLE_MAPS_KEY` is a **public** variable: it is inlined into the client
-bundle and readable by anyone who opens devtools. That is inherent to a browser
-key. What protects it is restriction, not secrecy — in the Google Cloud console,
-limit it to the Maps JavaScript, Places, and Geocoding APIs, and to the
-`bmltsearch.bmlt.app` referrer plus the iOS and Android bundle IDs.
+The awkward part is that one native session uses two keys at once. Inside the
+iOS and Android shells the map itself is a **native** view authenticated by
+bundle ID or package + SHA-1, while place autocomplete and geocoding are
+**JavaScript** running in the webview and so are referrer-checked like any web
+page. `src/lib/maps/keys.ts` picks the right one per call.
 
-| Platform  | Where it comes from                                                         |
-| --------- | --------------------------------------------------------------------------- |
-| Web / iOS | `PUBLIC_GOOGLE_MAPS_KEY` in `.env`, or the `GOOGLE_MAPS_KEY` CI secret      |
-| Android   | `GOOGLE_MAPS_KEY` env var, or `googleMapsKey` in `android/local.properties` |
+| Variable                         | Restriction                                      | APIs                                     | Used by                                                                                       |
+| -------------------------------- | ------------------------------------------------ | ---------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `PUBLIC_GOOGLE_MAPS_KEY_WEB`     | Websites                                         | Maps JavaScript, Places (New), Geocoding | The JS SDK — autocomplete and geocoding, on **every** platform; and the map itself on the web |
+| `PUBLIC_GOOGLE_MAPS_KEY_IOS`     | iOS apps — `app.bmlt.search`                     | Maps SDK for iOS                         | `GoogleMap.create` on iOS                                                                     |
+| `PUBLIC_GOOGLE_MAPS_KEY_ANDROID` | Android apps — `app.bmlt.search` + signing SHA-1 | Maps SDK for Android                     | `GoogleMap.create` on Android                                                                 |
 
-Android needs its own copy because the Maps SDK for Android reads the key from
-`AndroidManifest.xml`, not from the `apiKey` passed to `GoogleMap.create()`.
+The web key's referrer allowlist must include the native webview origins as well
+as the site, or autocomplete and geocoding fail on device:
 
-A checkout with no key still builds and runs; only the map screen is unavailable,
-and it says so rather than failing silently.
+```
+https://app.bmlt.app/*
+http://localhost:5173/*        # npm run dev
+http://localhost:4173/*        # npm run preview
+https://localhost/*            # Android webview origin
+capacitor://localhost/*        # iOS webview origin
+```
+
+These are **public** variables: inlined into the client bundle and readable by
+anyone using the app. That is inherent to client-side Maps keys — what protects
+them is restriction, not secrecy.
+
+All three names must be defined at build time even when empty, because
+`$env/static/public` fails the build on a missing name rather than a missing
+value. Android additionally needs its key at the Gradle level, from
+`GOOGLE_MAPS_KEY_ANDROID` or `googleMapsKeyAndroid` in
+`android/local.properties`, because the Maps SDK for Android reads the manifest
+rather than the `apiKey` passed to `GoogleMap.create()`.
+
+A checkout with no keys still builds and runs; only the map screen is
+unavailable, and it says so rather than failing silently.
+
+### Why the SDK loads through `@googlemaps/js-api-loader`
+
+Loading the SDK with a hand-rolled script tag and resolving on `onload` is
+subtly wrong. Under `loading=async` the file that arrives is only a bootstrap:
+at `onload` `google.maps` exists but `google.maps.Geocoder` does not, and
+`google.maps.importLibrary` is not yet defined either. Every caller wraps its
+work in a try/catch and reports failure as "no result", so the resulting
+TypeError was invisible — reverse geocoding silently returned null on a cold
+page load and worked on a warm one. Google's loader handles readiness properly
+and hands back typed library objects, which is also how `@types/google.maps`
+replaced an `any`-typed `google` global that had been hiding the same class of
+error.
 
 ## Translations
 
@@ -184,7 +218,12 @@ a permanent bottom bar instead of living behind the hamburger.
 
 ## Deployment
 
-**Web** — `main` builds and publishes to GitHub Pages (`.github/workflows/ci.yml`).
+**Web** — Cloudflare Pages at [app.bmlt.app](https://app.bmlt.app), built from
+this repository on every push to `main`. The project is declared in
+[bmlt-enabled/cloudflare-pages](https://github.com/bmlt-enabled/cloudflare-pages)
+(`terraform/terraform.tfvars`), which also holds the three Maps keys as Pages
+environment variables. `.github/workflows/ci.yml` only lints, type-checks,
+tests, and proves the build compiles — it does not deploy.
 
 **iOS** — `.github/workflows/ios-testflight.yml`, triggered by hand or by a `v*`
 tag. Archives, exports, and uploads to TestFlight. It is deliberately not on
@@ -228,15 +267,17 @@ impossible after the first upload.
 
 ### Required repository secrets
 
-| Secret                     | Notes                                                                |
-| -------------------------- | -------------------------------------------------------------------- |
-| `GOOGLE_MAPS_KEY`          | Browser key. Web and iOS builds read it as `PUBLIC_GOOGLE_MAPS_KEY`. |
-| `APPLE_TEAM_ID`            | 10-character Apple team ID; kept out of the tree                     |
-| `APPSTORE_ISSUER_ID`       | App Store Connect API issuer for the team                            |
-| `APPSTORE_KEY_ID`          | ASC API key id                                                       |
-| `APPSTORE_PRIVATE_KEY`     | The `.p8`, contents inline                                           |
-| `IOS_DIST_CERT_P12_BASE64` | Distribution `.p12`, base64                                          |
-| `IOS_DIST_CERT_PASSWORD`   | Password for that `.p12`                                             |
+| Secret                     | Notes                                            |
+| -------------------------- | ------------------------------------------------ |
+| `GOOGLE_MAPS_KEY_WEB`      | Websites-restricted key                          |
+| `GOOGLE_MAPS_KEY_IOS`      | iOS-apps-restricted key                          |
+| `GOOGLE_MAPS_KEY_ANDROID`  | Android-apps-restricted key                      |
+| `APPLE_TEAM_ID`            | 10-character Apple team ID; kept out of the tree |
+| `APPSTORE_ISSUER_ID`       | App Store Connect API issuer for the team        |
+| `APPSTORE_KEY_ID`          | ASC API key id                                   |
+| `APPSTORE_PRIVATE_KEY`     | The `.p8`, contents inline                       |
+| `IOS_DIST_CERT_P12_BASE64` | Distribution `.p12`, base64                      |
+| `IOS_DIST_CERT_PASSWORD`   | Password for that `.p12`                         |
 
 The four Apple secrets are per-team, not per-app, so a team that already has them
 configured on another repository reuses the same values verbatim.

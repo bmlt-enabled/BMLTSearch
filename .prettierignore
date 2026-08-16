@@ -5,3 +5,4 @@ ios/
 android/
 package-lock.json
 src/lib/i18n/locales/
+coverage/

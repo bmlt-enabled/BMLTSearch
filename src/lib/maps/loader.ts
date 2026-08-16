@@ -1,55 +1,54 @@
-import { PUBLIC_GOOGLE_MAPS_KEY } from '$env/static/public';
+import { importLibrary, setOptions } from '@googlemaps/js-api-loader';
+import type { LatLng } from '../geo';
+import { webKey } from './keys';
 
 /**
- * Load the Google Maps JS SDK on demand.
+ * Loading the Maps JS SDK, via Google's own loader.
  *
- * The Ionic build put a `<script>` tag for this in index.html, so every screen
- * — the settings page, the about page — paid for the Maps SDK on first paint,
- * and the API key was hard-coded in committed markup. Injecting it here means
- * only the map screen loads it, and the key comes from the environment.
+ * This was hand-rolled at first — inject a script tag, resolve on `onload` —
+ * and that is subtly wrong in a way worth recording. Under `loading=async` the
+ * file that arrives is only a bootstrap: when `onload` fires, `google.maps`
+ * exists but `google.maps.Geocoder` does not, and `google.maps.importLibrary`
+ * is not yet defined either. Every caller here wraps its work in a try/catch
+ * and reports failure as "no result", so the TypeError that followed was
+ * invisible: reverse geocoding silently returned null on a cold page load and
+ * worked on a warm one, and the place autocomplete had the same latent race.
  *
- * Only the `places` library is requested. The original also pulled in `geometry`
- * for a single distance calculation, which now lives in src/lib/geo.ts.
+ * `@googlemaps/js-api-loader` exists precisely to get this right. It also
+ * de-duplicates concurrent loads and hands back typed library objects, so the
+ * `any`-typed `google` global this file used to depend on is gone.
  */
 
-let pending: Promise<void> | null = null;
+let configured = false;
 
+/** `true` when a web key is configured. Callers use this to skip the round trip. */
 export function mapsAvailable(): boolean {
-  return Boolean(PUBLIC_GOOGLE_MAPS_KEY);
+  return Boolean(webKey());
 }
 
-export function loadGoogleMaps(language = 'en'): Promise<void> {
-  if (typeof window === 'undefined') return Promise.reject(new Error('Maps SDK needs a browser'));
-  if (window.google?.maps?.places) return Promise.resolve();
-  if (pending) return pending;
-  if (!mapsAvailable()) return Promise.reject(new Error('PUBLIC_GOOGLE_MAPS_KEY is not set'));
-
-  pending = new Promise<void>((resolve, reject) => {
-    const script = document.createElement('script');
-    const params = new URLSearchParams({
-      key: PUBLIC_GOOGLE_MAPS_KEY,
-      libraries: 'places',
-      language,
-      // `loading=async` is what lets the SDK bootstrap without blocking parse;
-      // omitting it logs a performance warning on every load.
-      loading: 'async',
-      v: 'weekly'
-    });
-    script.src = `https://maps.googleapis.com/maps/api/js?${params}`;
-    script.async = true;
-    script.onerror = () => {
-      // Clear the cached promise so a later retry is not stuck on this failure.
-      pending = null;
-      reject(new Error('Could not load the Google Maps SDK'));
-    };
-    script.onload = () => resolve();
-    document.head.appendChild(script);
-  });
-
-  return pending;
+/**
+ * Options have to be set before the first library import, and only take effect
+ * once — so the first caller's language is the language for the session. That
+ * is acceptable here: changing language re-renders the app but does not reload
+ * the SDK, and place names are a small part of the surface.
+ */
+function configure(language: string): void {
+  if (configured) return;
+  setOptions({ key: webKey(), v: 'weekly', language });
+  configured = true;
 }
 
-/** A place suggestion, flattened out of whichever Places API shape answered. */
+export async function loadPlaces(language = 'en'): Promise<google.maps.PlacesLibrary> {
+  configure(language);
+  return importLibrary('places');
+}
+
+export async function loadGeocoding(language = 'en'): Promise<google.maps.GeocodingLibrary> {
+  configure(language);
+  return importLibrary('geocoding');
+}
+
+/** A place suggestion, flattened out of the Places response shape. */
 export interface PlaceSuggestion {
   description: string;
   placeId: string;
@@ -58,57 +57,51 @@ export interface PlaceSuggestion {
 /**
  * Autocomplete a partial address.
  *
- * Returns an empty list rather than throwing: an autocomplete that quietly stops
- * suggesting is a much smaller failure than one that breaks the search box, and
- * the caller can always fall back to geocoding the raw text.
+ * Returns an empty list rather than throwing: an autocomplete that quietly
+ * stops suggesting is a far smaller failure than one that breaks the search
+ * box, and the caller can always fall back to geocoding the raw text.
  */
-export async function suggestPlaces(input: string, language: string, sessionToken?: unknown): Promise<PlaceSuggestion[]> {
-  if (!input.trim() || !window.google?.maps?.places) return [];
+export async function suggestPlaces(input: string, language: string, sessionToken?: google.maps.places.AutocompleteSessionToken): Promise<PlaceSuggestion[]> {
+  if (!input.trim() || !mapsAvailable()) return [];
   try {
-    const { AutocompleteSuggestion } = window.google.maps.places;
-    const response = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
-      input,
-      language,
-      sessionToken
-    });
+    const { AutocompleteSuggestion } = await loadPlaces(language);
+    const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({ input, language, sessionToken });
 
-    return (response?.suggestions ?? [])
-      .map((suggestion: { placePrediction?: { text?: { toString(): string }; placeId?: string } }) => ({
+    return suggestions
+      .map((suggestion) => ({
         description: suggestion.placePrediction?.text?.toString() ?? '',
         placeId: suggestion.placePrediction?.placeId ?? ''
       }))
-      .filter((suggestion: PlaceSuggestion) => suggestion.description);
+      .filter((suggestion) => suggestion.description);
   } catch {
     return [];
   }
 }
 
 /** Resolve a suggestion to coordinates, or `null` to fall back to geocoding. */
-export async function placeLocation(placeId: string): Promise<{ lat: number; lng: number } | null> {
-  if (!placeId || !window.google?.maps?.places) return null;
+export async function placeLocation(placeId: string, language = 'en'): Promise<LatLng | null> {
+  if (!placeId) return null;
   try {
-    const { Place } = await window.google.maps.importLibrary('places');
+    const { Place } = await loadPlaces(language);
     const place = new Place({ id: placeId });
     await place.fetchFields({ fields: ['location'] });
 
     const location = place.location;
     if (!location) return null;
-
-    // `location` is a LatLng (accessor methods) on some paths and a plain
-    // LatLngLiteral on others, depending on which Places surface answered.
-    const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
-    const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-    return { lat, lng };
+    return { lat: location.lat(), lng: location.lng() };
   } catch {
     return null;
   }
 }
 
-/** A session token groups keystrokes into one billable autocomplete session. */
-export function newSessionToken(): unknown {
+/**
+ * A session token groups a burst of keystrokes and the lookup that follows into
+ * one billable autocomplete session rather than charging per request.
+ */
+export async function newSessionToken(language = 'en'): Promise<google.maps.places.AutocompleteSessionToken | undefined> {
   try {
-    return new window.google.maps.places.AutocompleteSessionToken();
+    const { AutocompleteSessionToken } = await loadPlaces(language);
+    return new AutocompleteSessionToken();
   } catch {
     return undefined;
   }

@@ -2,18 +2,18 @@ apply plugin: 'com.android.application'
 
 // The Maps SDK key, kept out of the repository.
 //
-// Resolution order: the GOOGLE_MAPS_KEY environment variable (how CI supplies
-// it, from a repository secret), then googleMapsKey in local.properties (how a
+// Resolution order: the GOOGLE_MAPS_KEY_ANDROID environment variable (how CI supplies
+// it, from a repository secret), then googleMapsKeyAndroid in local.properties (how a
 // developer supplies it locally — that file is gitignored). Falling back to an
 // empty string means a checkout with no key still compiles and runs; only the
 // map screen is blank, which is a far better failure than a build that cannot
 // be reproduced without a secret.
-def googleMapsKey = System.getenv('GOOGLE_MAPS_KEY') ?: ''
+def googleMapsKey = System.getenv('GOOGLE_MAPS_KEY_ANDROID') ?: ''
 def localProperties = rootProject.file('local.properties')
 if (!googleMapsKey && localProperties.exists()) {
     def props = new Properties()
     localProperties.withInputStream { props.load(it) }
-    googleMapsKey = props.getProperty('googleMapsKey', '')
+    googleMapsKey = props.getProperty('googleMapsKeyAndroid', '')
 }
 
 android {
