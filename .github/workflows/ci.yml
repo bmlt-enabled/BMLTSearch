@@ -39,10 +39,9 @@ jobs:
       # repository itself (see the README) and holds its own copy of these keys
       # as project environment variables. This build only proves it compiles.
       #
-      # All three names must be passed even when empty: $env/static/public fails
-      # the build on a missing name rather than a missing value. On a fork's pull
-      # request the secrets resolve to empty, which is fine — only the map screen
-      # depends on them.
+      # On a fork's pull request these secrets resolve to empty, which is fine:
+      # an unset key degrades to an empty string and only the map screen depends
+      # on them. See src/lib/maps/keys.ts.
       - name: Build
         env:
           PUBLIC_GOOGLE_MAPS_KEY_WEB: ${{ secrets.GOOGLE_MAPS_KEY_WEB }}

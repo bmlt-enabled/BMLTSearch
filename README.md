@@ -122,9 +122,11 @@ These are **public** variables: inlined into the client bundle and readable by
 anyone using the app. That is inherent to client-side Maps keys — what protects
 them is restriction, not secrecy.
 
-All three names must be defined at build time even when empty, because
-`$env/static/public` fails the build on a missing name rather than a missing
-value. Android additionally needs its key at the Gradle level, from
+All three are optional. An unset key degrades to an empty string rather than
+failing the build — the keys are read through `import.meta.env`, not
+`$env/static/public`, precisely because the latter is a hard build error when a
+variable _name_ is absent. Android additionally needs its key at the Gradle
+level, from
 `GOOGLE_MAPS_KEY_ANDROID` or `googleMapsKeyAndroid` in
 `android/local.properties`, because the Maps SDK for Android reads the manifest
 rather than the `apiKey` passed to `GoogleMap.create()`.

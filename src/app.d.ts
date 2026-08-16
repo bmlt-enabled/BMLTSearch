@@ -10,17 +10,6 @@
 // invisible for as long as it was.
 /// <reference types="google.maps" />
 
-// The Maps keys are read from import.meta.env, not $env/static/public, so their
-// types are declared here. All three are optional on purpose: a checkout with no
-// keys must still build. See src/lib/maps/keys.ts.
-// Augments the interface Vite's own types already attach to `import.meta.env`,
-// so no `ImportMeta` declaration is needed here.
-interface ImportMetaEnv {
-  readonly PUBLIC_GOOGLE_MAPS_KEY_WEB?: string;
-  readonly PUBLIC_GOOGLE_MAPS_KEY_IOS?: string;
-  readonly PUBLIC_GOOGLE_MAPS_KEY_ANDROID?: string;
-}
-
 declare global {
   namespace App {
     // interface Error {}
@@ -28,6 +17,24 @@ declare global {
     // interface PageData {}
     // interface PageState {}
     // interface Platform {}
+  }
+
+  /**
+   * The Maps keys, read from `import.meta.env` rather than `$env/static/public`
+   * — see src/lib/maps/keys.ts for why.
+   *
+   * This must live inside `declare global`: the trailing `export {}` makes this
+   * file a module, and a top-level interface in a module is module-local rather
+   * than an augmentation of Vite's global `ImportMetaEnv`. Declared outside, it
+   * silently typed nothing and the keys fell back to the `any` from Vite's index
+   * signature.
+   *
+   * All three are optional on purpose — a checkout with no keys must still build.
+   */
+  interface ImportMetaEnv {
+    readonly PUBLIC_GOOGLE_MAPS_KEY_WEB?: string;
+    readonly PUBLIC_GOOGLE_MAPS_KEY_IOS?: string;
+    readonly PUBLIC_GOOGLE_MAPS_KEY_ANDROID?: string;
   }
 }
 
