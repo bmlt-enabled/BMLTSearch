@@ -24,6 +24,16 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- Export compliance, answered up front.
+	     Without this key every uploaded build lands in App Store Connect as
+	     "Missing Compliance" and cannot be distributed to testers until someone
+	     answers the encryption question by hand — once per build.
+	     `false` is the accurate answer here: the app's only cryptography is
+	     standard HTTPS/TLS to the BMLT root servers and Google's APIs, which is
+	     exempt under the standard exemption. It would need to be `true` if the
+	     app ever implemented or bundled its own non-standard encryption. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<!-- Required: iOS terminates the app on the first location request if this
 	     string is absent. It is shown verbatim in the permission prompt, so it
 	     says what the location is for rather than that one is needed. -->
