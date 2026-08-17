@@ -152,9 +152,13 @@ jobs:
       # having to be rebuilt.
       #
       # Google re-signs this with the Play app signing key, so what users install
-      # does NOT carry the upload keystore's certificate. That key's SHA-1 must be
-      # registered on the Android Maps key (Play Console → Setup → App integrity)
-      # or the map is blank for everyone who installs from Play.
+      # does NOT carry the upload keystore's certificate. That key's SHA-1 must
+      # be registered on the Android Maps key or the map is blank for everyone
+      # who installs from Play. Find it under Play Console → Protected with Play
+      # (it used to live under App integrity, which now just redirects), or read
+      # it off a downloaded universal APK with
+      # `apksigner verify --print-certs` — keytool -jarfile will not see it,
+      # since Play signs v2/v3 rather than v1.
       - name: Upload to Play internal testing
         if: (github.event_name == 'push' || inputs.upload) && steps.version.outputs.publish == 'true'
         uses: r0adkll/upload-google-play@v1
@@ -163,7 +167,7 @@ jobs:
           packageName: app.bmlt.search
           releaseFiles: android/app/build/outputs/bundle/release/*.aab
           releaseName: ${{ steps.version.outputs.name }} (${{ github.run_number }})
-          track: internal
+          tracks: internal
           status: completed
 
       - name: Clean up keystore

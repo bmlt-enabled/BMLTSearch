@@ -2,7 +2,7 @@
   import { ChevronRight } from '@lucide/svelte';
   import { SvelteMap } from 'svelte/reactivity';
   import { serviceBodyHasOwnMeetings } from '$lib/api/bmlt';
-  import type { MeetingSource, ServiceBodyNode } from '$lib/types';
+  import type { ServiceBodyNode } from '$lib/types';
   import Disclosure from './Disclosure.svelte';
   // Self-import: this component renders itself for each level of the tree.
   import ServiceBodyTree from './ServiceBodyTree.svelte';
@@ -10,13 +10,11 @@
   interface Props {
     nodes: ServiceBodyNode[];
     onselect: (node: ServiceBodyNode) => void;
-    /** Which root server to probe for a parent's own meetings. */
-    source: MeetingSource;
     /** Indentation depth; set by the recursion, not by callers. */
     depth?: number;
   }
 
-  let { nodes, onselect, source, depth = 0 }: Props = $props();
+  let { nodes, onselect, depth = 0 }: Props = $props();
 
   /**
    * Whether a parent body holds meetings of its own, keyed by body id.
@@ -39,7 +37,7 @@
   async function probe(node: ServiceBodyNode) {
     if (ownMeetings.has(node.id)) return;
     try {
-      ownMeetings.set(node.id, await serviceBodyHasOwnMeetings(node.id, source));
+      ownMeetings.set(node.id, await serviceBodyHasOwnMeetings(node.id));
     } catch {
       // A failed probe leaves the row hidden. Showing a link that may open an
       // empty list is the thing being fixed here, so a network blip must not
@@ -82,7 +80,7 @@
                 {node.name}
               </button>
             {/if}
-            <ServiceBodyTree nodes={node.children} {onselect} {source} depth={depth + 1} />
+            <ServiceBodyTree nodes={node.children} {onselect} depth={depth + 1} />
           </div>
         </Disclosure>
       {:else}

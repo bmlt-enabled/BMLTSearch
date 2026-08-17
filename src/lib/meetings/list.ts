@@ -1,4 +1,4 @@
-import type { Meeting, MeetingSource, RawMeeting } from '../types';
+import type { Meeting, RawMeeting } from '../types';
 import { formatKeys, meetingKind } from './kind';
 import { endLabel, hourOf, startLabel, toMinutes } from './time';
 
@@ -30,14 +30,12 @@ export function isToday(weekday: number, now: Date = new Date()): boolean {
 /**
  * Turn a format name lookup into the "Open. Wheelchair Accessible." line.
  *
- * The two root servers key formats differently, which is why `source` is needed:
- * Tomato meetings carry `format_shared_id_list` (world format *ids*, resolvable
- * to a translated name), while Virtual NA meetings carry only the `formats` key
- * strings. An unresolved virtual key falls back to the key itself so the reader
- * still sees something, which is what the Ionic build did.
+ * Aggregator meetings carry `format_shared_id_list` — world format *ids*, which
+ * resolve to a translated name. An id with no name resolved is dropped rather
+ * than printed raw: a bare number tells the reader nothing.
  */
-export function explodeFormats(meeting: RawMeeting, names: Map<string, string>, source: MeetingSource): string {
-  const tokens = source === 'tomato' ? (meeting.format_shared_id_list ?? '').split(',') : formatKeys(meeting.formats);
+export function explodeFormats(meeting: RawMeeting, names: Map<string, string>): string {
+  const tokens = (meeting.format_shared_id_list ?? '').split(',');
 
   const parts: string[] = [];
   for (const raw of tokens) {
@@ -45,7 +43,6 @@ export function explodeFormats(meeting: RawMeeting, names: Map<string, string>, 
     if (!token) continue;
     const name = names.get(token);
     if (name) parts.push(name);
-    else if (source === 'virtual') parts.push(token);
   }
   return parts.map((part) => `${part}.`).join(' ');
 }
@@ -57,22 +54,40 @@ export function explodeFormats(meeting: RawMeeting, names: Map<string, string>, 
  * filtering, the card, the share sheet — reads the decorated fields and never
  * re-parses `start_time`.
  */
-export function decorateMeetings(raw: RawMeeting[], names: Map<string, string>, source: MeetingSource): Meeting[] {
+export function decorateMeetings(raw: RawMeeting[], names: Map<string, string>): Meeting[] {
   return raw.map((meeting) => {
     const startMinutes = toMinutes(meeting.start_time);
     const keys = formatKeys(meeting.formats);
+    const kind = meetingKind(keys);
+    /*
+      The zone suffix belongs to any meeting that does not happen where the
+      reader is. An in-person meeting needs none: its start time is local to the
+      venue, which is where the reader searched. A virtual meeting's 19:30 is
+      meaningless without one.
+
+      This used to key on `source`, so only Virtual NA records were labelled.
+      That held while the aggregator meant in-person, and stopped holding the
+      moment the venue filter began surfacing the aggregator's ~4,300 virtual
+      meetings deliberately — they showed a bare time. Keying on the meeting's
+      own kind is what was always meant, and is all that survives now that the
+      second root server is gone.
+
+      Only about 37% of the aggregator's virtual records carry a `time_zone` at
+      all, against 99% on Virtual NA. The rest fall back to a bare time because
+      there is nothing better to show — `startLabel` omits the suffix rather
+      than inventing one, and guessing from the meeting's coordinates would be
+      confidently wrong, since virtual meetings are precisely the ones whose
+      coordinates are arbitrary.
+    */
+    const happensElsewhere = kind === 'virtual' || kind === 'temp-virtual';
     return {
       ...meeting,
       startMinutes,
-      // Only virtual meetings get the zone suffix. Tomato's in-person records
-      // have no reliable `time_zone`, and their start time is always local to
-      // wherever the meeting physically is — which is where the reader is
-      // standing if they searched by radius.
-      startsAtLabel: startLabel(startMinutes, source === 'virtual' ? meeting.time_zone : undefined),
+      startsAtLabel: startLabel(startMinutes, happensElsewhere ? meeting.time_zone : undefined),
       endsAtLabel: endLabel(startMinutes, meeting.duration_time),
-      formatsLabel: explodeFormats(meeting, names, source),
+      formatsLabel: explodeFormats(meeting, names),
       formatKeys: keys,
-      kind: meetingKind(keys, source)
+      kind
     };
   });
 }

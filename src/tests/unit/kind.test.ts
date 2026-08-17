@@ -47,21 +47,11 @@ describe('meetingKind', () => {
     expect(meetingKind(['TC', 'HY', 'VM'])).toBe('temp-virtual');
   });
 
-  it('treats a keyless meeting from the Virtual NA root as virtual', () => {
-    // That root hosts online meetings exclusively and its records mostly carry
-    // no VM key. Defaulting them to in-person put a Directions button on
-    // meetings that happen nowhere.
-    expect(meetingKind([], 'virtual')).toBe('virtual');
-    expect(meetingKind(['O'], 'virtual')).toBe('virtual');
-  });
-
-  it('still treats a keyless aggregator meeting as in person', () => {
-    expect(meetingKind([], 'tomato')).toBe('in-person');
-  });
-
-  it('lets an explicit key override the source default', () => {
-    expect(meetingKind(['HY'], 'virtual')).toBe('hybrid');
-    expect(meetingKind(['TC'], 'virtual')).toBe('temp-closed');
+  it('treats a keyless meeting as in person', () => {
+    // Safe on the aggregator, where VM is the convention for an online meeting
+    // so its absence is meaningful. It was not safe on the Virtual NA root,
+    // whose records routinely carried no VM key — that root is gone.
+    expect(meetingKind([])).toBe('in-person');
   });
 });
 

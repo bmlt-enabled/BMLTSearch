@@ -520,6 +520,6 @@
       <span class="text-text-muted text-sm">{t('FINDING_MTGS')}</span>
     </div>
   {:else}
-    <MeetingList meetings={sheetMeetings} source="tomato" expandAll />
+    <MeetingList meetings={sheetMeetings} expandAll />
   {/if}
 </Modal>

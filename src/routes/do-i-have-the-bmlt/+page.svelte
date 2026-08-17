@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Users, Globe, Smile } from '@lucide/svelte';
   import { onMount } from 'svelte';
-  import { singleNearestMeeting, tomatoServiceBodies } from '$lib/api/bmlt';
+  import { singleNearestMeeting, aggregatorServiceBodies } from '$lib/api/bmlt';
   import AppBar from '$lib/components/AppBar.svelte';
   import ErrorState from '$lib/components/ErrorState.svelte';
   import Spinner from '$lib/components/Spinner.svelte';
@@ -36,7 +36,7 @@
 
       // Both requests at once — the service body names do not depend on the
       // meeting, and the Ionic build serialised them, doubling the wait.
-      const [bodies, nearest] = await loading.during(t('FINDING_MTGS'), () => Promise.all([tomatoServiceBodies(), singleNearestMeeting(origin.lat, origin.lng)]));
+      const [bodies, nearest] = await loading.during(t('FINDING_MTGS'), () => Promise.all([aggregatorServiceBodies(), singleNearestMeeting(origin.lat, origin.lng)]));
 
       const meeting = nearest[0];
       if (!meeting) {

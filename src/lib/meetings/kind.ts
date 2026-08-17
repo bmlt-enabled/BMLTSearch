@@ -1,4 +1,4 @@
-import type { MeetingKind, MeetingSource } from '../types';
+import type { MeetingKind } from '../types';
 
 /**
  * Split BMLT's comma-separated `formats` field into individual key strings.
@@ -33,19 +33,19 @@ export function formatKeys(formats: string | undefined | null): string[] {
  * both keys then rendered with neither its address block nor its directions
  * button — a blank card. Leading with TC closes that gap.
  *
- * `source` decides what "no relevant keys" means, and it matters a great deal.
- * bmlt.virtual-na.org hosts online meetings exclusively, and its records
- * routinely carry no VM key — that key is a worldwide-aggregator convention.
- * Defaulting those to in-person put a Directions button on meetings that
- * happen nowhere, pointed at whatever nominal coordinates the group had
- * registered. On the aggregator, no keys genuinely does mean in person.
+ * No relevant keys means in person. That is safe on the aggregator, where VM is
+ * the established convention for an online meeting and its absence is
+ * meaningful. It was *not* safe on the Virtual NA root, whose records routinely
+ * carried no VM key at all — defaulting those to in-person put a Directions
+ * button on meetings that happen nowhere. That root is no longer queried, which
+ * is what lets this collapse back to a single rule.
  */
-export function meetingKind(keys: string[], source: MeetingSource = 'tomato'): MeetingKind {
+export function meetingKind(keys: string[]): MeetingKind {
   const has = (key: string) => keys.includes(key);
   if (has('TC')) return has('VM') ? 'temp-virtual' : 'temp-closed';
   if (has('HY')) return 'hybrid';
   if (has('VM')) return 'virtual';
-  return source === 'virtual' ? 'virtual' : 'in-person';
+  return 'in-person';
 }
 
 /**

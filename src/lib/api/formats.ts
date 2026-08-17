@@ -1,5 +1,5 @@
 import type { RawMeeting } from '../types';
-import { tomatoFormats, virtualFormats } from './bmlt';
+import { aggregatorFormats } from './bmlt';
 
 /**
  * Resolving format ids to readable names.
@@ -14,8 +14,7 @@ import { tomatoFormats, virtualFormats } from './bmlt';
  */
 
 /** Cache key is language-scoped: the same id has a different name per language. */
-const tomatoCache = new Map<string, string>();
-let virtualCache: Map<string, string> | null = null;
+const aggregatorCache = new Map<string, string>();
 
 function cacheKey(language: string, id: string): string {
   return `${language}:${id}`;
@@ -29,7 +28,7 @@ function cacheKey(language: string, id: string): string {
  * for most languages, and a reader is far better served by an English format
  * name than by a bare numeric id.
  */
-export async function tomatoFormatNames(meetings: RawMeeting[], language: string): Promise<Map<string, string>> {
+export async function aggregatorFormatNames(meetings: RawMeeting[], language: string): Promise<Map<string, string>> {
   const wanted = new Set<string>();
   for (const meeting of meetings) {
     for (const id of (meeting.format_shared_id_list ?? '').split(',')) {
@@ -39,52 +38,33 @@ export async function tomatoFormatNames(meetings: RawMeeting[], language: string
   }
   if (wanted.size === 0) return new Map();
 
-  const missing = [...wanted].filter((id) => !tomatoCache.has(cacheKey(language, id)));
+  const missing = [...wanted].filter((id) => !aggregatorCache.has(cacheKey(language, id)));
 
   if (missing.length > 0) {
     // English first so it is in place as a fallback, then the target language
     // over it. Both are fetched for the missing ids only.
-    const english = await tomatoFormats(missing, 'en');
+    const english = await aggregatorFormats(missing, 'en');
     for (const format of english) {
-      if (format?.id && format.name_string) tomatoCache.set(cacheKey(language, format.id), format.name_string);
+      if (format?.id && format.name_string) aggregatorCache.set(cacheKey(language, format.id), format.name_string);
     }
 
     if (language !== 'en') {
-      const translated = await tomatoFormats(missing, language);
+      const translated = await aggregatorFormats(missing, language);
       for (const format of translated) {
-        if (format?.id && format.name_string) tomatoCache.set(cacheKey(language, format.id), format.name_string);
+        if (format?.id && format.name_string) aggregatorCache.set(cacheKey(language, format.id), format.name_string);
       }
     }
   }
 
   const names = new Map<string, string>();
   for (const id of wanted) {
-    const name = tomatoCache.get(cacheKey(language, id));
+    const name = aggregatorCache.get(cacheKey(language, id));
     if (name) names.set(id, name);
   }
   return names;
 }
 
-/**
- * Virtual NA's format names, keyed by code rather than id.
- *
- * Virtual NA meetings carry only `formats` codes — no `format_shared_id_list` —
- * so the lookup is by `key_string`. The list is small and English-only upstream,
- * so it is fetched whole, once.
- */
-export async function virtualFormatNames(): Promise<Map<string, string>> {
-  if (virtualCache) return virtualCache;
-  const formats = await virtualFormats();
-  const names = new Map<string, string>();
-  for (const format of formats) {
-    if (format?.key_string && format.name_string) names.set(format.key_string.trim().toUpperCase(), format.name_string);
-  }
-  virtualCache = names;
-  return names;
-}
-
-/** Test seam — drops both caches. */
+/** Test seam — drops the cache. */
 export function resetFormatCaches(): void {
-  tomatoCache.clear();
-  virtualCache = null;
+  aggregatorCache.clear();
 }
