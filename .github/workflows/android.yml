@@ -6,6 +6,11 @@ name: Android build
 # already proves the web bundle compiles on every push.
 on:
   workflow_dispatch:
+    inputs:
+      upload:
+        description: 'Upload the build to Play internal testing (uncheck to build only)'
+        type: boolean
+        default: true
   push:
     tags:
       - 'v*'
@@ -131,9 +136,16 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      # Tags only: a manual run is a test build stamped 0.0.0-dev, and Play
-      # permanently refuses a versionCode it has already accepted, so there is no
-      # taking an upload back.
+      # A tag always publishes; a manual run publishes unless the box is
+      # unticked. Same shape as the iOS workflow's TestFlight step, deliberately
+      # — the two stores differ in plenty of ways, but "how do I get a build to
+      # my testers" should not be one of them.
+      #
+      # A manual build is stamped 0.0.0-dev, which is what appears in the Play
+      # release list. That is the intended tell: only a tag produces a version
+      # number anyone should quote. Note Play permanently refuses a versionCode
+      # it has already accepted, and versionCode comes from the run number, so
+      # every publish consumes one whether or not it was tagged.
       #
       # The artifact upload above runs first on purpose — if Play rejects the
       # release, the AAB and APK are still downloadable from the run rather than
@@ -144,7 +156,7 @@ jobs:
       # registered on the Android Maps key (Play Console → Setup → App integrity)
       # or the map is blank for everyone who installs from Play.
       - name: Upload to Play internal testing
-        if: github.ref_type == 'tag' && steps.version.outputs.publish == 'true'
+        if: (github.event_name == 'push' || inputs.upload) && steps.version.outputs.publish == 'true'
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
