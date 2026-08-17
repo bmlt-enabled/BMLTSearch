@@ -59,12 +59,21 @@ export function hasDirections(kind: MeetingKind): boolean {
 }
 
 /**
- * Translation key for the warning badge on a meeting whose location is shut.
+ * Translation key for a meeting's kind badge, or null when there is nothing
+ * worth saying.
  *
- * Only the two closed states get a badge. Hybrid and virtual meetings announce
- * themselves through the buttons they offer — a join link, a dial-in, directions
- * or not — which is how the Ionic build distinguished them, and it avoids
- * inventing labels that none of the nine translation files carry.
+ * Only in-person gets no badge: it is the default reading of a meeting with an
+ * address, so labelling it adds noise to every card on the aggregator.
+ *
+ * Virtual and hybrid were originally left unlabelled too, on the reasoning that
+ * they announce themselves through the buttons they offer — a join link, a
+ * dial-in, directions or not. They do not. A virtual meeting still carries
+ * coordinates, so it still gets a map pin, and BMLT requires a latitude and
+ * longitude on every record whether or not the meeting happens anywhere: an
+ * online-only group is routinely pinned to its home town, or to somewhere
+ * arbitrary. Reading a pin next to a card whose only distinguishing feature is
+ * the *absence* of a Directions button asks the reader to notice something that
+ * is not there. The badge says it outright.
  */
 export function kindLabelKey(kind: MeetingKind): string | null {
   switch (kind) {
@@ -72,6 +81,33 @@ export function kindLabelKey(kind: MeetingKind): string | null {
       return 'TEMPCLOSED';
     case 'temp-virtual':
       return 'TEMP_CLOSED';
+    case 'virtual':
+      return 'VIRTUAL';
+    case 'hybrid':
+      return 'HYBRID';
+    default:
+      return null;
+  }
+}
+
+/**
+ * Which badge treatment a kind gets. Separate from the label so the component
+ * does not re-derive meaning from a translation key.
+ *
+ * `warning` is the red one and is reserved for the two closed states — the
+ * cases where turning up in person would waste someone's evening. Virtual and
+ * hybrid are neutral information, not a caution, and colouring them red would
+ * dilute the one badge that needs to be alarming.
+ */
+export function kindBadgeTone(kind: MeetingKind): 'warning' | 'virtual' | 'hybrid' | null {
+  switch (kind) {
+    case 'temp-closed':
+    case 'temp-virtual':
+      return 'warning';
+    case 'virtual':
+      return 'virtual';
+    case 'hybrid':
+      return 'hybrid';
     default:
       return null;
   }

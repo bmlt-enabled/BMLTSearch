@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatKeys, hasDirections, kindLabelKey, meetingKind } from '$lib/meetings/kind';
+import { formatKeys, hasDirections, kindBadgeTone, kindLabelKey, meetingKind } from '$lib/meetings/kind';
 
 describe('formatKeys', () => {
   it('splits, trims, and upper-cases', () => {
@@ -74,10 +74,37 @@ describe('presentation helpers', () => {
     expect(hasDirections('hybrid')).toBe(true);
   });
 
-  it('badges only the closed states', () => {
+  it('badges every kind except in-person, which is the unremarkable default', () => {
     expect(kindLabelKey('temp-closed')).toBe('TEMPCLOSED');
     expect(kindLabelKey('temp-virtual')).toBe('TEMP_CLOSED');
+    expect(kindLabelKey('virtual')).toBe('VIRTUAL');
+    expect(kindLabelKey('hybrid')).toBe('HYBRID');
     expect(kindLabelKey('in-person')).toBeNull();
-    expect(kindLabelKey('hybrid')).toBeNull();
+  });
+
+  /**
+   * A virtual meeting still carries coordinates and so still gets a map pin —
+   * BMLT requires a latitude and longitude on every record. Without a badge the
+   * only thing distinguishing it on screen is the absence of a Directions
+   * button, which asks the reader to notice something that is not there.
+   */
+  it('badges a virtual meeting even though it has no directions', () => {
+    expect(hasDirections('virtual')).toBe(false);
+    expect(kindLabelKey('virtual')).toBe('VIRTUAL');
+  });
+
+  it('reserves the warning tone for the closed states', () => {
+    expect(kindBadgeTone('temp-closed')).toBe('warning');
+    expect(kindBadgeTone('temp-virtual')).toBe('warning');
+    expect(kindBadgeTone('virtual')).toBe('virtual');
+    expect(kindBadgeTone('hybrid')).toBe('hybrid');
+    expect(kindBadgeTone('in-person')).toBeNull();
+  });
+
+  it('gives every badged kind both a label and a tone', () => {
+    const kinds = ['in-person', 'virtual', 'hybrid', 'temp-closed', 'temp-virtual'] as const;
+    for (const kind of kinds) {
+      expect(Boolean(kindLabelKey(kind)), `${kind} label/tone disagree`).toBe(Boolean(kindBadgeTone(kind)));
+    }
   });
 });

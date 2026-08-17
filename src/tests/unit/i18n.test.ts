@@ -43,7 +43,24 @@ describe('translation coverage', () => {
   });
 
   it('resolves every key the weekday and meeting-kind code paths use', () => {
-    const required = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'WEEKDAYS', 'TEMPCLOSED', 'TEMP_CLOSED', 'FORMATS', 'MAP', 'VIRTUAL_LINK', 'PHONE_MEETING'];
+    const required = [
+      'SUNDAY',
+      'MONDAY',
+      'TUESDAY',
+      'WEDNESDAY',
+      'THURSDAY',
+      'FRIDAY',
+      'SATURDAY',
+      'WEEKDAYS',
+      'TEMPCLOSED',
+      'TEMP_CLOSED',
+      'FORMATS',
+      'MAP',
+      'VIRTUAL_LINK',
+      'PHONE_MEETING',
+      'VIRTUAL',
+      'HYBRID'
+    ];
     for (const key of required) expect(en[key as keyof typeof en], `en.json is missing ${key}`).toBeTruthy();
   });
 });
