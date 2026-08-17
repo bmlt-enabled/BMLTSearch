@@ -151,6 +151,21 @@ jobs:
       # chooses the identity), and command-line build settings apply to every
       # target in the graph, including SPM dependencies like GoogleMaps, which
       # then fail with their own provisioning conflict.
+      # MARKETING_VERSION is what TestFlight shows as the version; without it a
+      # tagged build inherits whatever is committed in the Xcode project, so
+      # every release reads 1.0. A manual run leaves the project value alone —
+      # only a tag names a version.
+      - name: Derive version
+        id: version
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            echo "marketing=MARKETING_VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+            echo "Version ${GITHUB_REF_NAME#v} (build ${{ github.run_number }})" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "marketing=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Archive
         env:
           ASC_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
@@ -169,6 +184,7 @@ jobs:
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             DEVELOPMENT_TEAM="$TEAM_ID" \
             CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            ${{ steps.version.outputs.marketing }} \
             CODE_SIGN_STYLE=Automatic
 
       # ExportOptions.plist ships without a teamID so this public repository

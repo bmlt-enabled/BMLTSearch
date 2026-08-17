@@ -38,6 +38,19 @@ def signingKeyAlias = System.getenv('ANDROID_KEY_ALIAS') ?: 'upload'
 def signingKeyPassword = System.getenv('ANDROID_KEY_PASSWORD') ?: signingStorePassword
 def hasSigning = signingStorePath && file(signingStorePath).exists() && signingStorePassword
 
+// Version, supplied by CI from the git tag that triggered the build.
+//
+// versionCode must be a monotonically increasing integer and Play permanently
+// refuses a second upload carrying one it has already seen, so it comes from the
+// workflow run number rather than from the tag: run numbers only ever go up,
+// whereas a semver-derived code regresses the moment a patch release is tagged
+// on an older branch. versionName is the tag itself, minus the leading "v".
+//
+// The fallbacks keep an ordinary local `./gradlew assembleRelease` working; they
+// produce an APK that installs for testing but must never reach Play.
+def versionCodeValue = (System.getenv('ANDROID_VERSION_CODE') ?: '1') as Integer
+def versionNameValue = System.getenv('ANDROID_VERSION_NAME') ?: '0.0.0-dev'
+
 android {
     namespace = "app.bmlt.search"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -57,8 +70,8 @@ android {
         applicationId "app.bmlt.search"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode versionCodeValue
+        versionName versionNameValue
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [googleMapsKey: googleMapsKey]
         aaptOptions {
