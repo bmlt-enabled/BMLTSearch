@@ -23,6 +23,7 @@
   import ErrorState from '$lib/components/ErrorState.svelte';
   import MeetingList from '$lib/components/MeetingList.svelte';
   import Modal from '$lib/components/Modal.svelte';
+  import Spinner from '$lib/components/Spinner.svelte';
   import { distanceKm, type LatLng } from '$lib/geo';
   import { i18n, t } from '$lib/i18n/index.svelte';
   import { currentPosition } from '$lib/location';
@@ -55,6 +56,7 @@
   let sessionToken: PlacesSession;
 
   let sheetOpen = $state(false);
+  let sheetLoading = $state(false);
   let sheetMeetings = $state<RawMeeting[]>([]);
 
   /**
@@ -337,10 +339,24 @@
     const ids = markerIds.get(markerId);
     if (!ids?.length) return;
 
-    await loading.during(t('FINDING_MTGS'), async () => {
+    // Tapping a pin makes Google recentre the map by itself. That recentre is
+    // not the reader panning, so it must not offer to search the new area.
+    programmaticMove = true;
+
+    // The sheet opens straight away with its own spinner rather than raising the
+    // app-wide overlay. Loading a pin's meetings is not an area search, and
+    // borrowing that overlay — and its "Finding Meetings…" wording — made a tap
+    // look like it had kicked off the very search the button is there to defer.
+    sheetMeetings = [];
+    sheetLoading = true;
+    sheetOpen = true;
+    try {
       sheetMeetings = await meetingsByIds(ids);
-      sheetOpen = true;
-    });
+    } catch {
+      sheetMeetings = [];
+    } finally {
+      sheetLoading = false;
+    }
   }
 
   async function onSearchInput(event: Event & { currentTarget: HTMLInputElement }) {
@@ -451,5 +467,12 @@
 </div>
 
 <Modal open={sheetOpen} title={t('MEETING_DETAILS')} onclose={() => (sheetOpen = false)}>
-  <MeetingList meetings={sheetMeetings} source="tomato" expandAll />
+  {#if sheetLoading}
+    <div class="text-bmlt flex items-center justify-center gap-3 py-12">
+      <Spinner size={22} label={t('FINDING_MTGS')} />
+      <span class="text-text-muted text-sm">{t('FINDING_MTGS')}</span>
+    </div>
+  {:else}
+    <MeetingList meetings={sheetMeetings} source="tomato" expandAll />
+  {/if}
 </Modal>
