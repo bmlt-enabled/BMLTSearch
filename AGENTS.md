@@ -37,7 +37,7 @@ necessary but not sufficient — see the native sections below.
 forced in `svelte.config.js`.
 
 **Prefer `$derived` to `$effect`.** An effect that seeds state on first render
-only fires when its dependencies change *after* mount, which silently does
+only fires when its dependencies change _after_ mount, which silently does
 nothing when a component is handed complete data up front. That exact bug hid the
 meeting list's auto-open. If you can express it as a derivation, do.
 
@@ -81,14 +81,14 @@ logic, and probe the API directly with `curl`.
 
 ## Google Maps: three keys, two code paths
 
-Google allows a key exactly one *application* restriction, so there is one key
+Google allows a key exactly one _application_ restriction, so there is one key
 per platform (`src/lib/maps/keys.ts`), and — less obviously — **a native session
 uses two of them at once**.
 
-| | Map view | Autocomplete + geocoding |
-| - | - | - |
-| Web | JS SDK, web key | JS SDK, web key |
-| iOS / Android | **native SDK, platform key** | **REST, platform key** |
+|               | Map view                     | Autocomplete + geocoding |
+| ------------- | ---------------------------- | ------------------------ |
+| Web           | JS SDK, web key              | JS SDK, web key          |
+| iOS / Android | **native SDK, platform key** | **REST, platform key**   |
 
 On device the map is a native view authenticated by bundle ID / package + SHA-1,
 while Places and geocoding go over REST with an app-identity header
@@ -101,7 +101,7 @@ There is no native Places plugin for Capacitor. `@capacitor/google-maps` wraps
 the Maps SDK only; the community proposal
 ([capacitor-community/proposals#111], 2021) was closed unimplemented and the
 request against the Maps plugin ([ionic-team/capacitor-google-maps#111], 2022) is
-still open. Places API (New) *is* the REST API — the SDKs are clients for it.
+still open. Places API (New) _is_ the REST API — the SDKs are clients for it.
 
 **The Android SHA-1 is a trap.** `X-Android-Cert` is baked in at build time from
 `PUBLIC_GOOGLE_MAPS_ANDROID_CERT_SHA1` and must be a fingerprint registered on
@@ -116,14 +116,14 @@ web and not on Android, check this first.
 Three separate days were lost to this plugin. All three causes are in its source,
 not ours.
 
-**Android: the map renders *beneath* the webview.** Every layer above it must be
+**Android: the map renders _beneath_ the webview.** Every layer above it must be
 transparent or the map is invisible while drawing perfectly. `app.css` has a
 `map-underlay` class applied only on the map screen and only on Android; the app
 bar and bottom nav deliberately stay opaque. The plugin's README calls this out
 as the first thing to check.
 
 **iOS: `create()` resolving does not mean the map exists.** `render()` hops onto
-the main queue *after* the promise resolves, and finds its target by matching the
+the main queue _after_ the promise resolves, and finds its target by matching the
 element's measured size against a `WKChildScrollView` that WebKit only creates
 because the custom element's `connectedCallback` sets `overflow: scroll` and
 appends a 200%-height child. Import `@capacitor/google-maps` **eagerly** so the
@@ -135,7 +135,7 @@ blank until you navigate away and back.
 **`setCamera` force-unwraps the native map view.** `var GMapView: GMSMapView!` —
 calling it before the view exists crashes the app outright rather than failing.
 All camera moves go through `moveCamera()` in the map route, which holds the
-request until the map has *emitted an event* (the only real proof it exists) and
+request until the map has _emitted an event_ (the only real proof it exists) and
 replays it.
 
 Related: a camera move we make ourselves must not arm "Search this area", but
@@ -154,7 +154,7 @@ Bundled at build time, not fetched.
 ## Environment
 
 All keys are read through `import.meta.env`, **not** `$env/static/public`. The
-latter is a hard build error when a variable *name* is absent — not merely unset
+latter is a hard build error when a variable _name_ is absent — not merely unset
 — which broke `git clone && npm run build`, broke `npm run check` in CI, and
 failed the first Cloudflare Pages deploy. An absent key now degrades to an empty
 string and only the map screen notices. See `envPrefix` in `vite.config.ts`.
