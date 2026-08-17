@@ -88,5 +88,6 @@
     "NO_RESULTS"        : "No meetings match these filters.",
     "FILTERS"           : "Filters",
     "PLACE_SEARCH"      : "Search for a place or address",
-    "MY_LOCATION"       : "Use my location"
+    "MY_LOCATION"       : "Use my location",
+    "SEARCH_AREA"       : "Search this area"
 }
