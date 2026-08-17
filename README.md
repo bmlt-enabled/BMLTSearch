@@ -95,32 +95,64 @@ permission strings, the manifest placeholders. Only build products are ignored.
 **Three of them**, because Google allows a key exactly one _application_
 restriction — Websites, or iOS apps, or Android apps, never a combination.
 
-The awkward part is that one native session uses two keys at once. Inside the
-iOS and Android shells the map itself is a **native** view authenticated by
-bundle ID or package + SHA-1, while place autocomplete and geocoding are
-**JavaScript** running in the webview and so are referrer-checked like any web
-page. `src/lib/maps/keys.ts` picks the right one per call.
+| Variable                               | Restriction                                      | APIs                                          | Used by                                            |
+| -------------------------------------- | ------------------------------------------------ | --------------------------------------------- | -------------------------------------------------- |
+| `PUBLIC_GOOGLE_MAPS_KEY_WEB`           | Websites                                         | Maps JavaScript, Places (New), Geocoding      | Everything, on the web only                        |
+| `PUBLIC_GOOGLE_MAPS_KEY_IOS`           | iOS apps — `app.bmlt.search`                     | Maps SDK for iOS, Places (New), Geocoding     | Map, autocomplete and geocoding on iOS             |
+| `PUBLIC_GOOGLE_MAPS_KEY_ANDROID`       | Android apps — `app.bmlt.search` + signing SHA-1 | Maps SDK for Android, Places (New), Geocoding | Map, autocomplete and geocoding on Android         |
+| `PUBLIC_GOOGLE_MAPS_ANDROID_CERT_SHA1` | —                                                | —                                             | Proves the Android signature to the REST endpoints |
 
-| Variable                         | Restriction                                      | APIs                                     | Used by                                                                                       |
-| -------------------------------- | ------------------------------------------------ | ---------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `PUBLIC_GOOGLE_MAPS_KEY_WEB`     | Websites                                         | Maps JavaScript, Places (New), Geocoding | The JS SDK — autocomplete and geocoding, on **every** platform; and the map itself on the web |
-| `PUBLIC_GOOGLE_MAPS_KEY_IOS`     | iOS apps — `app.bmlt.search`                     | Maps SDK for iOS                         | `GoogleMap.create` on iOS                                                                     |
-| `PUBLIC_GOOGLE_MAPS_KEY_ANDROID` | Android apps — `app.bmlt.search` + signing SHA-1 | Maps SDK for Android                     | `GoogleMap.create` on Android                                                                 |
-
-The web key's referrer allowlist must include the native webview origins as well
-as the site, or autocomplete and geocoding fail on device:
+The web key's referrer allowlist only needs the origins you actually serve from:
 
 ```
 https://app.bmlt.app/*
 http://localhost:5173/*        # npm run dev
 http://localhost:4173/*        # npm run preview
-https://localhost/*            # Android webview origin
-capacitor://localhost/*        # iOS webview origin
 ```
 
 These are **public** variables: inlined into the client bundle and readable by
 anyone using the app. That is inherent to client-side Maps keys — what protects
 them is restriction, not secrecy.
+
+### Why native does not use the JS SDK
+
+Autocomplete and geocoding take a different path on device than on the web, and
+the reason is worth stating plainly because the obvious approach does not work.
+
+Inside a Capacitor webview there is no origin Google will accept. Its guidance is
+explicit: _"API key website restrictions are not guaranteed to work correctly,
+unless your web app is loaded using HTTP or HTTPS from a website that you control
+and have authorized."_ A bundle served from `localhost` is not that, so a
+referrer-restricted key is unsupported there — not merely weak.
+
+The native SDKs are not an option either: `@capacitor/google-maps` wraps the Maps
+SDK only, with no Places or geocoding surface. The community proposal for a
+Places plugin ([capacitor-community/proposals#111], April 2021) was closed
+unimplemented, and the request against the Maps plugin
+([ionic-team/capacitor-google-maps#111], June 2022) is still open and unanswered.
+
+So on device the app calls the Places and Geocoding **REST** endpoints with the
+platform key and an app-identity header — `X-Ios-Bundle-Identifier`, or
+`X-Android-Package` plus `X-Android-Cert`. This is Google's documented mechanism
+for app-restricted keys over HTTP, and these are the same endpoints the JS SDK
+calls internally: Places API (New) _is_ the REST API and the SDKs are clients for
+it. The restriction is genuinely enforced — the same request without the header
+returns `403 API_KEY_IOS_APP_BLOCKED`, which is exactly the verification Google
+tells you to perform before relying on it.
+
+On the web the JS SDK is kept, because there the browser sends a real referrer
+from a real origin and the restriction works as designed.
+
+Google's strongest recommendation is a proxy server holding the key server-side.
+That remains open: `PLACES_BASE` and `GEOCODE_BASE` in `src/lib/maps/rest.ts` are
+two constants precisely so they can be pointed at our own origin, dropping the
+key and headers, without touching any caller. It is not done yet because it would
+protect only Places and Geocoding — the map view needs the key in-app regardless
+— while giving the native app a hard runtime dependency on our web
+infrastructure.
+
+[capacitor-community/proposals#111]: https://github.com/capacitor-community/proposals/issues/111
+[ionic-team/capacitor-google-maps#111]: https://github.com/ionic-team/capacitor-google-maps/issues/111
 
 All three are optional. An unset key degrades to an empty string rather than
 failing the build — the keys are read through `import.meta.env`, not
@@ -134,7 +166,7 @@ rather than the `apiKey` passed to `GoogleMap.create()`.
 A checkout with no keys still builds and runs; only the map screen is
 unavailable, and it says so rather than failing silently.
 
-### Why the SDK loads through `@googlemaps/js-api-loader`
+### Why the web path loads the SDK through `@googlemaps/js-api-loader`
 
 Loading the SDK with a hand-rolled script tag and resolving on `onload` is
 subtly wrong. Under `loading=async` the file that arrives is only a bootstrap:

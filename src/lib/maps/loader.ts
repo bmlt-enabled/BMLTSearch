@@ -1,6 +1,10 @@
 import { importLibrary, setOptions } from '@googlemaps/js-api-loader';
 import type { LatLng } from '../geo';
 import { webKey } from './keys';
+// Shape shared with the REST path so both platforms return the same thing.
+import type { PlaceSuggestion } from './rest';
+
+export type { PlaceSuggestion };
 
 /**
  * Loading the Maps JS SDK, via Google's own loader.
@@ -53,12 +57,6 @@ export async function loadPlaces(language = 'en'): Promise<google.maps.PlacesLib
 export async function loadGeocoding(language = 'en'): Promise<google.maps.GeocodingLibrary> {
   configure(language);
   return importLibrary('geocoding');
-}
-
-/** A place suggestion, flattened out of the Places response shape. */
-export interface PlaceSuggestion {
-  description: string;
-  placeId: string;
 }
 
 /**

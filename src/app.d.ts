@@ -35,6 +35,7 @@ declare global {
     readonly PUBLIC_GOOGLE_MAPS_KEY_WEB?: string;
     readonly PUBLIC_GOOGLE_MAPS_KEY_IOS?: string;
     readonly PUBLIC_GOOGLE_MAPS_KEY_ANDROID?: string;
+    readonly PUBLIC_GOOGLE_MAPS_ANDROID_CERT_SHA1?: string;
   }
 }
 

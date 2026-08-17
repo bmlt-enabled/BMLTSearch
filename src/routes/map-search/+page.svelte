@@ -12,7 +12,7 @@
   import { i18n, t } from '$lib/i18n/index.svelte';
   import { currentPosition } from '$lib/location';
   import { mapKey } from '$lib/maps/keys';
-  import { mapsAvailable, newSessionToken, placeLocation, suggestPlaces, type PlaceSuggestion } from '$lib/maps/loader';
+  import { newSessionToken, placeLocation, suggestPlaces, type PlaceSuggestion, type PlacesSession } from '$lib/maps/places';
   import { buildMarkers, iconFor } from '$lib/maps/markers';
   import { loading } from '$lib/stores/loading.svelte';
   import { settings } from '$lib/stores/settings.svelte';
@@ -37,7 +37,7 @@
 
   let queryText = $state('');
   let suggestions = $state<PlaceSuggestion[]>([]);
-  let sessionToken: google.maps.places.AutocompleteSessionToken | undefined;
+  let sessionToken: PlacesSession;
 
   let sheetOpen = $state(false);
   let sheetMeetings = $state<RawMeeting[]>([]);
@@ -79,7 +79,7 @@
   }
 
   async function start() {
-    if (!mapsAvailable() || !mapKey()) {
+    if (!mapKey()) {
       error = 'Google Maps is not configured. See .env.example for the three keys this needs.';
       return;
     }
