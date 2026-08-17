@@ -31,6 +31,12 @@
   /** Camera-idle fires repeatedly through a fling; only the last one matters. */
   const IDLE_DEBOUNCE_MS = 400;
 
+  /**
+   * How long to give a freshly created map to prove it rendered. A real map
+   * emits its first camera-idle well inside this; a stillborn one never will.
+   */
+  const MAP_RENDER_TIMEOUT_MS = 2000;
+
   let map: GoogleMapType | null = null;
   let mapElement = $state<HTMLElement | null>(null);
   let error = $state('');
@@ -65,6 +71,8 @@
    */
   let mapReady = false;
   let pendingCamera: { coordinate?: LatLng; zoom?: number } | null = null;
+  /** Resolves the create-and-verify wait as soon as the map proves itself. */
+  let readyWaiter: (() => void) | null = null;
 
   /** Where the currently drawn markers were searched from. */
   let searchedCentre: LatLng | null = null;
@@ -84,6 +92,7 @@
     map = null;
     mapReady = false;
     pendingCamera = null;
+    readyWaiter = null;
     if (!instance) return;
     try {
       await instance.removeAllMapListeners();
@@ -106,16 +115,72 @@
 
       // Open immediately at the last known position, or the fallback. Waiting on
       // a device fix first meant the very first visit showed nothing at all until
-      // the permission prompt was answered — and on a second visit the stored
-      // position made it appear instantly, which is why it looked like the map
-      // "only works the second time".
-      await createMap(settings.location ? { lat: settings.location.lat, lng: settings.location.lng } : FALLBACK_CENTRE);
+      // the permission prompt was answered.
+      const centre = settings.location ? { lat: settings.location.lat, lng: settings.location.lng } : FALLBACK_CENTRE;
+      if (!(await createMapUntilItRenders(centre))) {
+        error = t('LOAD_ERROR');
+        return;
+      }
 
       // Then refine, without blocking the map appearing.
       if (!settings.location) void locateAndRecentre();
     } catch {
       error = t('LOAD_ERROR');
     }
+  }
+
+  /**
+   * Create the map, and if it does not actually appear, throw it away and try
+   * again.
+   *
+   * On a cold start the very first attempt reliably produced a blank map, while
+   * leaving the page and returning fixed it. That second visit is really just a
+   * retry, so the app does the retry itself rather than asking someone to
+   * discover the workaround.
+   *
+   * The reason a retry is needed at all is in the plugin. `render()` hops onto
+   * the main queue *after* `create()` has already resolved back to JS, and there
+   * it locates its target by matching the element's measured size:
+   *
+   *     self.targetViewController = self.getTargetContainer(refWidth:…, refHeight:…)
+   *     if let target = self.targetViewController { … }
+   *
+   * When the webview's native layer has not settled, nothing matches, the `if
+   * let` quietly does nothing, and `GMapView` stays nil forever — a blank map,
+   * and a crash on the next camera call. Waiting for the *element* to have a
+   * size is not enough, because the mismatch is on the native side.
+   *
+   * A rendered map emits a camera-idle event on its own; a stillborn one never
+   * does. So that event is the success signal, and its absence is the retry.
+   */
+  async function createMapUntilItRenders(centre: LatLng, attempts = 3): Promise<boolean> {
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      await createMap(centre);
+      if (!map) return false;
+      if (await waitForFirstEvent(MAP_RENDER_TIMEOUT_MS)) return true;
+
+      // Nothing came back: the view was never added. Tear it down completely so
+      // the next attempt starts from a clean native state, and give the layout a
+      // little longer each time.
+      await teardown();
+      await new Promise((resolve) => setTimeout(resolve, 250 * attempt));
+    }
+    return false;
+  }
+
+  function waitForFirstEvent(timeoutMs: number): Promise<boolean> {
+    if (mapReady) return Promise.resolve(true);
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        readyWaiter = null;
+        resolve(false);
+      }, timeoutMs);
+      readyWaiter = () => {
+        clearTimeout(timer);
+        readyWaiter = null;
+        resolve(true);
+      };
+    });
   }
 
   async function locateAndRecentre() {
@@ -149,10 +214,7 @@
 
   async function createMap(centre: LatLng) {
     if (!mapElement) return;
-    if (!(await waitForLayout(mapElement))) {
-      error = t('LOAD_ERROR');
-      return;
-    }
+    if (!(await waitForLayout(mapElement))) return;
     // The element can disappear while we were waiting on layout.
     if (!mapElement) return;
 
@@ -189,6 +251,7 @@
   function markReady() {
     if (mapReady) return;
     mapReady = true;
+    readyWaiter?.();
     const pending = pendingCamera;
     pendingCamera = null;
     if (pending) void moveCamera(pending);
