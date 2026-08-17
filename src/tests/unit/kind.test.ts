@@ -73,10 +73,10 @@ describe('presentation helpers', () => {
   });
 
   /**
-   * A virtual meeting still carries coordinates and so still gets a map pin —
-   * BMLT requires a latitude and longitude on every record. Without a badge the
-   * only thing distinguishing it on screen is the absence of a Directions
-   * button, which asks the reader to notice something that is not there.
+   * Without a badge, the only thing distinguishing an online meeting in a list
+   * is the absence of a Directions button — which asks the reader to notice
+   * something that is not there. (The map no longer plots online meetings at
+   * all; see MAP_VENUE_TYPES.)
    */
   it('badges a virtual meeting even though it has no directions', () => {
     expect(hasDirections('virtual')).toBe(false);

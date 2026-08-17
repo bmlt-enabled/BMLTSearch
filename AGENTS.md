@@ -68,9 +68,21 @@ requests go through `src/lib/api/http.ts`, which also absorbs two wire quirks:
 empty result sets arrive as `{}` rather than `[]`, and bodies sometimes arrive as
 unparsed strings.
 
-**Two root servers.** Tomato (aggregator, in-person) and Virtual NA (online) are
-separate databases that key formats differently. `MeetingSource` is threaded
-explicitly through format resolution and meeting classification — never infer it.
+**One root server.** Everything comes from the aggregator
+(`aggregator.bmltenabled.org`, formerly called Tomato), which carries
+`venue_type`, so in-person, hybrid and online meetings all arrive from the same
+place. There used to be a second — `bmlt.virtual-na.org` — with its own screen
+and its own format keying, which is why a `MeetingSource` was threaded through
+format resolution and classification. Both are gone. Online meetings are reached
+through the venue filter on the geographic searches, not a screen of their own.
+
+**Do not propose a worldwide online-meeting list without reading
+`meetings/venue.ts` first.** Two independent reasons it does not work: the
+aggregator refuses unbounded queries (`venue_types` is not one of the filters
+that satisfies its gate, so `venue_types=2` alone returns `[]` silently, and the
+~5,255 matching rows time out even when it is satisfied), and only ~37% of those
+records carry a `time_zone`, so most cannot be given a start time a reader can
+act on.
 
 **A failed request must never look like an empty result.** Someone looking for a
 meeting reading "nothing found" when the server was actually down is the worst

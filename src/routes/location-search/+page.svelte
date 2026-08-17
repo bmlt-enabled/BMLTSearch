@@ -3,7 +3,9 @@
   import { onMount } from 'svelte';
   import { nearestMeetings } from '$lib/api/bmlt';
   import VenueFilter from '$lib/components/VenueFilter.svelte';
+  import { Monitor } from '@lucide/svelte';
   import { venueTypesParam, type MeetingMode } from '$lib/meetings/venue';
+  import { openExternal } from '$lib/native';
   import AppBar from '$lib/components/AppBar.svelte';
   import ErrorState from '$lib/components/ErrorState.svelte';
   import MeetingList from '$lib/components/MeetingList.svelte';
@@ -56,6 +58,16 @@
     settings.modes = modes;
     if (loaded || error) void search(false);
   }
+
+  /**
+   * Online-only search that found nothing.
+   *
+   * This app has no worldwide online-meeting list — the aggregator will not
+   * serve one — so an empty online search here is not evidence that none exist,
+   * only that none are registered near this point. Saying so, and pointing at
+   * NA's own directory, is the difference between a dead end and an answer.
+   */
+  const onlineOnlyAndEmpty = $derived(loaded && meetings.length === 0 && settings.modes.length === 1 && settings.modes[0] === 'online');
 </script>
 
 <svelte:head><title>{t('LOCATIONSEARCH')}</title></svelte:head>
@@ -84,4 +96,17 @@
   <ErrorState message={error} onretry={() => search(true)} />
 {:else if loaded}
   <MeetingList {meetings} />
+  {#if onlineOnlyAndEmpty}
+    <div class="px-4 pb-6">
+      <p class="text-text-muted mb-3 text-center text-sm">{t('NO_ONLINE_NEARBY')}</p>
+      <button
+        type="button"
+        class="focusable border-bmlt text-bmlt hover:bg-bmlt/10 mx-auto flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-colors"
+        onclick={() => openExternal('https://na.org/virtual/')}
+      >
+        <Monitor size={18} aria-hidden="true" />
+        {t('NA_VIRTUAL')}
+      </button>
+    </div>
+  {/if}
 {/if}

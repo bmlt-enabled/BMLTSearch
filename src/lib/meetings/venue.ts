@@ -22,12 +22,17 @@
  * This matters more than it looks. The aggregator holds about 4,300 virtual and
  * 950 hybrid meetings, and they were already coming back from Near Me and map
  * searches unfiltered, pinned at whatever coordinates their group registered.
- * That is why an online-only meeting can appear on the map in a town it has no
- * relationship with. The filter turns those from something you stumble across
+ * That is how an online-only group used to end up as a pin in a town it has no
+ * relationship with — the map no longer plots them at all (`MAP_VENUE_TYPES`). The filter turns those from something you stumble across
  * into something you can ask for — or exclude, when only a room will do.
  *
- * Deliberately not offered on the Virtual NA browse screen: that root holds
- * online meetings exclusively, so there is nothing to filter.
+ * This filter is the whole of the app's online-meeting story now. There used to
+ * be a separate screen against a separate root server, bmlt.virtual-na.org,
+ * holding online meetings exclusively. It was dropped: that data is unmaintained
+ * and the aggregator carries ~45% more online meetings anyway. Nothing else
+ * replaced it, deliberately — a worldwide online directory is a promise this data
+ * cannot keep, since only about 37% of the aggregator's virtual records carry a
+ * `time_zone` and so most cannot even be given a start time a reader can act on.
  */
 
 export const MEETING_MODES = ['in-person', 'online'] as const;
@@ -56,6 +61,27 @@ export function isMeetingMode(value: string): value is MeetingMode {
  * indistinguishable from "there is nothing near you", which is the one wrong
  * answer this app must not give. So it shows everything rather than nothing.
  */
+/**
+ * What the map asks for, always: in person and hybrid, never virtual-only.
+ *
+ * A pin asserts that the meeting is *there*. For an online meeting that is
+ * false — BMLT requires coordinates on every record whether or not the meeting
+ * happens anywhere, so online groups are pinned to a home town or to somewhere
+ * arbitrary. The aggregator's ~4,300 virtual meetings were being drawn on the
+ * map at those coordinates, which is how an online-only group ends up as a pin
+ * in a town it has no relationship with.
+ *
+ * This is the same judgement `hasDirections()` already makes: it refuses to
+ * offer directions to a virtual meeting because the coordinates would send
+ * someone to the wrong place. Drawing a pin is a quieter version of the same
+ * claim, so the map makes it only for meetings that genuinely have a venue.
+ *
+ * Hybrid is included — it has a real room, and the map is how you find it. The
+ * in-person/online filter therefore lives only on the list searches, where a
+ * result is a row rather than a location.
+ */
+export const MAP_VENUE_TYPES: readonly string[] = ['1', '3'];
+
 export function venueTypesParam(modes: readonly MeetingMode[]): string[] | undefined {
   const inPerson = modes.includes('in-person');
   const online = modes.includes('online');
