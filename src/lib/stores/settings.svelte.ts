@@ -1,4 +1,5 @@
 import type { LatLng } from '../geo';
+import { isMeetingMode, MEETING_MODES, type MeetingMode } from '../meetings/venue';
 
 /**
  * User preferences and the last known location.
@@ -12,7 +13,8 @@ import type { LatLng } from '../geo';
 
 const KEYS = {
   searchRange: 'bmltsearch.searchRange',
-  location: 'bmltsearch.location'
+  location: 'bmltsearch.location',
+  modes: 'bmltsearch.modes'
 } as const;
 
 /** Bounds of the search-range slider, in meetings. */
@@ -55,6 +57,20 @@ class Settings {
    */
   #searchRange = $state(DEFAULT_SEARCH_RANGE);
   #location = $state<SavedLocation | null>(null);
+  /**
+   * Which kinds of meeting the geographic searches ask for. Both by default, so
+   * a reader who never touches the filter sees exactly what they saw before.
+   */
+  #modes = $state<MeetingMode[]>([...MEETING_MODES]);
+
+  get modes(): MeetingMode[] {
+    return this.#modes;
+  }
+
+  set modes(value: MeetingMode[]) {
+    this.#modes = MEETING_MODES.filter((mode) => value.includes(mode));
+    write(KEYS.modes, this.#modes.join(','));
+  }
 
   get searchRange(): number {
     return this.#searchRange;
@@ -84,6 +100,12 @@ class Settings {
   init(): void {
     const range = Number.parseInt(read(KEYS.searchRange) ?? '', 10);
     this.#searchRange = Number.isNaN(range) ? DEFAULT_SEARCH_RANGE : clampRange(range);
+
+    // An absent entry means "never chosen", which is both modes — not none.
+    const modes = read(KEYS.modes);
+    if (modes !== null) {
+      this.#modes = modes.split(',').filter(isMeetingMode);
+    }
 
     const raw = read(KEYS.location);
     if (!raw) return;

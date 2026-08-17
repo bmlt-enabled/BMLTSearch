@@ -192,7 +192,7 @@ Two things the Capacitor map plugin will mislead you about are documented in
 
 ## Testing
 
-118 unit tests over the domain logic — time arithmetic, meeting classification,
+125 unit tests over the domain logic — time arithmetic, meeting classification,
 grouping and filtering, the service body tree, marker clustering, the share
 payload, the HTTP wrapper's handling of BMLT's quirks, and translation coverage.
 

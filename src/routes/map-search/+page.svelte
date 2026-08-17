@@ -20,6 +20,7 @@
   import { meetingsByIds, meetingsWithinRadius } from '$lib/api/bmlt';
   import { forwardGeocode } from '$lib/api/geocode';
   import AppBar from '$lib/components/AppBar.svelte';
+  import VenueFilter from '$lib/components/VenueFilter.svelte';
   import ErrorState from '$lib/components/ErrorState.svelte';
   import MeetingList from '$lib/components/MeetingList.svelte';
   import Modal from '$lib/components/Modal.svelte';
@@ -28,6 +29,7 @@
   import { i18n, t } from '$lib/i18n/index.svelte';
   import { currentPosition } from '$lib/location';
   import { mapKey } from '$lib/maps/keys';
+  import { venueTypesParam, type MeetingMode } from '$lib/meetings/venue';
   import { platform } from '$lib/native';
   import { newSessionToken, placeLocation, suggestPlaces, type PlaceSuggestion, type PlacesSession } from '$lib/maps/places';
   import { buildMarkers, iconFor } from '$lib/maps/markers';
@@ -318,7 +320,7 @@
 
     const release = loading.begin(t('FINDING_MTGS'));
     try {
-      const meetings = await meetingsWithinRadius(event.bounds.center.lat, event.bounds.center.lng, radiusKm);
+      const meetings = await meetingsWithinRadius(event.bounds.center.lat, event.bounds.center.lng, radiusKm, venueTypesParam(settings.modes));
       if (sequence !== searchSequence || !map) return;
       await drawMarkers(meetings);
       searchedCentre = event.bounds.center;
@@ -417,6 +419,16 @@
     if (lastCamera) void runSearch(lastCamera);
   }
 
+  /**
+   * Re-run against the pane already on screen. Markers currently drawn were
+   * matched under the old filter, so leaving them until the next pan would show
+   * results the buttons say are excluded.
+   */
+  function onModesChange(modes: MeetingMode[]) {
+    settings.modes = modes;
+    if (lastCamera) void runSearch(lastCamera);
+  }
+
   function clearSearch() {
     queryText = '';
     suggestions = [];
@@ -482,6 +494,15 @@
     >
       {t('SEARCH_AREA')}
     </button>
+  {/if}
+
+  <!--
+    Bottom-anchored so it clears both Google's Map/Satellite control and the
+    "Search this area" pill, and hidden while the autocomplete list is open so it
+    does not sit under the suggestions.
+  -->
+  {#if suggestions.length === 0}
+    <VenueFilter modes={settings.modes} onchange={onModesChange} class="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full bg-[var(--surface-raised)]/95 p-1.5 shadow-lg" />
   {/if}
 
   <!--

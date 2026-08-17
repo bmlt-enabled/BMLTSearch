@@ -2,6 +2,8 @@
   import { LocateFixed } from '@lucide/svelte';
   import { onMount } from 'svelte';
   import { nearestMeetings } from '$lib/api/bmlt';
+  import VenueFilter from '$lib/components/VenueFilter.svelte';
+  import { venueTypesParam, type MeetingMode } from '$lib/meetings/venue';
   import AppBar from '$lib/components/AppBar.svelte';
   import ErrorState from '$lib/components/ErrorState.svelte';
   import MeetingList from '$lib/components/MeetingList.svelte';
@@ -32,7 +34,7 @@
     error = '';
     try {
       const origin = await loading.during(t('LOCATING'), () => resolveSearchOrigin(refreshLocation));
-      meetings = await loading.during(t('FINDING_MTGS'), () => nearestMeetings(origin.lat, origin.lng, range));
+      meetings = await loading.during(t('FINDING_MTGS'), () => nearestMeetings(origin.lat, origin.lng, range, venueTypesParam(settings.modes)));
       loaded = true;
     } catch (cause) {
       // A denied or unavailable fix is a different problem from a root server
@@ -47,6 +49,12 @@
     settings.searchRange = value;
     range = settings.searchRange;
     void search(false);
+  }
+
+  /** Changing the filter re-runs the search, reusing the stored fix. */
+  function onModesChange(modes: MeetingMode[]) {
+    settings.modes = modes;
+    if (loaded || error) void search(false);
   }
 </script>
 
@@ -69,6 +77,7 @@
     {/if}
   </p>
   <RangeSlider bind:value={range} min={MIN_SEARCH_RANGE} max={MAX_SEARCH_RANGE} label={t('SEARCHRANGESETTING')} oncommit={onRangeCommit} class="mt-2" />
+  <VenueFilter modes={settings.modes} onchange={onModesChange} class="mt-3" />
 </div>
 
 {#if error}
