@@ -23,6 +23,19 @@ function tomato(params: Record<string, string | number | undefined>): string {
   return `${TOMATO_ROOT}?${query({ ...params, callingApp: CALLING_APP })}`;
 }
 
+/**
+ * `venue_types[]` repeated once per value, appended to an already-built URL.
+ *
+ * `query()` cannot express a repeated key, and the comma-separated alternative
+ * is not merely inelegant — the aggregator accepts `venue_types=1,3` and then
+ * filters on `1` alone, silently dropping every hybrid meeting. This is the only
+ * form that filters on all the values given.
+ */
+function venueTypesQuery(values: readonly string[] | undefined): string {
+  if (!values?.length) return '';
+  return values.map((value) => `&venue_types[]=${encodeURIComponent(value)}`).join('');
+}
+
 function virtual(params: Record<string, string | number | undefined>): string {
   return `${VIRTUAL_ROOT}?${query({ ...params, callingApp: CALLING_APP })}`;
 }
@@ -36,7 +49,7 @@ function virtual(params: Record<string, string | number | undefined>): string {
  * `count` here: the Ionic build called the same value `radius` throughout, which
  * read as a distance in every call site that touched it.
  */
-export function nearestMeetings(lat: number, lng: number, count: number): Promise<RawMeeting[]> {
+export function nearestMeetings(lat: number, lng: number, count: number, venueTypes?: readonly string[]): Promise<RawMeeting[]> {
   return getJsonArray<RawMeeting>(
     tomato({
       switcher: 'GetSearchResults',
@@ -44,7 +57,7 @@ export function nearestMeetings(lat: number, lng: number, count: number): Promis
       long_val: lng,
       lat_val: lat,
       sort_keys: 'longitude,latitude'
-    })
+    }) + venueTypesQuery(venueTypes)
   );
 }
 
@@ -55,7 +68,7 @@ export function nearestMeetings(lat: number, lng: number, count: number): Promis
  * can match thousands of meetings, and the full records are fetched only for the
  * marker the reader actually taps.
  */
-export function meetingsWithinRadius(lat: number, lng: number, radiusKm: number): Promise<RawMeeting[]> {
+export function meetingsWithinRadius(lat: number, lng: number, radiusKm: number, venueTypes?: readonly string[]): Promise<RawMeeting[]> {
   return getJsonArray<RawMeeting>(
     tomato({
       switcher: 'GetSearchResults',
@@ -64,7 +77,7 @@ export function meetingsWithinRadius(lat: number, lng: number, radiusKm: number)
       long_val: lng,
       lat_val: lat,
       sort_keys: 'longitude,latitude'
-    })
+    }) + venueTypesQuery(venueTypes)
   );
 }
 
