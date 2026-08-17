@@ -65,7 +65,7 @@
   }
 </script>
 
-<div class="bg-surface flex min-h-dvh flex-col">
+<div class="app-shell bg-surface flex min-h-dvh flex-col">
   <main class="app-main flex-1">
     {@render children()}
   </main>

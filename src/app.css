@@ -127,6 +127,27 @@
   }
 }
 
+/*
+  Android renders the Google map in a native view *beneath* the entire webview
+  and shows it through the page, so every layer above the map must be
+  transparent or the map is simply hidden — it is drawing correctly, you just
+  cannot see it. The plugin's own README calls this out as the first thing to
+  check when the map is blank on Android.
+
+  Applied only while the map screen is mounted, and only on Android: the rest of
+  the app keeps its background, and iOS needs none of this because there the map
+  is rendered into the webview rather than behind it.
+
+  `!important` because these backgrounds come from Tailwind utilities in
+  @layer utilities, which otherwise win.
+*/
+html.map-underlay,
+html.map-underlay body,
+html.map-underlay .app-shell,
+html.map-underlay .app-main {
+  background-color: transparent !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -28,6 +28,7 @@
   import { i18n, t } from '$lib/i18n/index.svelte';
   import { currentPosition } from '$lib/location';
   import { mapKey } from '$lib/maps/keys';
+  import { platform } from '$lib/native';
   import { newSessionToken, placeLocation, suggestPlaces, type PlaceSuggestion, type PlacesSession } from '$lib/maps/places';
   import { buildMarkers, iconFor } from '$lib/maps/markers';
   import { loading } from '$lib/stores/loading.svelte';
@@ -89,8 +90,17 @@
   let canSearchArea = $state(false);
 
   onMount(() => {
+    // Android draws the native map *underneath* the webview, so the page above
+    // it has to be see-through or the map is invisible. Scoped to this screen so
+    // the rest of the app keeps its background, and to Android because iOS
+    // renders the map into the webview instead. See app.css.
+    const needsUnderlay = platform() === 'android';
+    if (needsUnderlay) document.documentElement.classList.add('map-underlay');
+
     void start();
+
     return () => {
+      if (needsUnderlay) document.documentElement.classList.remove('map-underlay');
       clearTimeout(idleTimer);
       void teardown();
     };
