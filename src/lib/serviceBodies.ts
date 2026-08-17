@@ -38,7 +38,8 @@ const ZONE_TYPE = 'ZF';
 export function buildServiceBodyTree(bodies: RawServiceBody[]): ServiceBodyNode[] {
   const nodes = new Map<string, ServiceBodyNode>();
   const parentOf = new Map<string, string>();
-  const zones = new Set<string>();
+  // id → name, so a promoted body can be labelled with the zone it came out of.
+  const zones = new Map<string, string>();
 
   for (const body of bodies) {
     if (!body?.id) continue;
@@ -46,13 +47,14 @@ export function buildServiceBodyTree(bodies: RawServiceBody[]): ServiceBodyNode[
     parentOf.set(id, String(body.parent_id ?? '0'));
     // Recorded as a parent so its children can be re-pointed, but never given a
     // node of its own.
-    if (body.type === ZONE_TYPE) zones.add(id);
+    if (body.type === ZONE_TYPE) zones.set(id, body.name ?? '');
     else nodes.set(id, { id, name: body.name ?? '', children: [] });
   }
 
   const roots: ServiceBodyNode[] = [];
   for (const [id, node] of nodes) {
-    const parentId = skipZones(id, parentOf, zones);
+    const { parentId, zone } = skipZones(id, parentOf, zones);
+    node.name = labelWithZone(node.name, zone);
     const parent = parentId === '0' ? undefined : nodes.get(parentId);
 
     if (!parent || parent === node || isAncestor(node.id, parentId, parentOf)) roots.push(node);
@@ -64,21 +66,49 @@ export function buildServiceBodyTree(bodies: RawServiceBody[]): ServiceBodyNode[
 }
 
 /**
- * The nearest ancestor that is not a zone, as an id, or `'0'` for the root.
+ * Name a promoted body after the zone it was lifted out of.
+ *
+ * Flattening costs a region its context, and some regions are named only in
+ * relation to their zone: the Iran Zone contains "Region 1" and "Region 3",
+ * which say nothing at all once they are sitting between Buckeye Region and
+ * Ontario Region. Appending the zone restores what the nesting used to convey
+ * without putting the level back.
+ *
+ * Skipped when the name already carries the zone, so a "CANA Region" inside CANA
+ * does not become "CANA Region (CANA)".
+ */
+function labelWithZone(name: string, zone: string): string {
+  if (!zone || !name) return name;
+  // Whole words, not a substring. Zone names are short acronyms, and a plain
+  // `includes` sees "CANA" inside "Canada Atlantic Region" — leaving that one
+  // bare while its four siblings all gained "(CANA)". Escaped because real names
+  // carry brackets, e.g. "Région de Québec [CSRQ]".
+  const escaped = zone.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (new RegExp(`\\b${escaped}\\b`, 'i').test(name)) return name;
+  return `${name} (${zone})`;
+}
+
+/**
+ * The nearest ancestor that is not a zone, plus the zone that was skipped to
+ * reach it. `parentId` is `'0'` for the root, and `zone` is empty when nothing
+ * was skipped.
  *
  * Walks rather than checking a single level, so a zone nested inside another
- * zone still collapses. The `seen` guard is the same defence as `isAncestor`:
- * malformed data that loops must terminate rather than hang the app.
+ * zone still collapses; the *nearest* zone is the one reported, since that is
+ * the context the reader lost. The `seen` guard is the same defence as
+ * `isAncestor`: malformed data that loops must terminate rather than hang.
  */
-function skipZones(id: string, parentOf: Map<string, string>, zones: Set<string>): string {
+function skipZones(id: string, parentOf: Map<string, string>, zones: Map<string, string>): { parentId: string; zone: string } {
   let current = parentOf.get(id) ?? '0';
+  let zone = '';
   const seen = new Set<string>([id]);
   while (current !== '0' && zones.has(current)) {
-    if (seen.has(current)) return '0';
+    if (!zone) zone = zones.get(current) ?? '';
+    if (seen.has(current)) return { parentId: '0', zone };
     seen.add(current);
     current = parentOf.get(current) ?? '0';
   }
-  return current;
+  return { parentId: current, zone };
 }
 
 /**

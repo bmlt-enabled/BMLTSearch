@@ -65,34 +65,36 @@ describe('zonal forums are flattened away', () => {
    * on the aggregator 43 regions are top-level while 73 more hide one tap down
    * behind a zone, with nothing to tell the reader which is which.
    */
-  it('promotes a zone’s regions to the top level and drops the zone', () => {
+  it('promotes a zone\u2019s regions to the top level and drops the zone', () => {
     const tree = buildServiceBodyTree([zone('1', '0', 'Southeastern Zonal Forum'), body('2', '1', 'Carolina Region'), body('3', '1', 'Florida Region'), body('4', '0', 'Buckeye Region')]);
-    expect(tree.map((node) => node.name)).toEqual(['Buckeye Region', 'Carolina Region', 'Florida Region']);
+    expect(tree.map((node) => node.name)).toEqual(['Buckeye Region', 'Carolina Region (Southeastern Zonal Forum)', 'Florida Region (Southeastern Zonal Forum)']);
   });
 
   it('keeps what hangs beneath a promoted region', () => {
     const tree = buildServiceBodyTree([zone('1', '0', 'Zone'), body('2', '1', 'Region'), body('3', '2', 'Area'), body('4', '3', 'Group')]);
     expect(tree).toHaveLength(1);
-    expect(tree[0].name).toBe('Region');
+    expect(tree[0].name).toBe('Region (Zone)');
+    // Only the promoted body is relabelled — its descendants never lost context.
+    expect(tree[0].children[0].name).toBe('Area');
     expect(tree[0].children[0].children[0].name).toBe('Group');
   });
 
-  it('collapses a zone nested inside another zone', () => {
+  it('collapses a zone nested inside another zone, naming the nearest', () => {
     const tree = buildServiceBodyTree([zone('1', '0', 'Outer'), zone('2', '1', 'Inner'), body('3', '2', 'Region')]);
-    expect(tree.map((node) => node.name)).toEqual(['Region']);
+    expect(tree.map((node) => node.name)).toEqual(['Region (Inner)']);
   });
 
-  it('drops meetings-bearing zones too — that is bad server data, not a shape to preserve', () => {
+  it('drops meetings-bearing zones too \u2014 that is bad server data, not a shape to preserve', () => {
     // ABNA, Plains State and CANA each carry meetings directly on the
     // aggregator. Meetings belong to regions and areas; the tree does not bend
     // around 21 misfiled records.
     const tree = buildServiceBodyTree([zone('1', '0', 'CANA'), body('2', '1', 'Region')]);
-    expect(tree.map((node) => node.name)).toEqual(['Region']);
+    expect(tree.map((node) => node.name)).toEqual(['Region (CANA)']);
   });
 
   it('does not hang when a zone is its own parent', () => {
     const tree = buildServiceBodyTree([zone('1', '1', 'Loop'), body('2', '1', 'Region')]);
-    expect(tree.map((node) => node.name)).toEqual(['Region']);
+    expect(tree.map((node) => node.name)).toEqual(['Region (Loop)']);
   });
 
   it('leaves every other body type alone', () => {
@@ -100,6 +102,53 @@ describe('zonal forums are flattened away', () => {
     // missing from the response must stay — that is the orphan rescue.
     const tree = buildServiceBodyTree([body('1', '404', 'Orphan Area', 'AS'), body('2', '0', 'Region', 'RS')]);
     expect(tree.map((node) => node.name)).toEqual(['Orphan Area', 'Region']);
+  });
+});
+
+describe('promoted bodies are labelled with the zone they came from', () => {
+  /**
+   * Flattening costs a region its context, and some are named only in relation
+   * to their zone. The Iran Zone holds "Region 1" and "Region 3", which say
+   * nothing once they sit between Buckeye Region and Ontario Region — the exact
+   * confusion this reported: the promoted regions read as unnamed areas.
+   */
+  it('names a region that would otherwise be meaningless', () => {
+    const tree = buildServiceBodyTree([zone('1', '0', 'Iran Zone'), body('2', '1', 'Region 1'), body('3', '1', 'Region 3')]);
+    expect(tree.map((node) => node.name)).toEqual(['Region 1 (Iran Zone)', 'Region 3 (Iran Zone)']);
+  });
+
+  it('does not repeat a zone the name already carries', () => {
+    const tree = buildServiceBodyTree([zone('1', '0', 'CANA'), body('2', '1', 'CANA Atlantic Region')]);
+    expect(tree.map((node) => node.name)).toEqual(['CANA Atlantic Region']);
+  });
+
+  it('matches whole words only, so CANA does not hide inside Canada', () => {
+    // The real case: CANA's five regions include "Canada Atlantic Region". A
+    // substring check left that one bare while its four siblings were labelled.
+    const tree = buildServiceBodyTree([zone('1', '0', 'CANA'), body('2', '1', 'Canada Atlantic Region'), body('3', '1', 'Ontario Region')]);
+    expect(tree.map((node) => node.name)).toEqual(['Canada Atlantic Region (CANA)', 'Ontario Region (CANA)']);
+  });
+
+  it('handles a zone name containing regex characters', () => {
+    // Real name from the aggregator: "Région de Québec [CSRQ]".
+    const tree = buildServiceBodyTree([zone('1', '0', 'Zone [X]'), body('2', '1', 'Region')]);
+    expect(tree.map((node) => node.name)).toEqual(['Region (Zone [X])']);
+  });
+
+  it('matches the existing name case-insensitively', () => {
+    const tree = buildServiceBodyTree([zone('1', '0', 'cana'), body('2', '1', 'CANA Atlantic Region')]);
+    expect(tree.map((node) => node.name)).toEqual(['CANA Atlantic Region']);
+  });
+
+  it('leaves a body that was never under a zone untouched', () => {
+    const tree = buildServiceBodyTree([body('1', '0', 'Buckeye Region'), body('2', '1', 'WAGS Area', 'AS')]);
+    expect(tree[0].name).toBe('Buckeye Region');
+    expect(tree[0].children[0].name).toBe('WAGS Area');
+  });
+
+  it('survives a zone with no name', () => {
+    const tree = buildServiceBodyTree([zone('1', '0', ''), body('2', '1', 'Region')]);
+    expect(tree.map((node) => node.name)).toEqual(['Region']);
   });
 });
 
