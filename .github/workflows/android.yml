@@ -1,0 +1,108 @@
+name: Android APK
+
+# Manual or tag-triggered, matching the iOS workflow. Ubuntu runners are cheap
+# (no 10x macOS multiplier), so this could run on every push — it does not,
+# because a build worth installing should be a deliberate act, and `ci.yml`
+# already proves the web bundle compiles on every push.
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Signed release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      # AGP 8.13 requires JDK 17+; 21 is the current LTS and what the project
+      # builds against locally.
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The Maps keys are inlined into the web bundle at build time. All three
+      # are passed even when empty; an unset key degrades to an empty string.
+      - name: Build web bundle
+        env:
+          PUBLIC_GOOGLE_MAPS_KEY_WEB: ${{ secrets.GOOGLE_MAPS_KEY_WEB }}
+          PUBLIC_GOOGLE_MAPS_KEY_IOS: ${{ secrets.GOOGLE_MAPS_KEY_IOS }}
+          PUBLIC_GOOGLE_MAPS_KEY_ANDROID: ${{ secrets.GOOGLE_MAPS_KEY_ANDROID }}
+          PUBLIC_GOOGLE_MAPS_ANDROID_CERT_SHA1: ${{ secrets.GOOGLE_MAPS_ANDROID_CERT_SHA1 }}
+        run: npm run build
+
+      - name: Sync Capacitor Android
+        run: npx cap sync android
+
+      # Written outside the workspace so it cannot be picked up by a later step
+      # or swept into an artifact, and deleted in an always() step at the end.
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is not set — the APK would be unsigned and uninstallable."
+            exit 1
+          fi
+          echo -n "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/upload-keystore.jks"
+
+      # The Maps SDK for Android reads its key from the merged manifest, not from
+      # the apiKey passed to GoogleMap.create(), so Gradle needs it separately —
+      # and the key is restricted to this package *and* this keystore's SHA-1, so
+      # signing with anything else yields a blank map.
+      - name: Assemble release APK
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/upload-keystore.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          GOOGLE_MAPS_KEY_ANDROID: ${{ secrets.GOOGLE_MAPS_KEY_ANDROID }}
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
+
+      # An unsigned APK still builds and would upload happily, then fail to
+      # install with no useful message. Fail here instead, and record which
+      # certificate signed it so a blank map can be traced back to a SHA-1 that
+      # is not on the Maps key.
+      - name: Verify signature
+        run: |
+          set -euo pipefail
+          APK=$(find android/app/build/outputs/apk/release -name '*.apk' | head -1)
+          test -n "$APK" || { echo "::error::No APK produced"; exit 1; }
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -1)
+          "$APKSIGNER" verify --print-certs "$APK"
+          echo "APK_PATH=$APK" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bmlt-search-apk-${{ github.run_number }}
+          path: ${{ env.APK_PATH }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Clean up keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload-keystore.jks"

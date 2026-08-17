@@ -16,9 +16,43 @@ if (!googleMapsKey && localProperties.exists()) {
     googleMapsKey = props.getProperty('googleMapsKeyAndroid', '')
 }
 
+// Release signing, supplied entirely from the environment.
+//
+// The keystore itself never enters the repository — CI decodes it from a secret
+// into a temporary file and points ANDROID_KEYSTORE_PATH at it. When these are
+// absent (any ordinary checkout) `signingConfigs.release` is simply not created
+// and a release build comes out unsigned, which still compiles and still proves
+// the project builds.
+//
+// This matters beyond signing: the Android Maps key is restricted to the package
+// name *and* the signing certificate's SHA-1, so an APK signed with a different
+// key gets a blank map. Keeping one keystore is what keeps that restriction
+// usable. See PUBLIC_GOOGLE_MAPS_ANDROID_CERT_SHA1 in .env.example.
+// Names are deliberately prefixed. Inside a `signingConfigs.release { }` block
+// Groovy resolves bare `keyAlias` / `keyPassword` to the signing config's own
+// properties rather than to variables declared out here, so unprefixed names
+// silently read null and the build fails with "missing required property".
+def signingStorePath = System.getenv('ANDROID_KEYSTORE_PATH')
+def signingStorePassword = System.getenv('ANDROID_KEYSTORE_PASSWORD')
+def signingKeyAlias = System.getenv('ANDROID_KEY_ALIAS') ?: 'upload'
+def signingKeyPassword = System.getenv('ANDROID_KEY_PASSWORD') ?: signingStorePassword
+def hasSigning = signingStorePath && file(signingStorePath).exists() && signingStorePassword
+
 android {
     namespace = "app.bmlt.search"
     compileSdk = rootProject.ext.compileSdkVersion
+
+    if (hasSigning) {
+        signingConfigs {
+            release {
+                storeFile file(signingStorePath)
+                storePassword signingStorePassword
+                keyAlias signingKeyAlias
+                keyPassword signingKeyPassword
+            }
+        }
+    }
+
     defaultConfig {
         applicationId "app.bmlt.search"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -37,6 +71,9 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (hasSigning) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }

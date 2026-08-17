@@ -259,6 +259,13 @@ this repository on every push to `main`. The project is declared in
 environment variables. `.github/workflows/ci.yml` only lints, type-checks,
 tests, and proves the build compiles — it does not deploy.
 
+**Android** — `.github/workflows/android.yml`, triggered by hand or by a `v*`
+tag. Produces a signed release APK as a downloadable artifact, for sideloading;
+there is no Play Store listing. The keystore lives outside the repo and reaches
+CI as `ANDROID_KEYSTORE_BASE64`. Its SHA-1 must be registered on the Android
+Maps key, because that key is restricted to the package name _and_ the signing
+certificate — an APK signed with any other key shows a blank map.
+
 **iOS** — `.github/workflows/ios-testflight.yml`, triggered by hand or by a `v*`
 tag. Archives, exports, and uploads to TestFlight. It is deliberately not on
 every push: macOS runners bill at a 10× multiplier, and every upload creates a
