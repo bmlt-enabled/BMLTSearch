@@ -89,9 +89,6 @@ export interface Meeting extends RawMeeting {
  */
 export type MeetingKind = 'in-person' | 'virtual' | 'hybrid' | 'temp-closed' | 'temp-virtual';
 
-/** Which root server a list came from. They differ in how formats resolve. */
-export type MeetingSource = 'tomato' | 'virtual';
-
 /** A service body (region, area, group) from `GetServiceBodies`. */
 export interface RawServiceBody {
   id: string;

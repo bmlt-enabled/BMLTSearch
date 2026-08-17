@@ -83,5 +83,5 @@
 {#if error}
   <ErrorState message={error} onretry={() => search(true)} />
 {:else if loaded}
-  <MeetingList {meetings} source="tomato" />
+  <MeetingList {meetings} />
 {/if}

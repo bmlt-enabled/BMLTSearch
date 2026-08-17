@@ -32,8 +32,4 @@
       </span>
     </button>
   {/each}
-
-  <p class="text-text-muted px-1 pt-2 text-xs leading-relaxed">
-    {t('VIRTUAL_NA')}
-  </p>
 </div>

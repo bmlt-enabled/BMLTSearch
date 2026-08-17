@@ -1,10 +1,10 @@
 <script lang="ts">
   import { SvelteSet } from 'svelte/reactivity';
-  import { tomatoFormatNames, virtualFormatNames } from '$lib/api/formats';
+  import { aggregatorFormatNames } from '$lib/api/formats';
   import { i18n, t } from '$lib/i18n/index.svelte';
   import { ALL_DAYS, decorateMeetings, filterMeetings, groupByDay, isToday, WEEKDAY_KEYS } from '$lib/meetings/list';
   import { format12Hour } from '$lib/meetings/time';
-  import type { MeetingSource, RawMeeting } from '$lib/types';
+  import type { RawMeeting } from '$lib/types';
   import Disclosure from './Disclosure.svelte';
   import HourRange from './HourRange.svelte';
   import MeetingCard from './MeetingCard.svelte';
@@ -12,12 +12,11 @@
 
   interface Props {
     meetings: RawMeeting[];
-    source: MeetingSource;
     /** Skip the filter bar and open every day — used inside the map's detail sheet. */
     expandAll?: boolean;
   }
 
-  let { meetings, source, expandAll = false }: Props = $props();
+  let { meetings, expandAll = false }: Props = $props();
 
   let selectedDay = $state<number>(ALL_DAYS);
   let fromHour = $state(0);
@@ -32,11 +31,10 @@
 
   $effect(() => {
     const raw = meetings;
-    const from = source;
     const language = i18n.locale;
 
     let cancelled = false;
-    const load = from === 'tomato' ? tomatoFormatNames(raw, language) : virtualFormatNames();
+    const load = aggregatorFormatNames(raw, language);
     void load
       .then((names) => {
         if (!cancelled) formatNames = names;
@@ -50,7 +48,7 @@
     };
   });
 
-  const decorated = $derived(decorateMeetings(meetings, formatNames, source));
+  const decorated = $derived(decorateMeetings(meetings, formatNames));
   const visible = $derived(filterMeetings(decorated, { weekday: selectedDay, fromHour, toHour }));
   const groups = $derived(groupByDay(visible));
 
@@ -124,7 +122,7 @@
       {/snippet}
       <div class="space-y-2 p-2">
         {#each group.meetings as meeting (meeting.id_bigint)}
-          <MeetingCard {meeting} {source} />
+          <MeetingCard {meeting} />
         {/each}
       </div>
     </Disclosure>

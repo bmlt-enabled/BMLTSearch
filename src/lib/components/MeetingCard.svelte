@@ -6,14 +6,13 @@
   import { WEEKDAY_COLORS, WEEKDAY_KEYS, weekdayOf } from '$lib/meetings/list';
   import { sharePayload } from '$lib/meetings/share';
   import { canShare, dial, openDirections, openExternal, share } from '$lib/native';
-  import type { Meeting, MeetingSource } from '$lib/types';
+  import type { Meeting } from '$lib/types';
 
   interface Props {
     meeting: Meeting;
-    source: MeetingSource;
   }
 
-  let { meeting, source }: Props = $props();
+  let { meeting }: Props = $props();
 
   let shareable = $state(false);
   $effect(() => {
@@ -25,10 +24,10 @@
   const weekdayColor = $derived(WEEKDAY_COLORS[weekday - 1]);
   /**
    * Location lines are shown for every kind of meeting, not just the ones you
-   * can travel to. On the Virtual NA root these fields are often the only
-   * human description a meeting has — "Broadcast Speaker Tapes", "Reunião
-   * Corujão", the hosting region — and suppressing them because the meeting is
-   * online leaves a card with nothing but a name. What is gated on kind is the
+   * can travel to. On an online meeting these fields are often the only human
+   * description it has — the hosting region, a venue name kept from before the
+   * group moved online — and suppressing them because the meeting is virtual
+   * leaves a card with nothing but a name. What is gated on kind is the
    * Directions button, which is the part that could actually mislead someone.
    */
   const lines = $derived(addressLines(meeting));
@@ -49,18 +48,13 @@
   });
 
   /**
-   * Virtual NA meetings sometimes carry their join URL in `comments` rather than
-   * in `virtual_meeting_link`. The Ionic build rendered that field as a button
-   * unconditionally, so a group that used `comments` for actual prose got a
-   * "Virtual Link" button that opened nothing. Only offer it when it really is a
-   * link; otherwise it falls through to being displayed as the note it is.
+   * Comments are prose, never a link. Virtual NA groups sometimes stashed a join
+   * URL here and the Ionic build rendered it as a button unconditionally, so a
+   * group using the field for actual prose got a "Virtual Link" that opened
+   * nothing. That root is no longer queried; the aggregator has
+   * `virtual_meeting_link` for the URL.
    */
-  const commentsUrl = $derived.by(() => {
-    if (source !== 'virtual') return '';
-    const value = meeting.comments?.trim() ?? '';
-    return /^https?:\/\/\S+$/i.test(value) ? value : '';
-  });
-  const commentsText = $derived(commentsUrl ? '' : (meeting.comments?.trim() ?? ''));
+  const commentsText = $derived(meeting.comments?.trim() ?? '');
 
   const timeRange = $derived([meeting.startsAtLabel, meeting.endsAtLabel].filter(Boolean).join(' - '));
 
@@ -149,15 +143,6 @@
           type="button"
           class="focusable bg-bmlt hover:bg-bmlt-shade flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors"
           onclick={() => openExternal(meeting.virtual_meeting_link!)}
-        >
-          <Cloud size={18} aria-hidden="true" />
-          {t('VIRTUAL_LINK')}
-        </button>
-      {:else if commentsUrl}
-        <button
-          type="button"
-          class="focusable bg-bmlt hover:bg-bmlt-shade flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors"
-          onclick={() => openExternal(commentsUrl)}
         >
           <Cloud size={18} aria-hidden="true" />
           {t('VIRTUAL_LINK')}

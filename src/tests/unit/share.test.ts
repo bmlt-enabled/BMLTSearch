@@ -16,8 +16,7 @@ function decorate(raw: Partial<RawMeeting>): Meeting {
         ...raw
       }
     ],
-    new Map(),
-    'tomato'
+    new Map()
   )[0];
 }
 

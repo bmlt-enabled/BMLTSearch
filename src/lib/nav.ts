@@ -1,4 +1,4 @@
-import { Globe, HelpCircle, Home, Info, List, Map, Search, Settings } from '@lucide/svelte';
+import { HelpCircle, Home, Info, List, Map, Search, Settings } from '@lucide/svelte';
 import type { Component } from 'svelte';
 import { resolve } from '$app/paths';
 
@@ -21,7 +21,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { href: resolve('/map-search'), labelKey: 'MAP_SEARCH', icon: Map },
   { href: resolve('/location-search'), labelKey: 'LOCATIONSEARCH', icon: Search },
   { href: resolve('/listfull'), labelKey: 'LISTFULL', icon: List },
-  { href: resolve('/virtual'), labelKey: 'VIRTUAL_MEETINGS', icon: Globe },
   { href: resolve('/do-i-have-the-bmlt'), labelKey: 'DOIHAVETHEBMLT', icon: HelpCircle },
   { href: resolve('/contact'), labelKey: 'CONTACT', icon: Info }
 ];
@@ -37,5 +36,7 @@ export const BOTTOM_NAV: readonly NavItem[] = [
   { href: resolve('/location-search'), labelKey: 'LOCATIONSEARCH', icon: Search },
   { href: resolve('/map-search'), labelKey: 'MAP_SEARCH', icon: Map },
   { href: resolve('/listfull'), labelKey: 'LISTFULL', icon: List },
-  { href: resolve('/virtual'), labelKey: 'VIRTUAL_MEETINGS', icon: Globe }
+  // Fourth so the bar divides evenly. It took the slot the Virtual NA tab left
+  // behind when that root server was dropped.
+  { href: resolve('/contact'), labelKey: 'CONTACT', icon: Info }
 ];

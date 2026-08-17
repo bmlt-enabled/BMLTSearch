@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { meetingsByServiceBody, tomatoServiceBodies } from '$lib/api/bmlt';
+  import { meetingsByServiceBody, aggregatorServiceBodies } from '$lib/api/bmlt';
   import AppBar from '$lib/components/AppBar.svelte';
   import ErrorState from '$lib/components/ErrorState.svelte';
   import MeetingList from '$lib/components/MeetingList.svelte';
@@ -21,7 +21,7 @@
   async function loadTree() {
     error = '';
     try {
-      const bodies = await loading.during(t('FINDING_MTGS'), tomatoServiceBodies);
+      const bodies = await loading.during(t('FINDING_MTGS'), aggregatorServiceBodies);
       tree = buildServiceBodyTree(bodies);
     } catch {
       error = t('LOAD_ERROR');
@@ -46,9 +46,9 @@
 {#if error}
   <ErrorState message={error} onretry={() => (selected ? open(selected) : loadTree())} />
 {:else if selected}
-  <MeetingList {meetings} source="tomato" />
+  <MeetingList {meetings} />
 {:else}
   <div class="p-3">
-    <ServiceBodyTree nodes={tree} onselect={open} source="tomato" />
+    <ServiceBodyTree nodes={tree} onselect={open} />
   </div>
 {/if}
