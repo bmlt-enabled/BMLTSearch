@@ -39,6 +39,10 @@
   --border: #d3dae3;
   --text: #14202b;
   --text-muted: #5b6b7c;
+  /* Brand blue as *text on a surface*, which the fixed --color-bmlt cannot be:
+     at #0a61ad it scores 2.5:1 on the dark surface, well under AA's 4.5. This
+     flips with the theme so a blue label stays readable in both. */
+  --brand-ink: #2371b5;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -49,6 +53,7 @@
     --border: #2c3641;
     --text: #e8edf3;
     --text-muted: #97a6b6;
+    --brand-ink: #7cc0f5;
   }
 }
 
@@ -59,6 +64,7 @@
   --color-border: var(--border);
   --color-text: var(--text);
   --color-text-muted: var(--text-muted);
+  --color-brand-ink: var(--brand-ink);
 }
 
 @layer base {

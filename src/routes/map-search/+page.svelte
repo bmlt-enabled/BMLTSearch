@@ -15,7 +15,7 @@
    * nothing elsewhere.
    */
   import { GoogleMap, type GoogleMap as GoogleMapType } from '@capacitor/google-maps';
-  import { Search, X } from '@lucide/svelte';
+  import { RotateCw, Search, X } from '@lucide/svelte';
   import { onMount } from 'svelte';
   import { meetingsByIds, meetingsWithinRadius } from '$lib/api/bmlt';
   import { forwardGeocode } from '$lib/api/geocode';
@@ -472,15 +472,23 @@
     per camera idle rebuilt the markers underneath the reader — including when
     tapping a pin near the edge made Google recentre the map by itself.
 
-    Sits at top-14 rather than top-3 to clear Google's own Map/Satellite control,
-    which occupies the top left and otherwise collides with it on a narrow screen.
+    Styled as a floating white pill rather than a solid brand-blue one: it sits
+    on top of a photographic surface, and a bordered light chip is what reads as
+    controls-above-a-map. Google's own "search this area" does the same.
+
+    `top-8` is as high as it can safely go. On the web the JS SDK draws its
+    Map/Satellite control at the top left, roughly 10-50px down, and a centred
+    pill any higher overlaps it on a narrow screen. Native has no such control,
+    so this is a web-only ceiling — if the toggle is ever turned off, this can
+    move to top-3.
   -->
   {#if canSearchArea && suggestions.length === 0}
     <button
       type="button"
-      class="focusable bg-bmlt hover:bg-bmlt-shade absolute top-14 left-1/2 z-20 -translate-x-1/2 rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-colors"
+      class="focusable bg-surface-raised text-brand-ink ring-border hover:bg-surface-sunken absolute top-8 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full px-5 py-3 text-[15px] font-semibold shadow-lg ring-1 transition-colors"
       onclick={searchThisArea}
     >
+      <RotateCw size={16} aria-hidden="true" />
       {t('SEARCH_AREA')}
     </button>
   {/if}

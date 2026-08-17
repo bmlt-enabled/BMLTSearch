@@ -40,7 +40,7 @@
       {#each NAV_ITEMS as item (item.href)}
         {@const Icon = item.icon}
         {@const active = isActive(item.href)}
-        <li>
+        <li class:border-border={item.dividerBefore} class:mt-2={item.dividerBefore} class:border-t={item.dividerBefore} class:pt-2={item.dividerBefore}>
           <!-- eslint-disable svelte/no-navigation-without-resolve -- every href in NAV_ITEMS is already built with resolve() in $lib/nav.ts; the rule only recognises a literal resolve() at the call site. -->
           <a
             href={item.href}
