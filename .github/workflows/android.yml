@@ -1,4 +1,4 @@
-name: Android APK
+name: Android build
 
 # Manual or tag-triggered, matching the iOS workflow. Ubuntu runners are cheap
 # (no 10x macOS multiplier), so this could run on every push — it does not,
@@ -19,16 +19,16 @@ permissions:
 
 jobs:
   build:
-    name: Signed release APK
+    name: Signed APK and AAB
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
       # AGP 8.13 requires JDK 17+; 21 is the current LTS and what the project
@@ -38,7 +38,7 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - uses: gradle/actions/setup-gradle@v5
+      - uses: gradle/actions/setup-gradle@v6
 
       - name: Install dependencies
         run: npm ci
@@ -69,11 +69,16 @@ jobs:
           fi
           echo -n "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/upload-keystore.jks"
 
-      # The Maps SDK for Android reads its key from the merged manifest, not from
-      # the apiKey passed to GoogleMap.create(), so Gradle needs it separately —
-      # and the key is restricted to this package *and* this keystore's SHA-1, so
-      # signing with anything else yields a blank map.
-      - name: Assemble release APK
+      # Two artifacts on purpose: the APK is what you sideload to test, the AAB
+      # is the only format Play accepts for a new app.
+      #
+      # GOOGLE_MAPS_KEY_ANDROID is passed to Gradle separately from the web
+      # bundle's keys because the Maps SDK for Android reads its key from the
+      # merged manifest, not from the apiKey handed to GoogleMap.create(). That
+      # key is restricted to this package *and* this keystore's SHA-1, so
+      # anything signed with a different key shows a blank map — which is why the
+      # AAB needs care: see the Play App Signing note in the README.
+      - name: Assemble release APK and AAB
         env:
           ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/upload-keystore.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -81,7 +86,7 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           GOOGLE_MAPS_KEY_ANDROID: ${{ secrets.GOOGLE_MAPS_KEY_ANDROID }}
         working-directory: android
-        run: ./gradlew assembleRelease --no-daemon
+        run: ./gradlew assembleRelease bundleRelease --no-daemon
 
       # An unsigned APK still builds and would upload happily, then fail to
       # install with no useful message. Fail here instead, and record which
@@ -94,12 +99,13 @@ jobs:
           test -n "$APK" || { echo "::error::No APK produced"; exit 1; }
           APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -1)
           "$APKSIGNER" verify --print-certs "$APK"
-          echo "APK_PATH=$APK" >> "$GITHUB_ENV"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
-          name: bmlt-search-apk-${{ github.run_number }}
-          path: ${{ env.APK_PATH }}
+          name: bmlt-search-${{ github.run_number }}
+          path: |
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
           retention-days: 14
 
