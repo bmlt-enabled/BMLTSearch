@@ -1,8 +1,9 @@
 # AGENTS.md
 
-Guidance for AI agents working in this repository. [README.md](README.md) covers
-what the project is and how to run it; this file covers the things that are easy
-to get wrong, and why they are the way they are.
+Guidance for AI agents working in this repository. [README.md](README.md) is the
+front door and [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) covers setup,
+commands, architecture, and the Google Maps key model; this file covers the
+things that are easy to get wrong, and why they are the way they are.
 
 ## Stack
 
@@ -10,9 +11,11 @@ SvelteKit 2 / Svelte 5 (runes) / Tailwind 4 / Capacitor 8 / Vitest. TypeScript
 strict. No component library — every UI primitive in `src/lib/components/` is
 hand-written.
 
-A rewrite of the Ionic + Angular BMLTSearch3. Before porting behaviour across,
-read the "What was fixed" list in the README: a fair amount of the original's
-behaviour was a bug, and reproducing it is not the goal.
+A rewrite of the Ionic + Angular BMLTSearch3. Where this app deliberately
+diverges from the original, the tests say so — several assert the specific bug
+they replaced. Matching the old behaviour is not itself a goal; if you are about
+to port something across, check whether a test already pins the corrected
+version.
 
 ## Before you say it works
 

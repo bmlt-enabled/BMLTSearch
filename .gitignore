@@ -1,5 +1,8 @@
 node_modules
 
+# Temp
+CHANGELOG.md
+
 # Output
 .output
 .vercel
