@@ -49,6 +49,6 @@
   <MeetingList {meetings} source="tomato" />
 {:else}
   <div class="p-3">
-    <ServiceBodyTree nodes={tree} onselect={open} />
+    <ServiceBodyTree nodes={tree} onselect={open} source="tomato" />
   </div>
 {/if}
