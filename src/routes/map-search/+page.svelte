@@ -75,6 +75,16 @@
   let searchSequence = 0;
   /** Set while we move the camera ourselves, so it does not trigger a search. */
   let programmaticMove = false;
+  /**
+   * Overrides the above for one move.
+   *
+   * Not every camera move we make is the same. Recentring after a marker tap
+   * must stay silent; going to a place the reader picked, or to their location
+   * once the fix lands, must produce results. Without this distinction a chosen
+   * place moved the map and then sat there showing the previous area's pins
+   * until you nudged it by hand.
+   */
+  let searchAfterMove = false;
 
   /**
    * True once the native map has emitted an event, which is the only reliable
@@ -147,6 +157,10 @@
     try {
       const fix = await currentPosition(6000);
       settings.setLocation({ ...fix, address: '' });
+      // Otherwise the map slides to the reader's location while the pins stay
+      // where the fallback centre was.
+      searchedCentre = null;
+      searchAfterMove = true;
       await moveCamera({ coordinate: fix, zoom: 11 });
     } catch {
       // No fix: the fallback view stands, and the reader can search or pan.
@@ -208,10 +222,11 @@
       // main-queue turn, so a camera call in that window hits a nil map view.
       markReady();
 
-      if (programmaticMove) {
-        programmaticMove = false;
-        return;
-      }
+      const wasProgrammatic = programmaticMove;
+      programmaticMove = false;
+      if (wasProgrammatic && !searchAfterMove) return;
+      searchAfterMove = false;
+
       clearTimeout(idleTimer);
       idleTimer = setTimeout(() => void onCameraIdle(event), IDLE_DEBOUNCE_MS);
     });
@@ -390,6 +405,7 @@
 
       // Jumping somewhere new should search there, not wait to be asked.
       searchedCentre = null;
+      searchAfterMove = true;
 
       // A new session token per completed search is what keeps Places billing
       // on the per-session rate rather than per-keystroke.
