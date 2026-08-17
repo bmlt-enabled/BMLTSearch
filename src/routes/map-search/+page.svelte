@@ -1,5 +1,20 @@
 <script lang="ts">
-  import type { GoogleMap as GoogleMapType } from '@capacitor/google-maps';
+  /**
+   * Imported eagerly, not with a dynamic import inside createMap().
+   *
+   * Importing the module is what runs `customElements.define('capacitor-google-map', …)`,
+   * and the element's connectedCallback is what applies `overflow: scroll` plus a
+   * 200%-height child — the two things that make WebKit materialise the
+   * WKChildScrollView the iOS plugin hunts for in the native view tree.
+   *
+   * Defined late, the element gets inserted as an unknown element and is only
+   * upgraded once the import resolves, so `create()` ran before WebKit had a
+   * layout pass to build that scroll view: no match, blank map. The second visit
+   * worked because by then the element was already defined and its scroll view
+   * already existed. This route is its own chunk, so importing here costs
+   * nothing elsewhere.
+   */
+  import { GoogleMap, type GoogleMap as GoogleMapType } from '@capacitor/google-maps';
   import { Search, X } from '@lucide/svelte';
   import { onMount } from 'svelte';
   import { meetingsByIds, meetingsWithinRadius } from '$lib/api/bmlt';
@@ -30,12 +45,6 @@
 
   /** Camera-idle fires repeatedly through a fling; only the last one matters. */
   const IDLE_DEBOUNCE_MS = 400;
-
-  /**
-   * How long to give a freshly created map to prove it rendered. A real map
-   * emits its first camera-idle well inside this; a stillborn one never will.
-   */
-  const MAP_RENDER_TIMEOUT_MS = 2000;
 
   let map: GoogleMapType | null = null;
   let mapElement = $state<HTMLElement | null>(null);
@@ -71,8 +80,6 @@
    */
   let mapReady = false;
   let pendingCamera: { coordinate?: LatLng; zoom?: number } | null = null;
-  /** Resolves the create-and-verify wait as soon as the map proves itself. */
-  let readyWaiter: (() => void) | null = null;
 
   /** Where the currently drawn markers were searched from. */
   let searchedCentre: LatLng | null = null;
@@ -92,7 +99,6 @@
     map = null;
     mapReady = false;
     pendingCamera = null;
-    readyWaiter = null;
     if (!instance) return;
     try {
       await instance.removeAllMapListeners();
@@ -116,71 +122,13 @@
       // Open immediately at the last known position, or the fallback. Waiting on
       // a device fix first meant the very first visit showed nothing at all until
       // the permission prompt was answered.
-      const centre = settings.location ? { lat: settings.location.lat, lng: settings.location.lng } : FALLBACK_CENTRE;
-      if (!(await createMapUntilItRenders(centre))) {
-        error = t('LOAD_ERROR');
-        return;
-      }
+      await createMap(settings.location ? { lat: settings.location.lat, lng: settings.location.lng } : FALLBACK_CENTRE);
 
       // Then refine, without blocking the map appearing.
       if (!settings.location) void locateAndRecentre();
     } catch {
       error = t('LOAD_ERROR');
     }
-  }
-
-  /**
-   * Create the map, and if it does not actually appear, throw it away and try
-   * again.
-   *
-   * On a cold start the very first attempt reliably produced a blank map, while
-   * leaving the page and returning fixed it. That second visit is really just a
-   * retry, so the app does the retry itself rather than asking someone to
-   * discover the workaround.
-   *
-   * The reason a retry is needed at all is in the plugin. `render()` hops onto
-   * the main queue *after* `create()` has already resolved back to JS, and there
-   * it locates its target by matching the element's measured size:
-   *
-   *     self.targetViewController = self.getTargetContainer(refWidth:…, refHeight:…)
-   *     if let target = self.targetViewController { … }
-   *
-   * When the webview's native layer has not settled, nothing matches, the `if
-   * let` quietly does nothing, and `GMapView` stays nil forever — a blank map,
-   * and a crash on the next camera call. Waiting for the *element* to have a
-   * size is not enough, because the mismatch is on the native side.
-   *
-   * A rendered map emits a camera-idle event on its own; a stillborn one never
-   * does. So that event is the success signal, and its absence is the retry.
-   */
-  async function createMapUntilItRenders(centre: LatLng, attempts = 3): Promise<boolean> {
-    for (let attempt = 1; attempt <= attempts; attempt += 1) {
-      await createMap(centre);
-      if (!map) return false;
-      if (await waitForFirstEvent(MAP_RENDER_TIMEOUT_MS)) return true;
-
-      // Nothing came back: the view was never added. Tear it down completely so
-      // the next attempt starts from a clean native state, and give the layout a
-      // little longer each time.
-      await teardown();
-      await new Promise((resolve) => setTimeout(resolve, 250 * attempt));
-    }
-    return false;
-  }
-
-  function waitForFirstEvent(timeoutMs: number): Promise<boolean> {
-    if (mapReady) return Promise.resolve(true);
-    return new Promise((resolve) => {
-      const timer = setTimeout(() => {
-        readyWaiter = null;
-        resolve(false);
-      }, timeoutMs);
-      readyWaiter = () => {
-        clearTimeout(timer);
-        readyWaiter = null;
-        resolve(true);
-      };
-    });
   }
 
   async function locateAndRecentre() {
@@ -203,6 +151,10 @@
    * then a hard crash on the next `setCamera`, because that property is an
    * implicitly unwrapped optional.
    */
+  function nextFrame(): Promise<void> {
+    return new Promise((resolve) => requestAnimationFrame(() => resolve()));
+  }
+
   async function waitForLayout(element: HTMLElement, attempts = 30): Promise<boolean> {
     for (let i = 0; i < attempts; i += 1) {
       const { width, height } = element.getBoundingClientRect();
@@ -215,10 +167,18 @@
   async function createMap(centre: LatLng) {
     if (!mapElement) return;
     if (!(await waitForLayout(mapElement))) return;
-    // The element can disappear while we were waiting on layout.
-    if (!mapElement) return;
 
-    const { GoogleMap } = await import('@capacitor/google-maps');
+    // The element's connectedCallback must have run — it is what applies the
+    // overflow styling WebKit needs — and WebKit then needs a layout and
+    // compositing pass to actually build the child scroll view the native side
+    // matches against. Two frames after upgrade is enough; creating in the same
+    // turn is not.
+    await customElements.whenDefined('capacitor-google-map');
+    await nextFrame();
+    await nextFrame();
+
+    // The element can disappear while we were waiting.
+    if (!mapElement) return;
 
     map = await GoogleMap.create({
       id: 'bmlt-map',
@@ -251,7 +211,6 @@
   function markReady() {
     if (mapReady) return;
     mapReady = true;
-    readyWaiter?.();
     const pending = pendingCamera;
     pendingCamera = null;
     if (pending) void moveCamera(pending);
