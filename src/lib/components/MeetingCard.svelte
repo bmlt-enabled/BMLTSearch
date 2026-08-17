@@ -2,7 +2,7 @@
   import { Cloud, MapPin, Phone, Share2 } from '@lucide/svelte';
   import { t } from '$lib/i18n/index.svelte';
   import { addressLines, hasCoordinates, tidyDelimiter } from '$lib/meetings/address';
-  import { hasDirections, kindLabelKey } from '$lib/meetings/kind';
+  import { hasDirections, kindBadgeTone, kindLabelKey } from '$lib/meetings/kind';
   import { WEEKDAY_COLORS, WEEKDAY_KEYS, weekdayOf } from '$lib/meetings/list';
   import { sharePayload } from '$lib/meetings/share';
   import { canShare, dial, openDirections, openExternal, share } from '$lib/native';
@@ -32,7 +32,21 @@
    * Directions button, which is the part that could actually mislead someone.
    */
   const lines = $derived(addressLines(meeting));
-  const closedKey = $derived(kindLabelKey(meeting.kind));
+  const badgeKey = $derived(kindLabelKey(meeting.kind));
+  /**
+   * Red is reserved for the closed states. Virtual and hybrid are information,
+   * not a warning, so they take the app's own palette rather than the alarm
+   * colour — see kindBadgeTone().
+   */
+  const BADGE_CLASS = {
+    warning: 'bg-danger text-white',
+    virtual: 'bg-bmlt text-bmlt-ink',
+    hybrid: 'bg-success text-white'
+  } as const;
+  const badgeClass = $derived.by(() => {
+    const tone = kindBadgeTone(meeting.kind);
+    return tone ? BADGE_CLASS[tone] : '';
+  });
 
   /**
    * Virtual NA meetings sometimes carry their join URL in `comments` rather than
@@ -64,9 +78,9 @@
     <span class="{weekdayColor} rounded-md px-2.5 py-1 text-sm font-bold text-slate-900">
       {t(weekdayKey)}&nbsp;&nbsp;{timeRange}
     </span>
-    {#if closedKey}
-      <span class="bg-danger rounded-md px-2.5 py-1 text-xs font-bold tracking-wide text-white uppercase">
-        {t(closedKey)}
+    {#if badgeKey}
+      <span class="{badgeClass} rounded-md px-2.5 py-1 text-xs font-bold tracking-wide uppercase">
+        {t(badgeKey)}
       </span>
     {/if}
   </header>
