@@ -18,20 +18,41 @@ import type { RawServiceBody, ServiceBodyNode } from './types';
  * It is also a single pass rather than the original's re-scan of the whole list
  * once per node, which mattered at ~7,000 aggregator service bodies.
  */
+/**
+ * Zonal forums, which the tree flattens away.
+ *
+ * A zone is an administrative layer above regions, and whether a region sits
+ * under one is a per-server configuration choice rather than anything a reader
+ * would know or care about. On the aggregator that inconsistency is stark: 43
+ * regions sit at the top level while 73 others are one tap further down, hidden
+ * behind a zone, with nothing to distinguish the two groups. Dropping the zone
+ * layer promotes its regions to the top so all of them are siblings.
+ *
+ * Meetings belong to regions and areas. A meeting registered directly against a
+ * zone is a mistake in that server's data — 21 of them across 3 zones on the
+ * aggregator — and this deliberately does not contort the tree to accommodate
+ * it. Those meetings are still found by map and location search.
+ */
+const ZONE_TYPE = 'ZF';
+
 export function buildServiceBodyTree(bodies: RawServiceBody[]): ServiceBodyNode[] {
   const nodes = new Map<string, ServiceBodyNode>();
   const parentOf = new Map<string, string>();
+  const zones = new Set<string>();
 
   for (const body of bodies) {
     if (!body?.id) continue;
     const id = String(body.id);
-    nodes.set(id, { id, name: body.name ?? '', children: [] });
     parentOf.set(id, String(body.parent_id ?? '0'));
+    // Recorded as a parent so its children can be re-pointed, but never given a
+    // node of its own.
+    if (body.type === ZONE_TYPE) zones.add(id);
+    else nodes.set(id, { id, name: body.name ?? '', children: [] });
   }
 
   const roots: ServiceBodyNode[] = [];
   for (const [id, node] of nodes) {
-    const parentId = parentOf.get(id) ?? '0';
+    const parentId = skipZones(id, parentOf, zones);
     const parent = parentId === '0' ? undefined : nodes.get(parentId);
 
     if (!parent || parent === node || isAncestor(node.id, parentId, parentOf)) roots.push(node);
@@ -40,6 +61,24 @@ export function buildServiceBodyTree(bodies: RawServiceBody[]): ServiceBodyNode[
 
   sortTree(roots);
   return roots;
+}
+
+/**
+ * The nearest ancestor that is not a zone, as an id, or `'0'` for the root.
+ *
+ * Walks rather than checking a single level, so a zone nested inside another
+ * zone still collapses. The `seen` guard is the same defence as `isAncestor`:
+ * malformed data that loops must terminate rather than hang the app.
+ */
+function skipZones(id: string, parentOf: Map<string, string>, zones: Set<string>): string {
+  let current = parentOf.get(id) ?? '0';
+  const seen = new Set<string>([id]);
+  while (current !== '0' && zones.has(current)) {
+    if (seen.has(current)) return '0';
+    seen.add(current);
+    current = parentOf.get(current) ?? '0';
+  }
+  return current;
 }
 
 /**

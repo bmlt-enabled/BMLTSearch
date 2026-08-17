@@ -1,4 +1,4 @@
-import type { RawFormat, RawMeeting, RawServiceBody } from '../types';
+import type { MeetingSource, RawFormat, RawMeeting, RawServiceBody } from '../types';
 import { getJsonArray, query } from './http';
 
 /**
@@ -99,6 +99,33 @@ export function meetingsByServiceBody(serviceBodyId: string): Promise<RawMeeting
       sort_keys: 'weekday_tinyint,start_time'
     })
   );
+}
+
+/**
+ * Whether a service body holds meetings of its own, ignoring its children.
+ *
+ * `services` matches exactly the bodies named — BMLT only walks down the tree
+ * when `recursive=1` is passed — so this answers precisely the question the tree
+ * needs: would tapping this body list anything? A region that exists only to
+ * contain areas comes back empty, which is why its row used to open a blank
+ * list.
+ *
+ * `data_field_key` trims the response to one field per meeting, so the probe is
+ * cheap: a region with nothing of its own is two bytes on the wire, and the
+ * largest area in the aggregator is about four kilobytes. That is what makes it
+ * affordable to ask on expand rather than prefetching the whole picture — the
+ * one request that answers it for every body at once (`GetFieldValues` on
+ * `service_body_bigint`) is 463 KB and the root servers do not gzip.
+ */
+export function serviceBodyHasOwnMeetings(serviceBodyId: string, source: MeetingSource): Promise<boolean> {
+  const build = source === 'virtual' ? virtual : tomato;
+  return getJsonArray<{ id_bigint: string }>(
+    build({
+      switcher: 'GetSearchResults',
+      services: serviceBodyId,
+      data_field_key: 'id_bigint'
+    })
+  ).then((rows) => rows.length > 0);
 }
 
 /** Every meeting belonging to one service body, on Virtual NA. */
