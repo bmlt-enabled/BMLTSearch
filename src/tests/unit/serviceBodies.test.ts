@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildServiceBodyTree, serviceBodyNames } from '$lib/serviceBodies';
+import { buildServiceBodyTree, SEARCH_LIMIT, searchServiceBodies, serviceBodyNames } from '$lib/serviceBodies';
 import type { RawServiceBody } from '$lib/types';
 
 function body(id: string, parent: string, name: string, type = 'RS'): RawServiceBody {
@@ -155,5 +155,55 @@ describe('promoted bodies are labelled with the zone they came from', () => {
 describe('serviceBodyNames', () => {
   it('maps id to name', () => {
     expect(serviceBodyNames([body('7', '0', 'Southern Region')]).get('7')).toBe('Southern Region');
+  });
+});
+
+describe('searchServiceBodies', () => {
+  const tree = buildServiceBodyTree([
+    body('1', '0', 'Buckeye Region'),
+    body('2', '1', 'WAGS Area', 'AS'),
+    body('3', '1', 'NE Ohio Area', 'AS'),
+    body('4', '0', 'Région de Québec [CSRQ]'),
+    body('5', '4', 'WAGS Area', 'AS')
+  ]);
+
+  it('finds a body nested anywhere in the tree', () => {
+    expect(searchServiceBodies(tree, 'NE Ohio').map((m) => m.node.name)).toEqual(['NE Ohio Area']);
+  });
+
+  it('is case-insensitive', () => {
+    expect(searchServiceBodies(tree, 'buckeye')).toHaveLength(1);
+  });
+
+  /**
+   * The aggregator carries "Région de Québec [CSRQ]", "Región Española" and
+   * "Área de Canarias". Nobody types those accents on a phone, and without
+   * folding they conclude the body is missing.
+   */
+  it('ignores accents, so "quebec" finds "Québec"', () => {
+    expect(searchServiceBodies(tree, 'region de quebec').map((m) => m.node.name)).toEqual(['Région de Québec [CSRQ]']);
+  });
+
+  /**
+   * Area names repeat across regions — two different "WAGS Area"s here — so a
+   * bare name would not say which one. The path is what disambiguates them.
+   */
+  it('returns the branch each match was found on', () => {
+    const paths = searchServiceBodies(tree, 'WAGS').map((m) => m.path.join(' / '));
+    expect(paths.sort()).toEqual(['Buckeye Region', 'Région de Québec [CSRQ]']);
+  });
+
+  it('gives a top-level body an empty path', () => {
+    expect(searchServiceBodies(tree, 'Buckeye')[0].path).toEqual([]);
+  });
+
+  it('is empty for a blank or whitespace query rather than matching everything', () => {
+    expect(searchServiceBodies(tree, '')).toEqual([]);
+    expect(searchServiceBodies(tree, '   ')).toEqual([]);
+  });
+
+  it('stops at the cap — 1,600 bodies means a one-letter query is not a result set', () => {
+    const many = buildServiceBodyTree(Array.from({ length: SEARCH_LIMIT + 20 }, (_, i) => body(String(i + 1), '0', `Area ${i}`, 'AS')));
+    expect(searchServiceBodies(many, 'Area')).toHaveLength(SEARCH_LIMIT);
   });
 });

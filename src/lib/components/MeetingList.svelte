@@ -67,8 +67,8 @@
    *
    * Derived rather than driven by an effect. An effect that seeded the open set
    * on first populated render only fired when `groups` changed *after* mount, so
-   * a list handed complete data up front — the whole Virtual NA list, which is
-   * only rendered once loaded — opened nothing at all. Deriving the default
+   * a list handed complete data up front — the map's detail sheet, which is only
+   * rendered once its meetings have loaded — opened nothing at all. Deriving the default
    * removes the ordering question: it is a function of the groups, whenever they
    * arrive. The two override sets record what the reader has actually tapped, so
    * an explicit choice always wins over the default.

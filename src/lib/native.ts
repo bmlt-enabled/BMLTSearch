@@ -30,11 +30,27 @@ export async function initNativeShell(): Promise<void> {
 }
 
 /**
- * Open a URL outside the app. Native uses the in-app browser so the reader keeps
- * their place in the meeting list; web falls back to a new tab.
+ * Open a URL outside the app.
+ *
+ * On native this is `@capacitor/browser`, which is *not* the app's own webview:
+ * it is SFSafariViewController on iOS and a Chrome Custom Tab on Android — the
+ * system browser rendered over the app, with its own close button and its own
+ * cookie jar. The reader keeps their place in the meeting list, which is why it
+ * is preferred over throwing them out to the browser app entirely.
+ *
+ * Only `http(s)` goes there. `mailto:`, `tel:`, `geo:` and the rest are handled
+ * by a different app, and handing one to `Browser.open()` leaves an empty
+ * browser sheet on screen while that app launches behind it — the same failure
+ * `dial()` documents below. Those go to the system handler instead.
  */
 export async function openExternal(url: string): Promise<void> {
   if (!url) return;
+
+  if (!/^https?:/i.test(url)) {
+    window.open(url, '_self');
+    return;
+  }
+
   if (!isNative()) {
     window.open(url, '_blank', 'noopener,noreferrer');
     return;

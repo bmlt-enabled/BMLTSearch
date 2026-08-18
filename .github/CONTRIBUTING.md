@@ -60,7 +60,7 @@ No component library — every UI primitive in `src/lib/components/` is hand-wri
 
 ```
 src/lib/
-  api/            HTTP against the root servers, plus Google Geocoding
+  api/            HTTP against the aggregator, plus Google Geocoding
     http.ts       The single request path — CapacitorHttp, so native avoids CORS
     bmlt.ts       Every BMLT endpoint the app calls
     formats.ts    Format id/code → readable name, cached
@@ -84,18 +84,30 @@ The domain logic in `src/lib/meetings/` has no Svelte, no network, and no
 behaviour worth trusting lives — if you are writing date maths or classification
 inside a `.svelte` file, it is in the wrong place.
 
-## Two root servers, not one
+## One root server
 
-The app searches two separate BMLT databases, and the distinction runs all the
-way down through the code:
+The app searches the **aggregator** (`aggregator.bmltenabled.org`) — the
+worldwide BMLT root server, formerly called Tomato. It carries `venue_type` on
+every meeting, so in-person, hybrid and online meetings all come from there.
 
-- **Tomato** (`aggregator.bmltenabled.org`) — the worldwide aggregator. In-person
-  and hybrid meetings.
-- **Virtual NA** (`bmlt.virtual-na.org`) — online-only meetings.
+It used to search two. `bmlt.virtual-na.org` held online-only meetings and had
+its own screen, its own service body tree, and its own format keying — which is
+why a `MeetingSource` was threaded through format resolution and classification.
+That root was dropped: nobody maintains its data, and the aggregator holds ~45%
+more online meetings. Online meetings are now reached through the venue filter on
+the geographic searches (`meetings/venue.ts`) rather than a screen of their own.
 
-A meeting lives in one or the other, never both. They differ in how formats are
-keyed, which is why `MeetingSource` is threaded through format resolution and
-meeting classification rather than inferred. See `src/lib/api/bmlt.ts`.
+Two things worth knowing before proposing a worldwide online-meeting list again:
+
+- **The aggregator will not serve one.** In aggregator mode `GetSearchResults`
+  requires a bounding filter — `services`, `formats`, `meeting_ids`,
+  `root_server_ids`, lat/long, or `page_size` — and `venue_types` is not on that
+  list, so `venue_types=2` alone returns `[]` with no error. Adding `page_size`
+  satisfies the gate, but the ~5,255 virtual + hybrid rows time out
+  intermittently: 958 rows is reliable, 4,297 is not, 5,255 never succeeded.
+- **The data will not support one.** Only ~37% of the aggregator's virtual
+  records carry a `time_zone` (against 99% on Virtual NA), so most cannot be
+  given a start time a reader can act on, and language appears on 3% of records.
 
 ## Google Maps keys
 
@@ -192,7 +204,7 @@ Two things the Capacitor map plugin will mislead you about are documented in
 
 ## Testing
 
-132 unit tests over the domain logic — time arithmetic, meeting classification,
+133 unit tests over the domain logic — time arithmetic, meeting classification,
 grouping and filtering, the service body tree, marker clustering, the share
 payload, the HTTP wrapper's handling of BMLT's quirks, and translation coverage.
 

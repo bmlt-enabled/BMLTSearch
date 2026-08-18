@@ -15,12 +15,11 @@
    * nothing elsewhere.
    */
   import { GoogleMap, type GoogleMap as GoogleMapType } from '@capacitor/google-maps';
-  import { Search, X } from '@lucide/svelte';
+  import { RotateCw, Search, X } from '@lucide/svelte';
   import { onMount } from 'svelte';
   import { meetingsByIds, meetingsWithinRadius } from '$lib/api/bmlt';
   import { forwardGeocode } from '$lib/api/geocode';
   import AppBar from '$lib/components/AppBar.svelte';
-  import VenueFilter from '$lib/components/VenueFilter.svelte';
   import ErrorState from '$lib/components/ErrorState.svelte';
   import MeetingList from '$lib/components/MeetingList.svelte';
   import Modal from '$lib/components/Modal.svelte';
@@ -29,7 +28,7 @@
   import { i18n, t } from '$lib/i18n/index.svelte';
   import { currentPosition } from '$lib/location';
   import { mapKey } from '$lib/maps/keys';
-  import { venueTypesParam, type MeetingMode } from '$lib/meetings/venue';
+  import { MAP_VENUE_TYPES } from '$lib/meetings/venue';
   import { platform } from '$lib/native';
   import { newSessionToken, placeLocation, suggestPlaces, type PlaceSuggestion, type PlacesSession } from '$lib/maps/places';
   import { buildMarkers, iconFor } from '$lib/maps/markers';
@@ -320,7 +319,7 @@
 
     const release = loading.begin(t('FINDING_MTGS'));
     try {
-      const meetings = await meetingsWithinRadius(event.bounds.center.lat, event.bounds.center.lng, radiusKm, venueTypesParam(settings.modes));
+      const meetings = await meetingsWithinRadius(event.bounds.center.lat, event.bounds.center.lng, radiusKm, MAP_VENUE_TYPES);
       if (sequence !== searchSequence || !map) return;
       await drawMarkers(meetings);
       searchedCentre = event.bounds.center;
@@ -419,16 +418,6 @@
     if (lastCamera) void runSearch(lastCamera);
   }
 
-  /**
-   * Re-run against the pane already on screen. Markers currently drawn were
-   * matched under the old filter, so leaving them until the next pan would show
-   * results the buttons say are excluded.
-   */
-  function onModesChange(modes: MeetingMode[]) {
-    settings.modes = modes;
-    if (lastCamera) void runSearch(lastCamera);
-  }
-
   function clearSearch() {
     queryText = '';
     suggestions = [];
@@ -483,26 +472,25 @@
     per camera idle rebuilt the markers underneath the reader — including when
     tapping a pin near the edge made Google recentre the map by itself.
 
-    Sits at top-14 rather than top-3 to clear Google's own Map/Satellite control,
-    which occupies the top left and otherwise collides with it on a narrow screen.
+    Styled as a floating white pill rather than a solid brand-blue one: it sits
+    on top of a photographic surface, and a bordered light chip is what reads as
+    controls-above-a-map. Google's own "search this area" does the same.
+
+    `top-8` is as high as it can safely go. On the web the JS SDK draws its
+    Map/Satellite control at the top left, roughly 10-50px down, and a centred
+    pill any higher overlaps it on a narrow screen. Native has no such control,
+    so this is a web-only ceiling — if the toggle is ever turned off, this can
+    move to top-3.
   -->
   {#if canSearchArea && suggestions.length === 0}
     <button
       type="button"
-      class="focusable bg-bmlt hover:bg-bmlt-shade absolute top-14 left-1/2 z-20 -translate-x-1/2 rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-colors"
+      class="focusable bg-surface-raised text-brand-ink ring-border hover:bg-surface-sunken absolute top-8 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full px-5 py-3 text-[15px] font-semibold shadow-lg ring-1 transition-colors"
       onclick={searchThisArea}
     >
+      <RotateCw size={16} aria-hidden="true" />
       {t('SEARCH_AREA')}
     </button>
-  {/if}
-
-  <!--
-    Bottom-anchored so it clears both Google's Map/Satellite control and the
-    "Search this area" pill, and hidden while the autocomplete list is open so it
-    does not sit under the suggestions.
-  -->
-  {#if suggestions.length === 0}
-    <VenueFilter modes={settings.modes} onchange={onModesChange} class="absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full bg-[var(--surface-raised)]/95 p-1.5 shadow-lg" />
   {/if}
 
   <!--

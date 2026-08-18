@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isMeetingMode, MEETING_MODES, venueTypesParam } from '$lib/meetings/venue';
+import { isMeetingMode, MAP_VENUE_TYPES, MEETING_MODES, venueTypesParam } from '$lib/meetings/venue';
 
 describe('venueTypesParam', () => {
   /**
@@ -65,5 +65,28 @@ describe('isMeetingMode', () => {
     // must not put a junk value into a query string.
     expect(isMeetingMode('hybrid')).toBe(false);
     expect(isMeetingMode('')).toBe(false);
+  });
+});
+
+describe('MAP_VENUE_TYPES', () => {
+  /**
+   * A pin asserts the meeting is there, and for an online meeting that is false:
+   * BMLT requires coordinates on every record, so online groups sit at a home
+   * town or somewhere arbitrary. `hasDirections()` already refuses to route to
+   * them; drawing a pin is the same claim, quieter.
+   */
+  it('excludes virtual, so the map never pins a meeting that happens nowhere', () => {
+    expect(MAP_VENUE_TYPES).not.toContain('2');
+  });
+
+  it('includes hybrid — it has a real room, and the map is how you find it', () => {
+    expect(MAP_VENUE_TYPES).toContain('1');
+    expect(MAP_VENUE_TYPES).toContain('3');
+  });
+
+  it('matches what the in-person filter asks for', () => {
+    // Same set, arrived at two ways. If these ever diverge, the map and the
+    // list's "in person" filter would disagree about what in-person means.
+    expect([...MAP_VENUE_TYPES]).toEqual(venueTypesParam(['in-person']));
   });
 });

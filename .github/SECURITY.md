@@ -66,9 +66,8 @@ In scope:
 
 Out of scope:
 
-- The BMLT root servers themselves (`aggregator.bmltenabled.org`,
-  `bmlt.virtual-na.org`) — report those to the [BMLT
-  project](https://bmlt.app/)
+- The BMLT root server itself (`aggregator.bmltenabled.org`) — report those to
+  the [BMLT project](https://bmlt.app/)
 - Google Maps Platform infrastructure
 - Meeting data content, which comes from the root servers and is maintained by
   service bodies

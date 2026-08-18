@@ -67,13 +67,14 @@ export function hasDirections(kind: MeetingKind): boolean {
  *
  * Virtual and hybrid were originally left unlabelled too, on the reasoning that
  * they announce themselves through the buttons they offer — a join link, a
- * dial-in, directions or not. They do not. A virtual meeting still carries
- * coordinates, so it still gets a map pin, and BMLT requires a latitude and
- * longitude on every record whether or not the meeting happens anywhere: an
- * online-only group is routinely pinned to its home town, or to somewhere
- * arbitrary. Reading a pin next to a card whose only distinguishing feature is
- * the *absence* of a Directions button asks the reader to notice something that
- * is not there. The badge says it outright.
+ * dial-in, directions or not. They do not: the only thing distinguishing an
+ * online meeting in a list was the *absence* of a Directions button, which asks
+ * the reader to notice something that is not there. The badge says it outright.
+ *
+ * This used to matter on the map too, where online meetings were drawn at
+ * whatever coordinates their group registered. The map no longer plots them at
+ * all (`MAP_VENUE_TYPES`), so the badge now earns its place in the list results
+ * alone — which is also the only place an online meeting can still appear.
  */
 export function kindLabelKey(kind: MeetingKind): string | null {
   switch (kind) {

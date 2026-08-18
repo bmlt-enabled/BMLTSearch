@@ -27,11 +27,11 @@ Find Narcotics Anonymous meetings worldwide — in person, hybrid, and online �
 ## Features
 
 - **Four ways to search** — near your current location, by typed city / postal code / address, by panning a map, or by browsing the full service body tree
-- **In-person and online** — searches both the worldwide [Tomato](https://aggregator.bmltenabled.org) aggregator and [Virtual NA](https://bmlt.virtual-na.org), so hybrid and online-only meetings are found alongside in-person ones
+- **In-person and online** — every search covers in-person, hybrid and online meetings from the worldwide [BMLT aggregator](https://aggregator.bmltenabled.org), with a filter to narrow to one or the other
 - **Meeting detail** — directions, virtual join links, phone dial-in, formats, and a share sheet
 - **Correct times for online meetings** — a meeting's time is shown in its own timezone, labelled, rather than silently converted
 - **Nine languages** — English, Español, Français, Italiano, Dansk, Polski, Português, Русский, and فارسی (with right-to-left layout)
-- **No account, no analytics** — requests go to the BMLT root servers, Google Maps, and Google Fonts, and nowhere else
+- **No account, no analytics** — requests go to the BMLT aggregator, Google Maps, and Google Fonts, and nowhere else
 
 ## Contributing
 
