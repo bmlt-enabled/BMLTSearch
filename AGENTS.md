@@ -206,7 +206,7 @@ The Apple team identifier is supplied by CI as a secret rather than committed, s
 `DEVELOPMENT_TEAM` is blank in the Xcode project and `ExportOptions.plist`
 carries no `teamID`.
 
-Machine-specific details — where signing material lives, account identifiers —
+Machine-specific details - where signing material lives, account identifiers —
 are deliberately not in this file. They belong in a local, uncommitted note.
 
 [capacitor-community/proposals#111]: https://github.com/capacitor-community/proposals/issues/111
