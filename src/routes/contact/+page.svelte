@@ -29,7 +29,7 @@
       titleKey: 'ABOUT_THIS_APP',
       links: [
         { titleKey: 'EMAIL_US', label: 'app@bmlt.app', url: 'mailto:app@bmlt.app', icon: Mail },
-        { titleKey: 'BUG_REPORT', label: 'github.com/bmlt-enabled/BMLTSearchSvelte/issues', url: 'https://github.com/bmlt-enabled/BMLTSearchSvelte/issues', icon: Bug },
+        { titleKey: 'BUG_REPORT', label: 'github.com/bmlt-enabled/BMLTSearch/issues', url: 'https://github.com/bmlt-enabled/BMLTSearch/issues', icon: Bug },
         { titleKey: 'JOIN_FB_GROUP', label: 'facebook.com/groups/BMLT', url: 'https://www.facebook.com/groups/149214049107349/', icon: Users },
         { titleKey: 'VISIT_WEBSITE', label: 'bmlt.app', url: 'https://bmlt.app/', icon: Globe }
       ]

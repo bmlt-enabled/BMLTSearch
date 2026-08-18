@@ -10,8 +10,8 @@
 ## Setup
 
 ```bash
-git clone https://github.com/bmlt-enabled/BMLTSearchSvelte.git
-cd BMLTSearchSvelte
+git clone https://github.com/bmlt-enabled/BMLTSearch.git
+cd BMLTSearch
 npm install
 cp .env.example .env      # then add your Google Maps keys
 npm run dev               # http://localhost:5173

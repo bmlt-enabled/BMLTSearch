@@ -5,7 +5,7 @@
 <h1 align="center">BMLT Search</h1>
 
 <p align="center">
-  <a href="https://github.com/bmlt-enabled/BMLTSearchSvelte/actions/workflows/ci.yml"><img src="https://github.com/bmlt-enabled/BMLTSearchSvelte/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/bmlt-enabled/BMLTSearch/actions/workflows/ci.yml"><img src="https://github.com/bmlt-enabled/BMLTSearch/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://app.bmlt.app"><img src="https://img.shields.io/badge/web-app.bmlt.app-blue" alt="web app"></a>
   <a href="https://bmlt.app/"><img src="https://img.shields.io/badge/powered%20by-BMLT-0a61ad" alt="BMLT"></a>
 </p>
@@ -22,7 +22,7 @@ Find Narcotics Anonymous meetings worldwide — in person, hybrid, and online �
 | ----------- | ------------------------------------------------------------------------------------------------------------------ |
 | **Web**     | [app.bmlt.app](https://app.bmlt.app) — installable as a PWA                                                        |
 | **iOS**     | TestFlight beta                                                                                                    |
-| **Android** | Signed APK from the [latest build](https://github.com/bmlt-enabled/BMLTSearchSvelte/actions/workflows/android.yml) |
+| **Android** | Signed APK from the [latest build](https://github.com/bmlt-enabled/BMLTSearch/actions/workflows/android.yml) |
 
 ## Features
 
@@ -47,7 +47,7 @@ Everything except the map screen works without keys.
 
 ## Need help?
 
-- 🐛 **Bug or feature request:** open an issue on [GitHub](https://github.com/bmlt-enabled/BMLTSearchSvelte/issues)
+- 🐛 **Bug or feature request:** open an issue on [GitHub](https://github.com/bmlt-enabled/BMLTSearch/issues)
 - 🔒 **Security issue:** see [SECURITY.md](.github/SECURITY.md) — please don't open a public issue
 - 📧 **Email:** [help@bmlt.app](mailto:help@bmlt.app)
 - 💬 **Community:** the [BMLT Facebook group](https://www.facebook.com/groups/bmltapp/)
