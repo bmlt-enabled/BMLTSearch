@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { BookOpen, Bug, Mail, Monitor, Smartphone, Users, Globe } from '@lucide/svelte';
+  import { BookOpen, Bug, Mail, Monitor, Users, Globe } from '@lucide/svelte';
   import AppBar from '$lib/components/AppBar.svelte';
   import { t } from '$lib/i18n/index.svelte';
-  import { openExternal, platform } from '$lib/native';
+  import { openExternal } from '$lib/native';
   import { drawer } from '$lib/stores/ui.svelte';
 
   /*
@@ -16,23 +16,13 @@
     records carry a usable time zone. Pointing at NA's own directory beats
     pretending otherwise.
   */
-  /*
-    "We Are Never Alone" is an iPhone-only app by a community member, aimed at
-    exactly the thing this app deliberately does not do — finding online
-    meetings. Hidden on Android, where an App Store link is a dead end. Shown on
-    the web because a browser gives no reliable read on the device, and an
-    iPhone user reading app.bmlt.app is a plausible visitor; an Android one
-    loses nothing but a line.
-  */
-  const showIosApp = platform() !== 'android';
 
   const groups = [
     {
       titleKey: 'RESOURCES',
       links: [
         { titleKey: 'NA_VIRTUAL', label: 'na.org/virtual', url: 'https://na.org/virtual/', icon: Monitor },
-        { titleKey: 'NA_LITERATURE', label: 'na.org/literature', url: 'https://na.org/literature/', icon: BookOpen },
-        ...(showIosApp ? [{ titleKey: 'ONLINE_MEETINGS_APP', label: 'We Are Never Alone · App Store', url: 'https://apps.apple.com/us/app/we-are-never-alone/id6504826025', icon: Smartphone }] : [])
+        { titleKey: 'NA_LITERATURE', label: 'na.org/literature', url: 'https://na.org/literature/', icon: BookOpen }
       ]
     },
     {
