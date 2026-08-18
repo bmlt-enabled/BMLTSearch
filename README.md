@@ -18,10 +18,10 @@ Find Narcotics Anonymous meetings worldwide — in person, hybrid, and online �
 
 ## Where to get it
 
-| Platform    | Where                                                                                                              |
-| ----------- | ------------------------------------------------------------------------------------------------------------------ |
-| **Web**     | [app.bmlt.app](https://app.bmlt.app) — installable as a PWA                                                        |
-| **iOS**     | TestFlight beta                                                                                                    |
+| Platform    | Where                                                                                                        |
+| ----------- | ------------------------------------------------------------------------------------------------------------ |
+| **Web**     | [app.bmlt.app](https://app.bmlt.app) — installable as a PWA                                                  |
+| **iOS**     | TestFlight beta                                                                                              |
 | **Android** | Signed APK from the [latest build](https://github.com/bmlt-enabled/BMLTSearch/actions/workflows/android.yml) |
 
 ## Features
