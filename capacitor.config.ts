@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.bmlt.search',
+  appId: 'ie.nasouth.bmltsearch',
   appName: 'BMLT Search',
   webDir: 'build',
   backgroundColor: '#0a61ad',

@@ -44,7 +44,9 @@ def hasSigning = signingStorePath && file(signingStorePath).exists() && signingS
 // refuses a second upload carrying one it has already seen, so it comes from the
 // workflow run number rather than from the tag: run numbers only ever go up,
 // whereas a semver-derived code regresses the moment a patch release is tagged
-// on an older branch. versionName is the tag itself, minus the leading "v".
+// on an older branch. CI adds a 60000 offset because the transferred listing's
+// 5.x releases already reached five digits. versionName is the tag itself, minus
+// the leading "v".
 //
 // The fallbacks keep an ordinary local `./gradlew assembleRelease` working; they
 // produce an APK that installs for testing but must never reach Play.
@@ -52,7 +54,7 @@ def versionCodeValue = (System.getenv('ANDROID_VERSION_CODE') ?: '1') as Integer
 def versionNameValue = System.getenv('ANDROID_VERSION_NAME') ?: '0.0.0-dev'
 
 android {
-    namespace = "app.bmlt.search"
+    namespace = "ie.nasouth.bmltsearch"
     compileSdk = rootProject.ext.compileSdkVersion
 
     if (hasSigning) {
@@ -67,7 +69,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "app.bmlt.search"
+        applicationId "ie.nasouth.bmltsearch"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode versionCodeValue

@@ -28,7 +28,7 @@ import { platform } from '../native';
  * the built app. A unit test asserts the two agree, so a rename cannot silently
  * break device requests.
  */
-export const APP_ID = 'app.bmlt.search';
+export const APP_ID = 'ie.nasouth.bmltsearch';
 
 /**
  * SHA-1 of the certificate that signed the running Android build.

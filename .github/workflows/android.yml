@@ -62,7 +62,7 @@ jobs:
             NAME="0.0.0-dev"
           fi
           echo "name=$NAME" >> "$GITHUB_OUTPUT"
-          echo "Version $NAME (code ${{ github.run_number }})" >> "$GITHUB_STEP_SUMMARY"
+          echo "Version $NAME (code ${{ 60000 + github.run_number }})" >> "$GITHUB_STEP_SUMMARY"
           # Recorded here because `secrets` is not available in a step-level
           # `if`. A fork without the secret builds and uploads artifacts as
           # normal; it just does not publish.
@@ -110,7 +110,11 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           GOOGLE_MAPS_KEY_ANDROID: ${{ secrets.GOOGLE_MAPS_KEY_ANDROID }}
-          ANDROID_VERSION_CODE: ${{ github.run_number }}
+          # Offset because this build now publishes to the *transferred* listing,
+          # whose 5.x releases already used five-digit codes (the Ionic app's last
+          # was 50500) and Play permanently refuses a code it has already seen. A
+          # bare run number — currently double digits — is rejected outright.
+          ANDROID_VERSION_CODE: ${{ 60000 + github.run_number }}
           ANDROID_VERSION_NAME: ${{ steps.version.outputs.name }}
         working-directory: android
         run: ./gradlew assembleRelease bundleRelease --no-daemon
@@ -164,7 +168,7 @@ jobs:
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
-          packageName: app.bmlt.search
+          packageName: ie.nasouth.bmltsearch
           releaseFiles: android/app/build/outputs/bundle/release/*.aab
           releaseName: ${{ steps.version.outputs.name }} (${{ github.run_number }})
           tracks: internal

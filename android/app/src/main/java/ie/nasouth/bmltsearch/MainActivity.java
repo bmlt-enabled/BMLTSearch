@@ -1,4 +1,4 @@
-package app.bmlt.search;
+package ie.nasouth.bmltsearch;
 
 import com.getcapacitor.BridgeActivity;
 

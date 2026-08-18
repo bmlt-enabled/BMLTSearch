@@ -114,12 +114,12 @@ Two things worth knowing before proposing a worldwide online-meeting list again:
 **Three of them**, because Google allows a key exactly one _application_
 restriction — Websites, or iOS apps, or Android apps, never a combination.
 
-| Variable                               | Restriction                                      | APIs                                          | Used by                                            |
-| -------------------------------------- | ------------------------------------------------ | --------------------------------------------- | -------------------------------------------------- |
-| `PUBLIC_GOOGLE_MAPS_KEY_WEB`           | Websites                                         | Maps JavaScript, Places (New), Geocoding      | Everything, on the web only                        |
-| `PUBLIC_GOOGLE_MAPS_KEY_IOS`           | iOS apps — `app.bmlt.search`                     | Maps SDK for iOS, Places (New), Geocoding     | Map, autocomplete and geocoding on iOS             |
-| `PUBLIC_GOOGLE_MAPS_KEY_ANDROID`       | Android apps — `app.bmlt.search` + signing SHA-1 | Maps SDK for Android, Places (New), Geocoding | Map, autocomplete and geocoding on Android         |
-| `PUBLIC_GOOGLE_MAPS_ANDROID_CERT_SHA1` | —                                                | —                                             | Proves the Android signature to the REST endpoints |
+| Variable                               | Restriction                                            | APIs                                          | Used by                                            |
+| -------------------------------------- | ------------------------------------------------------ | --------------------------------------------- | -------------------------------------------------- |
+| `PUBLIC_GOOGLE_MAPS_KEY_WEB`           | Websites                                               | Maps JavaScript, Places (New), Geocoding      | Everything, on the web only                        |
+| `PUBLIC_GOOGLE_MAPS_KEY_IOS`           | iOS apps — `ie.nasouth.bmltsearch`                     | Maps SDK for iOS, Places (New), Geocoding     | Map, autocomplete and geocoding on iOS             |
+| `PUBLIC_GOOGLE_MAPS_KEY_ANDROID`       | Android apps — `ie.nasouth.bmltsearch` + signing SHA-1 | Maps SDK for Android, Places (New), Geocoding | Map, autocomplete and geocoding on Android         |
+| `PUBLIC_GOOGLE_MAPS_ANDROID_CERT_SHA1` | —                                                      | —                                             | Proves the Android signature to the REST endpoints |
 
 These are **public** variables: inlined into the client bundle and readable by
 anyone using the app. That is inherent to client-side Maps keys — what protects
@@ -267,8 +267,8 @@ expired but never deleted. Tag deliberately.
 
 |                       |                                   |
 | --------------------- | --------------------------------- |
-| Bundle ID             | `app.bmlt.search`                 |
-| Android applicationId | `app.bmlt.search`                 |
+| Bundle ID             | `ie.nasouth.bmltsearch`           |
+| Android applicationId | `ie.nasouth.bmltsearch`           |
 | Apple team            | `APPLE_TEAM_ID` repository secret |
 
 The Apple team ID is supplied by CI rather than committed, so `DEVELOPMENT_TEAM`

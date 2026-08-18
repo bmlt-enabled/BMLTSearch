@@ -4,7 +4,7 @@
 
 Complete rewrite. The app is now **SvelteKit 2 + Svelte 5 + Tailwind 4 +
 Capacitor 8**, replacing the Ionic 8 + Angular 20 build that shipped through
-5.4.6. The user-facing feature set is unchanged; everything below the surface is
+5.5.0. The user-facing feature set is unchanged; everything below the surface is
 new.
 
 - **Rewritten in Svelte** — one static bundle serving web, iOS, and Android. No component library: every UI primitive is hand-written against Tailwind, and every route is prerendered because there is no server inside a webview
