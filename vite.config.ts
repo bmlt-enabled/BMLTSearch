@@ -22,6 +22,15 @@ export default defineConfig({
   // an unconfigured build succeeds and only the map screen reports itself
   // unavailable — which is the degradation the README always described.
   envPrefix: ['VITE_', 'PUBLIC_'],
+  build: {
+    rolldownOptions: {
+      // Rolldown prints a [PLUGIN_TIMINGS] advisory whenever most of the build
+      // is spent inside plugin hooks. That's simply what a SvelteKit build is —
+      // Svelte compilation, Tailwind, and Workbox are all plugin work — so the
+      // notice reports nothing actionable and only obscures real build output.
+      checks: { pluginTimings: false }
+    }
+  },
   plugins: [
     tailwindcss(),
     sveltekit(),
