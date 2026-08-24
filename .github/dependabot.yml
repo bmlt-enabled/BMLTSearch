@@ -1,0 +1,61 @@
+# Dependency updates.
+#
+# Two ecosystems only, and the omissions are deliberate:
+#
+#   gradle  — every version in android/ comes from `android/variables.gradle`,
+#             which Capacitor owns and rewrites. Bumping androidx there by hand
+#             puts Dependabot and `npx cap sync` in a fight that sync wins, so
+#             those versions move when @capacitor/android moves.
+#   swift   — same story for ios/App/CapApp-SPM/Package.swift, which `cap sync`
+#             regenerates from the installed plugins.
+#
+# So the npm updates below are what actually moves the native projects too.
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    # One PR rather than thirty. CI proves the whole tree builds together, which
+    # is the only signal that matters for a lockfile bump, and a single PR is a
+    # single review of a single green run.
+    groups:
+      dev-dependencies:
+        dependency-type: development
+      production-dependencies:
+        dependency-type: production
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+    commit-message:
+      prefix: deps
+      prefix-development: deps-dev
+    ignore:
+      # Capacitor's core, platforms and plugins are a matched set — the platform
+      # packages must track @capacitor/core, and a major crossing on its own
+      # breaks `cap sync` in ways CI cannot see, because ci.yml never syncs.
+      # Majors here are a deliberate, hands-on upgrade; patch and minor flow.
+      - dependency-name: '@capacitor/*'
+        update-types:
+          - version-update:semver-major
+      # TypeScript 7 is the native Go rewrite, not a normal major. svelte-check
+      # and the eslint/svelte toolchain have to land support for it first, and a
+      # grouped lockfile PR is the worst place to discover they have not. It
+      # moves when we go looking for it; 6.x patch and minor still flow.
+      - dependency-name: 'typescript'
+        update-types:
+          - version-update:semver-major
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns:
+          - '*'
+    labels:
+      - dependencies
+    commit-message:
+      prefix: ci
