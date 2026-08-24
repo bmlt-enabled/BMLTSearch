@@ -7,22 +7,26 @@
 <p align="center">
   <a href="https://github.com/bmlt-enabled/BMLTSearch/actions/workflows/ci.yml"><img src="https://github.com/bmlt-enabled/BMLTSearch/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://app.bmlt.app"><img src="https://img.shields.io/badge/web-app.bmlt.app-blue" alt="web app"></a>
+  <a href="https://apps.apple.com/us/app/bmlt-search/id1370165741"><img src="https://img.shields.io/badge/App%20Store-iOS-0d96f6?logo=apple&logoColor=white" alt="Download on the App Store"></a>
+  <a href="https://play.google.com/store/apps/details?id=ie.nasouth.bmltsearch"><img src="https://img.shields.io/badge/Google%20Play-Android-3ddc84?logo=googleplay&logoColor=white" alt="Get it on Google Play"></a>
   <a href="https://bmlt.app/"><img src="https://img.shields.io/badge/powered%20by-BMLT-0a61ad" alt="BMLT"></a>
 </p>
 
 <p align="center">
-  <strong>👉 Try it:</strong> <a href="https://app.bmlt.app">app.bmlt.app</a>
+  <strong>👉 Try it:</strong> <a href="https://app.bmlt.app">app.bmlt.app</a> &nbsp;·&nbsp;
+  <a href="https://apps.apple.com/us/app/bmlt-search/id1370165741">App Store</a> &nbsp;·&nbsp;
+  <a href="https://play.google.com/store/apps/details?id=ie.nasouth.bmltsearch">Google Play</a>
 </p>
 
 Find Narcotics Anonymous meetings worldwide — in person, hybrid, and online — from the [BMLT](https://bmlt.app/). One codebase runs as a web app, an iOS app, and an Android app.
 
 ## Where to get it
 
-| Platform    | Where                                                                                                        |
-| ----------- | ------------------------------------------------------------------------------------------------------------ |
-| **Web**     | [app.bmlt.app](https://app.bmlt.app) — installable as a PWA                                                  |
-| **iOS**     | TestFlight beta                                                                                              |
-| **Android** | Signed APK from the [latest build](https://github.com/bmlt-enabled/BMLTSearch/actions/workflows/android.yml) |
+| Platform    | Where                                                                              |
+| ----------- | ---------------------------------------------------------------------------------- |
+| **Web**     | [app.bmlt.app](https://app.bmlt.app) — installable as a PWA                        |
+| **iOS**     | [App Store](https://apps.apple.com/us/app/bmlt-search/id1370165741)                |
+| **Android** | [Google Play](https://play.google.com/store/apps/details?id=ie.nasouth.bmltsearch) |
 
 ## Features
 
