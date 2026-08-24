@@ -1,6 +1,7 @@
 node_modules
 
 # Output
+build-artifacts
 .output
 .vercel
 .netlify
@@ -8,11 +9,34 @@ node_modules
 /.svelte-kit
 /build
 
+# Store screenshots
+#
+# The tooling in tools/screenshots/ is committed; its output is not. Every shot
+# carries live data — the countdown on each row, today's meeting list, the
+# clean-time total — so all 32 change on every capture whether the UI moved or
+# not. Committing them would add ~13MB of fresh blobs per release to a public
+# repository, with no delta compression and a 32-file diff that never means
+# anything. `npm run screenshots` rebuilds the set in about fifteen minutes, and
+# App Store Connect and the Play Console keep the images actually uploaded.
+#
+# Scoped to the four capture directories rather than the whole tree, so that
+# play/feature-graphic.png stays in git: it is listing artwork, not a
+# screenshot, nothing here regenerates it, and this is the only copy that is not
+# sitting on one machine's desktop.
+store/screenshots/app-store/**/*.png
+store/screenshots/play/phone/*.png
+store/screenshots/play/tablet-10in/*.png
+
 # Test and tooling output
 /coverage
 *.tsbuildinfo
 *.log
 npm-debug.log*
+
+# Local working notes — review write-ups, scratch findings. Deliberately not
+# committed: they go stale against the code they describe, and anything in one
+# worth keeping belongs in AGENTS.md or an issue instead.
+/REVIEW.md
 
 # OS
 .DS_Store
@@ -45,6 +69,7 @@ android/keystore.properties
 .env
 .env.*
 !.env.example
+!.env.release.example
 !.env.test
 
 # Vite
