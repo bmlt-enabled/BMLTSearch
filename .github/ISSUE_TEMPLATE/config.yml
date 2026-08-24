@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Try the app
+    url: https://app.bmlt.app
+    about: The live web app — check whether the issue reproduces there before reporting.
+  - name: Translation contribution guide
+    url: https://github.com/bmlt-enabled/BMLTSearch/blob/main/.github/CONTRIBUTING.md#translations
+    about: How to fix or add translations for the app's nine languages.
+  - name: Meeting data is wrong
+    url: https://bmlt.app/
+    about: Wrong times, addresses, or missing meetings come from the root servers, not this app — contact the service body or the BMLT project.
