@@ -1,6 +1,11 @@
 # Changelog
 
-## 6.0.0 (unreleased)
+## 6.1.0 (August 31, 2026)
+
+- **Apple Maps on iPhone and iPad.** The map now uses Apple Maps on iOS.
+- **Bigger meeting pins.** The NA markers on the map are larger, so they are easier to see and to tap.
+
+## 6.0.0 (August 18, 2026)
 
 Complete rewrite. The app is now **SvelteKit 2 + Svelte 5 + Tailwind 4 +
 Capacitor 8**, replacing the Ionic 8 + Angular 20 build that shipped through

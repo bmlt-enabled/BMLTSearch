@@ -108,8 +108,10 @@ export async function createMap(options: CreateMapOptions): Promise<MapHandle> {
       getMapBounds: async () => normaliseBounds(await map.getMapBounds()),
       setCamera: (config) => map.setCamera(config),
       // MapKit sizes the annotation image; without a size the raw PNG pixels are
-      // used, which is tiny on a hi-DPI screen. 30×36 matches the pin art.
-      addMarkers: (markers) => map.addMarkers(markers.map((m) => ({ coordinate: m.coordinate, iconUrl: m.iconUrl, iconSize: { width: 30, height: 36 } }))),
+      // used, which is tiny on a hi-DPI screen. 60×72 keeps the pin art's ~0.83
+      // aspect (the source is 83×100) and matches the marker size in the
+      // NA-New-England app.
+      addMarkers: (markers) => map.addMarkers(markers.map((m) => ({ coordinate: m.coordinate, iconUrl: m.iconUrl, iconSize: { width: 60, height: 72 } }))),
       removeMarkers: (ids) => map.removeMarkers(ids),
       enableClustering: () => map.enableClustering(),
       disableClustering: () => Promise.resolve(),
