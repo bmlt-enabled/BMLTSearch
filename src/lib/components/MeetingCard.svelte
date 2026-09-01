@@ -142,7 +142,7 @@
         <button
           type="button"
           class="focusable bg-bmlt hover:bg-bmlt-shade flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors"
-          onclick={() => openExternal(meeting.virtual_meeting_link!)}
+          onclick={() => openExternal(meeting.virtual_meeting_link!, { system: true })}
         >
           <Cloud size={18} aria-hidden="true" />
           {t('VIRTUAL_LINK')}

@@ -42,8 +42,17 @@ export async function initNativeShell(): Promise<void> {
  * by a different app, and handing one to `Browser.open()` leaves an empty
  * browser sheet on screen while that app launches behind it — the same failure
  * `dial()` documents below. Those go to the system handler instead.
+ *
+ * `system` hands an http(s) link to the OS rather than the in-app browser, for
+ * links whose destination is really an app — a Zoom invite being the one that
+ * matters here. The in-app browser is a webview, so it cannot follow a
+ * universal link into Zoom: it just renders zoom.us' launch page and the reader
+ * has to tap through it. A top-level navigation to an outside origin is
+ * cancelled by Capacitor and passed to `UIApplication.open` / an `ACTION_VIEW`
+ * intent — the same path a link tapped in Mail takes — so Zoom opens directly
+ * where it is installed and the system browser handles it where it is not.
  */
-export async function openExternal(url: string): Promise<void> {
+export async function openExternal(url: string, options: { system?: boolean } = {}): Promise<void> {
   if (!url) return;
 
   if (!/^https?:/i.test(url)) {
@@ -53,6 +62,10 @@ export async function openExternal(url: string): Promise<void> {
 
   if (!isNative()) {
     window.open(url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  if (options.system) {
+    window.location.href = url;
     return;
   }
   try {
