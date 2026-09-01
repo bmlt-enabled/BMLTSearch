@@ -1,7 +1,7 @@
 {
   "name": "bmlt-search",
   "private": true,
-  "version": "6.0.0",
+  "version": "6.1.0",
   "license": "MIT",
   "type": "module",
   "author": "BMLT Enabled",
@@ -26,6 +26,14 @@
     "android": "run-s build sync:android open:android",
     "open:ios": "cap open ios",
     "open:android": "cap open android",
+    "#Native run": "Build, then compile and boot the app onto a simulator, emulator or device. `cap run` syncs on its own, so there is no sync step here. With no --target it prompts with a picker; targets:* prints that list non-interactively so an id can be pinned.",
+    "#Native run args": "`&&` rather than run-s, so that `npm run sim:ios -- --target <id>` works: npm appends those args to the end of the script string, and only a chain ending in `cap` hands them over intact. Both run-s and a nested `npm run` parse them first and swallow the flag.",
+    "sim:ios": "npm run build && cap run ios",
+    "sim:android": "npm run build && cap run android",
+    "run:ios": "cap run ios",
+    "run:android": "cap run android",
+    "targets:ios": "cap run ios --list",
+    "targets:android": "cap run android --list",
     "#Release": "Build, sign and upload exactly as CI does — reads .env.release (op:// refs) via `op run`; see .env.release.example",
     "release:ios": "bash scripts/release-ios.sh",
     "release:android": "bash scripts/release-android.sh",
@@ -83,6 +91,7 @@
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.3",
     "@googlemaps/js-api-loader": "^2.1.1",
-    "@lucide/svelte": "^1.33.0"
+    "@lucide/svelte": "^1.33.0",
+    "capacitor-plugin-apple-maps": "^0.3.4"
   }
 }

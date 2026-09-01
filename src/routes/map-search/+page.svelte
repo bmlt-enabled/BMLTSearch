@@ -1,11 +1,14 @@
 <script lang="ts">
   /**
-   * Imported eagerly, not with a dynamic import inside createMap().
+   * The provider module is imported eagerly, not with a dynamic import inside
+   * createMap().
    *
-   * Importing the module is what runs `customElements.define('capacitor-google-map', …)`,
-   * and the element's connectedCallback is what applies `overflow: scroll` plus a
-   * 200%-height child — the two things that make WebKit materialise the
-   * WKChildScrollView the iOS plugin hunts for in the native view tree.
+   * Importing it is what runs `customElements.define(...)` for the platform's
+   * map element — `capacitor-apple-map` on iOS, `capacitor-google-map` on
+   * Android/web — and the element's connectedCallback is what applies
+   * `overflow: scroll` plus a 200%-height child, the two things that make WebKit
+   * materialise the WKChildScrollView the native plugins hunt for in the view
+   * tree.
    *
    * Defined late, the element gets inserted as an unknown element and is only
    * upgraded once the import resolves, so `create()` ran before WebKit had a
@@ -14,7 +17,7 @@
    * already existed. This route is its own chunk, so importing here costs
    * nothing elsewhere.
    */
-  import { GoogleMap, type GoogleMap as GoogleMapType } from '@capacitor/google-maps';
+  import { createMap as createNativeMap, mapElementTag, usesAppleMaps, type MapHandle, type MarkerClickData } from '$lib/maps/provider';
   import { RotateCw, Search, X } from '@lucide/svelte';
   import { onMount } from 'svelte';
   import { meetingsByIds, meetingsWithinRadius } from '$lib/api/bmlt';
@@ -30,7 +33,7 @@
   import { mapKey } from '$lib/maps/keys';
   import { MAP_VENUE_TYPES } from '$lib/meetings/venue';
   import { platform } from '$lib/native';
-  import { newSessionToken, placeLocation, suggestPlaces, type PlaceSuggestion, type PlacesSession } from '$lib/maps/places';
+  import { newSessionToken, placeLocation, suggestPlaces, type PlaceSuggestion, type PlacesSession, type SearchBias } from '$lib/maps/places';
   import { buildMarkers, iconFor } from '$lib/maps/markers';
   import { loading } from '$lib/stores/loading.svelte';
   import { settings } from '$lib/stores/settings.svelte';
@@ -49,13 +52,29 @@
   /** Camera-idle fires repeatedly through a fling; only the last one matters. */
   const IDLE_DEBOUNCE_MS = 400;
 
-  let map: GoogleMapType | null = null;
+  let map: MapHandle | null = null;
   let mapElement = $state<HTMLElement | null>(null);
   let error = $state('');
 
   let queryText = $state('');
   let suggestions = $state<PlaceSuggestion[]>([]);
   let sessionToken: PlacesSession;
+
+  /**
+   * Current map region, used to bias iOS (MapKit) autocomplete toward what is on
+   * screen. Not $state — only read by the async search handler, never rendered.
+   * Ignored on the Google paths, which do their own biasing.
+   */
+  let searchBias: SearchBias | undefined;
+
+  function updateSearchBias(center: LatLng, southwest: LatLng) {
+    searchBias = {
+      latitude: center.lat,
+      longitude: center.lng,
+      latitudeDelta: Math.abs(center.lat - southwest.lat) * 2,
+      longitudeDelta: Math.abs(center.lng - southwest.lng) * 2
+    };
+  }
 
   let sheetOpen = $state(false);
   let sheetLoading = $state(false);
@@ -74,23 +93,22 @@
 
   let idleTimer: ReturnType<typeof setTimeout> | undefined;
   let searchSequence = 0;
-  /** Set while we move the camera ourselves, so it does not trigger a search. */
-  let programmaticMove = false;
   /**
-   * Overrides the above for one move.
-   *
-   * Not every camera move we make is the same. Recentring after a marker tap
-   * must stay silent; going to a place the reader picked, or to their location
-   * once the fix lands, must produce results. Without this distinction a chosen
-   * place moved the map and then sat there showing the previous area's pins
-   * until you nudged it by hand.
+   * Set while we move the camera ourselves, so the camera-idle it may (or may
+   * not) produce is ignored. Our own moves always search explicitly via
+   * `searchCurrentView()` afterwards; only a user gesture searches through idle.
    */
-  let searchAfterMove = false;
+  let programmaticMove = false;
 
   /**
-   * True once the native map has emitted an event, which is the only reliable
-   * proof its view exists — `create()` resolving is not, because the iOS side
-   * renders on a later main-queue turn.
+   * True once the native view exists and is safe to drive. We set it a couple of
+   * frames after `create()` resolves rather than waiting for a camera-idle:
+   *
+   * MapKit only emits `onCameraIdle` from its `regionDidChangeAnimated` delegate,
+   * which does NOT fire for the region set during `create()` (our listener is not
+   * attached yet) and fires only unreliably for a programmatic, non-animated
+   * `setCamera`. So the first search — and every search after a programmatic move
+   * — reads `getMapBounds()` and runs directly; idle is left to handle user pans.
    */
   let mapReady = false;
   let pendingCamera: { coordinate?: LatLng; zoom?: number } | null = null;
@@ -124,7 +142,8 @@
     pendingCamera = null;
     if (!instance) return;
     try {
-      await instance.removeAllMapListeners();
+      // destroy() tears the native view down and drops its listeners; both
+      // plugins clean up on destroy, so there is no separate listener removal.
       await instance.destroy();
     } catch {
       // Already gone — nothing to clean up.
@@ -132,7 +151,8 @@
   }
 
   async function start() {
-    if (!mapKey()) {
+    // Apple Maps (iOS) needs no key; Google (Android/web) does.
+    if (!usesAppleMaps() && !mapKey()) {
       error = 'Google Maps is not configured. See .env.example for the three keys this needs.';
       return;
     }
@@ -147,8 +167,15 @@
       // the permission prompt was answered.
       await createMap(settings.location ? { lat: settings.location.lat, lng: settings.location.lng } : FALLBACK_CENTRE);
 
-      // Then refine, without blocking the map appearing.
-      if (!settings.location) void locateAndRecentre();
+      if (settings.location) {
+        // Search the opening view straight away — the map does not emit a
+        // reliable idle for its initial region, so we cannot wait for one.
+        await searchCurrentView();
+      } else {
+        // No stored location: refine to the device fix without blocking the map
+        // appearing, and let that path run the first search where the reader is.
+        void locateAndRecentre();
+      }
     } catch {
       error = t('LOAD_ERROR');
     }
@@ -161,10 +188,13 @@
       // Otherwise the map slides to the reader's location while the pins stay
       // where the fallback centre was.
       searchedCentre = null;
-      searchAfterMove = true;
       await moveCamera({ coordinate: fix, zoom: 11 });
+      // The move may not emit an idle (see mapReady), so search the new view now.
+      await searchCurrentView();
     } catch {
-      // No fix: the fallback view stands, and the reader can search or pan.
+      // No fix: search the fallback view that is already on screen, so the reader
+      // still gets meetings rather than an empty map.
+      await searchCurrentView();
     }
   }
 
@@ -200,39 +230,48 @@
     // compositing pass to actually build the child scroll view the native side
     // matches against. Two frames after upgrade is enough; creating in the same
     // turn is not.
-    await customElements.whenDefined('capacitor-google-map');
+    await customElements.whenDefined(mapElementTag);
     await nextFrame();
     await nextFrame();
 
     // The element can disappear while we were waiting.
     if (!mapElement) return;
 
-    map = await GoogleMap.create({
+    // Apple Maps on iOS, Google on Android/web — the provider picks and only
+    // Google is handed a key. minZoom keeps a zoom-out from asking the
+    // aggregator for a continent's worth of meetings.
+    map = await createNativeMap({
       id: 'bmlt-map',
       element: mapElement,
-      // Platform key: the native Maps SDK on device, the web key in a browser.
-      apiKey: mapKey(),
-      forceCreate: true,
-      language: i18n.locale,
-      config: { center: centre, zoom: 11 }
+      config: { center: centre, zoom: 11, minZoom: MIN_SEARCH_ZOOM }
     });
 
-    await map.setOnCameraIdleListener((event) => {
-      // The first idle is proof the native map view exists: the event came from
-      // it. `create()` resolving is not proof — the iOS side renders on a later
-      // main-queue turn, so a camera call in that window hits a nil map view.
-      markReady();
-
+    await map.setOnCameraIdleListener((data) => {
+      // Idle handles user gestures only. Our own moves search explicitly, so the
+      // idle they may emit is swallowed here — otherwise a programmatic recentre
+      // (marker tap, locate, place pick) would fire a second, unwanted search.
       const wasProgrammatic = programmaticMove;
       programmaticMove = false;
-      if (wasProgrammatic && !searchAfterMove) return;
-      searchAfterMove = false;
+      if (wasProgrammatic) return;
+
+      // Normalise the provider payload into the {zoom, bounds:{center, southwest}}
+      // shape the rest of the route uses.
+      const event: CameraEvent = { zoom: data.zoom, bounds: { center: data.bounds.center, southwest: data.bounds.southwest } };
+      updateSearchBias(event.bounds.center, event.bounds.southwest);
 
       clearTimeout(idleTimer);
       idleTimer = setTimeout(() => void onCameraIdle(event), IDLE_DEBOUNCE_MS);
     });
 
-    await map.setOnMarkerClickListener((event) => void onMarkerClick(event.markerId));
+    await map.setOnMarkerClickListener((data: MarkerClickData) => void onMarkerClick(data.markerId));
+
+    // The native view exists now; give iOS a couple of frames to finish its first
+    // render, then mark ready so setCamera / getMapBounds are safe. We do NOT wait
+    // for a camera-idle to prove readiness — MapKit may never send one for the
+    // initial region (see mapReady).
+    await nextFrame();
+    await nextFrame();
+    markReady();
   }
 
   /** Applies any camera move that was requested before the map was usable. */
@@ -307,6 +346,26 @@
     canSearchArea = distanceKm(searchedCentre, event.bounds.center) > radiusKm * 0.25;
   }
 
+  /**
+   * Read the map's current viewport and search it directly.
+   *
+   * This is how the first load and every programmatic move (locate, place pick)
+   * run their search, instead of waiting for a camera-idle that MapKit does not
+   * reliably send for non-gesture region changes. `getMapBounds()` returns the
+   * real visible rectangle, so the search covers exactly what is on screen.
+   */
+  async function searchCurrentView(zoom = 11) {
+    if (!map) return;
+    try {
+      const bounds = await map.getMapBounds();
+      const event: CameraEvent = { zoom, bounds: { center: bounds.center, southwest: bounds.southwest } };
+      updateSearchBias(event.bounds.center, event.bounds.southwest);
+      await runSearch(event);
+    } catch {
+      // The view can be torn down mid-flight; a failed bounds read is not fatal.
+    }
+  }
+
   async function runSearch(event: CameraEvent) {
     if (!map) return;
 
@@ -347,8 +406,7 @@
     const placed = await map.addMarkers(
       markers.map((marker) => ({
         coordinate: marker.coordinate,
-        iconUrl: iconFor(marker),
-        iconAnchor: { x: 15, y: 45 }
+        iconUrl: iconFor(marker)
       }))
     );
 
@@ -387,7 +445,7 @@
 
   async function onSearchInput(event: Event & { currentTarget: HTMLInputElement }) {
     queryText = event.currentTarget.value;
-    suggestions = queryText.trim() ? await suggestPlaces(queryText, i18n.locale, sessionToken) : [];
+    suggestions = queryText.trim() ? await suggestPlaces(queryText, i18n.locale, sessionToken, searchBias) : [];
   }
 
   async function choose(suggestion: PlaceSuggestion) {
@@ -404,9 +462,10 @@
       // app when someone typed a search before the map had rendered.
       await moveCamera({ coordinate: point, zoom: 12 });
 
-      // Jumping somewhere new should search there, not wait to be asked.
+      // Jumping somewhere new should search there, not wait to be asked — and the
+      // move may not emit an idle, so run the search explicitly on the new view.
       searchedCentre = null;
-      searchAfterMove = true;
+      await searchCurrentView(12);
 
       // A new session token per completed search is what keeps Places billing
       // on the per-session rate rather than per-keystroke.
@@ -426,47 +485,58 @@
 
 <svelte:head><title>{t('MAP_SEARCH')}</title></svelte:head>
 
-<AppBar title={t('MAP_SEARCH')} onmenu={() => drawer.toggle()}>
-  {#snippet below()}
-    <div class="relative">
-      <Search size={18} class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/70" aria-hidden="true" />
-      <input
-        type="search"
-        value={queryText}
-        oninput={onSearchInput}
-        placeholder={t('PLACE_SEARCH')}
-        aria-label={t('PLACE_SEARCH')}
-        class="focusable w-full rounded-lg bg-white/15 py-2.5 pr-10 pl-10 text-sm text-white placeholder:text-white/60"
-      />
-      {#if queryText}
-        <button type="button" class="focusable absolute top-1/2 right-2 -translate-y-1/2 rounded p-1.5 text-white/70 hover:bg-white/15" onclick={clearSearch} aria-label={t('CANCEL')}>
-          <X size={16} aria-hidden="true" />
-        </button>
-      {/if}
-    </div>
-  {/snippet}
-</AppBar>
-
-{#if error}
-  <ErrorState message={error} onretry={() => ((error = ''), start())} />
-{/if}
-
-<div class="relative" style="height: calc(100dvh - 12rem)">
-  {#if suggestions.length > 0}
-    <ul class="border-border bg-surface-raised absolute inset-x-0 top-0 z-20 max-h-72 overflow-y-auto border-b shadow-lg">
-      <!-- Keyed by position: Places can return two suggestions with the same
-           text and no place id, and a duplicate key is a hard render error. -->
-      {#each suggestions as suggestion, index (index)}
-        <li>
-          <button type="button" class="focusable border-border hover:bg-surface-sunken text-text w-full border-b px-4 py-3 text-left text-sm last:border-0" onclick={() => choose(suggestion)}>
-            {suggestion.description}
+<!--
+  The screen is a flex column exactly one viewport tall: the app bar takes its
+  natural height (search box and top safe area included) and the map area takes
+  whatever is left. The height is measured, not a magic constant, so the map's
+  bottom edge lands right on the tab bar on every device — which is what keeps
+  MapKit's required Apple logo and "Legal" link (drawn at the map's bottom-left)
+  visible instead of tucked behind the nav or the home indicator. `.map-screen`
+  reserves the nav + bottom safe-area itself and cancels the global `.app-main`
+  bottom padding so there is no stray scroll. See the <style> block below.
+-->
+<div class="map-screen flex flex-col">
+  <AppBar title={t('MAP_SEARCH')} onmenu={() => drawer.toggle()}>
+    {#snippet below()}
+      <div class="relative">
+        <Search size={18} class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/70" aria-hidden="true" />
+        <input
+          type="search"
+          value={queryText}
+          oninput={onSearchInput}
+          placeholder={t('PLACE_SEARCH')}
+          aria-label={t('PLACE_SEARCH')}
+          class="focusable w-full rounded-lg bg-white/15 py-2.5 pr-10 pl-10 text-sm text-white placeholder:text-white/60"
+        />
+        {#if queryText}
+          <button type="button" class="focusable absolute top-1/2 right-2 -translate-y-1/2 rounded p-1.5 text-white/70 hover:bg-white/15" onclick={clearSearch} aria-label={t('CANCEL')}>
+            <X size={16} aria-hidden="true" />
           </button>
-        </li>
-      {/each}
-    </ul>
+        {/if}
+      </div>
+    {/snippet}
+  </AppBar>
+
+  {#if error}
+    <ErrorState message={error} onretry={() => ((error = ''), start())} />
   {/if}
 
-  <!--
+  <div class="relative min-h-0 flex-1">
+    {#if suggestions.length > 0}
+      <ul class="border-border bg-surface-raised absolute inset-x-0 top-0 z-20 max-h-72 overflow-y-auto border-b shadow-lg">
+        <!-- Keyed by position: Places can return two suggestions with the same
+           text and no place id, and a duplicate key is a hard render error. -->
+        {#each suggestions as suggestion, index (index)}
+          <li>
+            <button type="button" class="focusable border-border hover:bg-surface-sunken text-text w-full border-b px-4 py-3 text-left text-sm last:border-0" onclick={() => choose(suggestion)}>
+              {suggestion.description}
+            </button>
+          </li>
+        {/each}
+      </ul>
+    {/if}
+
+    <!--
     Offered only once the view has moved away from where the current pins were
     found. Nothing searches on its own after the first load: an automatic search
     per camera idle rebuilt the markers underneath the reader — including when
@@ -482,23 +552,25 @@
     so this is a web-only ceiling — if the toggle is ever turned off, this can
     move to top-3.
   -->
-  {#if canSearchArea && suggestions.length === 0}
-    <button
-      type="button"
-      class="focusable bg-surface-raised text-brand-ink ring-border hover:bg-surface-sunken absolute top-8 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full px-5 py-3 text-[15px] font-semibold shadow-lg ring-1 transition-colors"
-      onclick={searchThisArea}
-    >
-      <RotateCw size={16} aria-hidden="true" />
-      {t('SEARCH_AREA')}
-    </button>
-  {/if}
+    {#if canSearchArea && suggestions.length === 0}
+      <button
+        type="button"
+        class="focusable bg-surface-raised text-brand-ink ring-border hover:bg-surface-sunken absolute top-8 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full px-5 py-3 text-[15px] font-semibold shadow-lg ring-1 transition-colors"
+        onclick={searchThisArea}
+      >
+        <RotateCw size={16} aria-hidden="true" />
+        {t('SEARCH_AREA')}
+      </button>
+    {/if}
 
-  <!--
-    `capacitor-google-map` is the plugin's own element. On the native platforms
-    it is a transparent hole punched through the webview with the platform map
-    view rendered behind it; on the web the plugin mounts a normal JS map inside.
+    <!--
+    The plugin's own element — `capacitor-apple-map` on iOS, `capacitor-google-map`
+    on Android/web (see provider.ts). On the native platforms it is a transparent
+    hole punched through the webview with the platform map view rendered behind
+    it; on the web the Google plugin mounts a normal JS map inside.
   -->
-  <capacitor-google-map bind:this={mapElement} class="block h-full w-full"></capacitor-google-map>
+    <svelte:element this={mapElementTag} bind:this={mapElement} class="block h-full w-full"></svelte:element>
+  </div>
 </div>
 
 <Modal open={sheetOpen} title={t('MEETING_DETAILS')} onclose={() => (sheetOpen = false)}>
@@ -511,3 +583,21 @@
     <MeetingList meetings={sheetMeetings} expandAll />
   {/if}
 </Modal>
+
+<style>
+  /*
+   * The map screen owns the full viewport. `.app-main` (app.css) adds a
+   * bottom padding of `4.5rem + safe-area-inset-bottom` so ordinary pages clear
+   * the fixed bottom nav; here we cancel that with a matching negative margin and
+   * reserve the same space as our own padding instead. Net effect: the wrapper is
+   * exactly `100dvh`, the inner `flex-1` map area ends at the top of the tab bar,
+   * and MapKit's Apple logo + "Legal" link sit just above it rather than behind
+   * it (or behind the home indicator). box-sizing is border-box (Tailwind reset),
+   * so the 100dvh height includes the padding.
+   */
+  .map-screen {
+    height: 100dvh;
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+    margin-bottom: calc(-4.5rem - env(safe-area-inset-bottom, 0px));
+  }
+</style>

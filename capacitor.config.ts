@@ -22,7 +22,12 @@ const config: CapacitorConfig = {
     }
   },
   ios: {
-    scheme: 'BMLT Search',
+    // Xcode scheme the Capacitor CLI builds (`cap run`/`cap build`). It must be
+    // an actual scheme in App.xcodeproj — the only one is `App` (App.xcscheme),
+    // which is also what CI and scripts/release-ios.sh pass as `-scheme App`.
+    // This is NOT the app's display name (that's `appName` above); setting it to
+    // 'BMLT Search' made `cap run` fail with "does not contain a scheme named".
+    scheme: 'App',
     contentInset: 'never',
     backgroundColor: '#0a61ad'
   },
