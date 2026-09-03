@@ -1,7 +1,7 @@
 {
   "name": "bmlt-search",
   "private": true,
-  "version": "6.1.0",
+  "version": "6.1.1",
   "license": "MIT",
   "type": "module",
   "author": "BMLT Enabled",
@@ -96,6 +96,6 @@
     "@capacitor/status-bar": "^8.0.3",
     "@googlemaps/js-api-loader": "^2.1.1",
     "@lucide/svelte": "^1.37.0",
-    "capacitor-plugin-apple-maps": "^0.3.4"
+    "capacitor-plugin-apple-maps": "^0.5.0"
   }
 }

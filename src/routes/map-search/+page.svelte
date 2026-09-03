@@ -52,6 +52,38 @@
   /** Camera-idle fires repeatedly through a fling; only the last one matters. */
   const IDLE_DEBOUNCE_MS = 400;
 
+  /** Edge inset, in pixels, kept clear of pins when framing a search's results. */
+  const FIT_PADDING_PX = 48;
+
+  /**
+   * A single result has no extent to frame, so `fitBounds` would zoom to the
+   * maximum. Centre on it at this zoom instead — close, but with context around.
+   */
+  const SINGLE_PIN_ZOOM = 13;
+
+  /**
+   * Keep the native map's light/dark appearance in step with the app, which
+   * follows the system scheme via `prefers-color-scheme` (see app.css). Apple
+   * Maps honours this; the Google branch's `setColorScheme` is a no-op.
+   */
+  function currentColorScheme(): 'light' | 'dark' {
+    return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  let schemeQuery: MediaQueryList | null = null;
+  function onColorSchemeChange() {
+    void map?.setColorScheme(currentColorScheme());
+  }
+  function watchColorScheme() {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    schemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    schemeQuery.addEventListener('change', onColorSchemeChange);
+  }
+  function unwatchColorScheme() {
+    schemeQuery?.removeEventListener('change', onColorSchemeChange);
+    schemeQuery = null;
+  }
+
   let map: MapHandle | null = null;
   let mapElement = $state<HTMLElement | null>(null);
   let error = $state('');
@@ -94,11 +126,17 @@
   let idleTimer: ReturnType<typeof setTimeout> | undefined;
   let searchSequence = 0;
   /**
-   * Set while we move the camera ourselves, so the camera-idle it may (or may
-   * not) produce is ignored. Our own moves always search explicitly via
-   * `searchCurrentView()` afterwards; only a user gesture searches through idle.
+   * Whether the move that is about to settle was a user gesture, as reported by
+   * the plugin's `onCameraMoveStarted`. Only a gesture-driven idle offers to
+   * "search this area"; a programmatic move (our `setCamera`/`fitBounds`, or the
+   * provider recentring itself on a marker tap) reports `false` and is ignored.
+   *
+   * This replaces the old inference — treating *any* non-programmatic idle as a
+   * reader pan — which misfired on self-triggered moves like a min-zoom bounce.
+   * Defaults to `false` so an idle with no preceding move-started never spuriously
+   * arms the button.
    */
-  let programmaticMove = false;
+  let lastMoveWasGesture = false;
 
   /**
    * True once the native view exists and is safe to drive. We set it a couple of
@@ -136,6 +174,7 @@
   });
 
   async function teardown() {
+    unwatchColorScheme();
     const instance = map;
     map = null;
     mapReady = false;
@@ -169,8 +208,9 @@
 
       if (settings.location) {
         // Search the opening view straight away — the map does not emit a
-        // reliable idle for its initial region, so we cannot wait for one.
-        await searchCurrentView();
+        // reliable idle for its initial region, so we cannot wait for one. Frame
+        // the results: opening at the saved spot is itself a jump to a location.
+        await searchCurrentView(11, true);
       } else {
         // No stored location: refine to the device fix without blocking the map
         // appearing, and let that path run the first search where the reader is.
@@ -189,12 +229,13 @@
       // where the fallback centre was.
       searchedCentre = null;
       await moveCamera({ coordinate: fix, zoom: 11 });
-      // The move may not emit an idle (see mapReady), so search the new view now.
-      await searchCurrentView();
+      // The move may not emit an idle (see mapReady), so search the new view now,
+      // and frame the results around the reader's location.
+      await searchCurrentView(11, true);
     } catch {
       // No fix: search the fallback view that is already on screen, so the reader
-      // still gets meetings rather than an empty map.
-      await searchCurrentView();
+      // still gets meetings rather than an empty map, framed around the results.
+      await searchCurrentView(11, true);
     }
   }
 
@@ -243,16 +284,23 @@
     map = await createNativeMap({
       id: 'bmlt-map',
       element: mapElement,
-      config: { center: centre, zoom: 11, minZoom: MIN_SEARCH_ZOOM }
+      // colorScheme applied at create time so the map paints in the right theme
+      // from its first frame, not a beat later. Kept in sync below.
+      config: { center: centre, zoom: 11, minZoom: MIN_SEARCH_ZOOM, colorScheme: currentColorScheme() }
     });
+    watchColorScheme();
+
+    // Authoritative from the plugin, and it fires before the idle: was the move
+    // that is settling a user gesture, or one we (or the provider) made? Only a
+    // gesture should offer to search the new area.
+    await map.setOnCameraMoveStartedListener((isGesture) => (lastMoveWasGesture = isGesture));
 
     await map.setOnCameraIdleListener((data) => {
       // Idle handles user gestures only. Our own moves search explicitly, so the
-      // idle they may emit is swallowed here — otherwise a programmatic recentre
-      // (marker tap, locate, place pick) would fire a second, unwanted search.
-      const wasProgrammatic = programmaticMove;
-      programmaticMove = false;
-      if (wasProgrammatic) return;
+      // idle they emit is swallowed here — otherwise a programmatic recentre
+      // (marker tap, locate, place pick, fit-to-pins) would fire a second,
+      // unwanted search.
+      if (!lastMoveWasGesture) return;
 
       // Normalise the provider payload into the {zoom, bounds:{center, southwest}}
       // shape the rest of the route uses.
@@ -298,12 +346,11 @@
       return;
     }
     try {
-      programmaticMove = true;
       await map.setCamera(config);
     } catch {
       // A destroyed or not-yet-rendered map. Nothing to recover, and it must not
-      // take the app down.
-      programmaticMove = false;
+      // take the app down. The move-started listener already reported this move
+      // as non-gesture, so no idle it emits will be mistaken for a reader pan.
     }
   }
 
@@ -354,19 +401,25 @@
    * reliably send for non-gesture region changes. `getMapBounds()` returns the
    * real visible rectangle, so the search covers exactly what is on screen.
    */
-  async function searchCurrentView(zoom = 11) {
+  async function searchCurrentView(zoom = 11, frame = false) {
     if (!map) return;
     try {
       const bounds = await map.getMapBounds();
       const event: CameraEvent = { zoom, bounds: { center: bounds.center, southwest: bounds.southwest } };
       updateSearchBias(event.bounds.center, event.bounds.southwest);
-      await runSearch(event);
+      await runSearch(event, frame);
     } catch {
       // The view can be torn down mid-flight; a failed bounds read is not fatal.
     }
   }
 
-  async function runSearch(event: CameraEvent) {
+  /**
+   * `frame` reframes the camera to enclose the pins this search draws. Set on
+   * "jump" searches (place pick, locate, initial load) where the reader has just
+   * teleported and framing the results beats the fixed opening zoom. It is left
+   * off for "Search this area", so refining in place keeps the reader's view.
+   */
+  async function runSearch(event: CameraEvent, frame = false) {
     if (!map) return;
 
     const radiusKm = Math.ceil(distanceKm(event.bounds.center, event.bounds.southwest));
@@ -380,9 +433,10 @@
     try {
       const meetings = await meetingsWithinRadius(event.bounds.center.lat, event.bounds.center.lng, radiusKm, MAP_VENUE_TYPES);
       if (sequence !== searchSequence || !map) return;
-      await drawMarkers(meetings);
+      const coords = await drawMarkers(meetings);
       searchedCentre = event.bounds.center;
       canSearchArea = false;
+      if (frame) await frameToPins(coords);
     } catch {
       if (sequence === searchSequence) error = t('LOAD_ERROR');
     } finally {
@@ -390,8 +444,48 @@
     }
   }
 
-  async function drawMarkers(meetings: RawMeeting[]) {
-    if (!map) return;
+  /**
+   * Frame the camera to the search's results using the plugin's native
+   * `fitBounds`, which frames to the real viewport aspect ratio. This is a
+   * programmatic move, so the move-started listener reports it as non-gesture and
+   * the idle it emits never arms "Search this area". `searchedCentre` is then
+   * re-based to the framed centre, so a later pan measures drift from what the
+   * reader actually sees rather than the pre-fit search centre.
+   */
+  async function frameToPins(coords: LatLng[]) {
+    if (!map || coords.length === 0) return;
+    try {
+      if (coords.length === 1) {
+        // No extent to frame; centre on the lone pin instead of zooming to max.
+        await map.setCamera({ coordinate: coords[0], zoom: SINGLE_PIN_ZOOM });
+        searchedCentre = coords[0];
+      } else {
+        await map.fitBounds(coords, FIT_PADDING_PX);
+        searchedCentre = boundsCentre(coords);
+      }
+    } catch {
+      // Map torn down mid-flight; framing is best-effort.
+    }
+  }
+
+  /** Centre of the bounding box of a set of coordinates. */
+  function boundsCentre(coords: LatLng[]): LatLng {
+    let minLat = Infinity;
+    let maxLat = -Infinity;
+    let minLng = Infinity;
+    let maxLng = -Infinity;
+    for (const { lat, lng } of coords) {
+      minLat = Math.min(minLat, lat);
+      maxLat = Math.max(maxLat, lat);
+      minLng = Math.min(minLng, lng);
+      maxLng = Math.max(maxLng, lng);
+    }
+    return { lat: (minLat + maxLat) / 2, lng: (minLng + maxLng) / 2 };
+  }
+
+  /** Draws the pins for a result set and returns their coordinates (for framing). */
+  async function drawMarkers(meetings: RawMeeting[]): Promise<LatLng[]> {
+    if (!map) return [];
 
     if (placedMarkerIds.length > 0) {
       await map.removeMarkers(placedMarkerIds);
@@ -401,7 +495,7 @@
     }
 
     const markers = buildMarkers(meetings);
-    if (markers.length === 0) return;
+    if (markers.length === 0) return [];
 
     const placed = await map.addMarkers(
       markers.map((marker) => ({
@@ -417,15 +511,16 @@
     placedMarkerIds = placed;
 
     await map.enableClustering();
+    return markers.map((marker) => marker.coordinate);
   }
 
   async function onMarkerClick(markerId: string) {
     const ids = markerIds.get(markerId);
     if (!ids?.length) return;
 
-    // Tapping a pin makes Google recentre the map by itself. That recentre is
-    // not the reader panning, so it must not offer to search the new area.
-    programmaticMove = true;
+    // Tapping a pin makes Google recentre the map by itself. That recentre is not
+    // the reader panning — the plugin reports it as a non-gesture move-started, so
+    // the idle it emits is already ignored and won't offer to search the new area.
 
     // The sheet opens straight away with its own spinner rather than raising the
     // app-wide overlay. Loading a pin's meetings is not an area search, and
@@ -464,8 +559,9 @@
 
       // Jumping somewhere new should search there, not wait to be asked — and the
       // move may not emit an idle, so run the search explicitly on the new view.
+      // Frame the results, since the reader has just jumped to a chosen place.
       searchedCentre = null;
-      await searchCurrentView(12);
+      await searchCurrentView(12, true);
 
       // A new session token per completed search is what keeps Places billing
       // on the per-session rate rather than per-keystroke.

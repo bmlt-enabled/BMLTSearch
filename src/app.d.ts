@@ -19,6 +19,12 @@ declare global {
     // interface Platform {}
   }
 
+  /** Short commit this bundle was built from; see `gitCommit` in vite.config.ts. */
+  const __GIT_SHA__: string;
+
+  /** Release version, from the git tag; see `appVersion` in vite.config.ts. */
+  const __APP_VERSION__: string;
+
   /**
    * The Maps keys, read from `import.meta.env` rather than `$env/static/public`
    * — see src/lib/maps/keys.ts for why.

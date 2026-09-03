@@ -1,5 +1,6 @@
 /// <reference types="vitest/config" />
 
+import { execSync } from 'node:child_process';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { svelteTesting } from '@testing-library/svelte/vite';
@@ -9,7 +10,59 @@ import tailwindcss from '@tailwindcss/vite';
 // Kit options (adapter, paths, runes) live in svelte.config.js — see the note
 // there for why they can't be inline here.
 
+/**
+ * The commit this bundle was built from.
+ *
+ * CI is the case that matters: `GITHUB_SHA` is the only reliable answer there,
+ * because the checkout is detached and the worktree is thrown away afterwards.
+ * Locally it falls back to git, and to a placeholder when there is no git at
+ * all — a tarball, or a container without the binary. A build must never fail
+ * for want of a label.
+ *
+ * This exists because working out which commit produced TestFlight build 6
+ * meant correlating an upload timestamp against workflow run times. That works
+ * until two builds go out twenty minutes apart, which has already happened.
+ */
+function git(command: string): string | undefined {
+  try {
+    return execSync(command, { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim();
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * The version this build calls itself.
+ *
+ * The git tag, not `package.json`. The tag is what actually ships: CI sets
+ * `MARKETING_VERSION` from `GITHUB_REF_NAME` on a tagged run, and nothing reads
+ * the package version on the way to a store. They have already drifted apart —
+ * package.json says 0.1.0 while v1.0.0 is in TestFlight — so taking the tag is
+ * the difference between a number that matches the store listing and one that
+ * quietly does not.
+ *
+ * Falls back to the package version, then to `dev`, for a checkout with no tags
+ * at all. Paired with the commit below, an approximate version is still useful:
+ * the sha is the exact answer, the version is the readable one.
+ */
+function appVersion(): string {
+  const tag = process.env.GITHUB_REF_TYPE === 'tag' ? process.env.GITHUB_REF_NAME : git('git describe --tags --abbrev=0');
+  return (tag ?? process.env.npm_package_version ?? 'dev').replace(/^v/, '');
+}
+
+function gitCommit(): string {
+  const fromCi = process.env.GITHUB_SHA;
+  if (fromCi) return fromCi.slice(0, 7);
+  return git('git rev-parse --short=7 HEAD') ?? 'unknown';
+}
+
 export default defineConfig({
+  define: {
+    __GIT_SHA__: JSON.stringify(gitCommit()),
+    __APP_VERSION__: JSON.stringify(appVersion())
+  },
   // Vite only exposes VITE_-prefixed variables on `import.meta.env`; adding
   // PUBLIC_ lets the Maps keys be read that way instead of through
   // `$env/static/public`.

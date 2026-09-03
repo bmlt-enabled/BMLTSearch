@@ -1,4 +1,4 @@
-import { GoogleMap } from '@capacitor/google-maps';
+import { GoogleMap, LatLngBounds } from '@capacitor/google-maps';
 import { AppleMap } from 'capacitor-plugin-apple-maps';
 import { platform } from '../native';
 import { mapKey } from './keys';
@@ -58,20 +58,54 @@ export interface ProviderMarker {
 export interface CreateMapOptions {
   id: string;
   element: HTMLElement;
-  config: { center: LatLng; zoom: number; minZoom?: number };
+  config: { center: LatLng; zoom: number; minZoom?: number; colorScheme?: 'light' | 'dark' };
 }
 
 /** Provider-neutral handle over the native map, exposing only what the route needs. */
 export interface MapHandle {
   setOnCameraIdleListener(callback: (data: CameraIdleData) => void): Promise<void>;
+  /**
+   * Fires once as the camera starts moving, before the ensuing idle, with the
+   * plugin's authoritative `isGesture` flag: true for a user pan/zoom, false for
+   * a programmatic move (our own `setCamera`/`fitBounds`, or the provider
+   * recentring itself on a marker tap). Both plugins expose it identically.
+   */
+  setOnCameraMoveStartedListener(callback: (isGesture: boolean) => void): Promise<void>;
   setOnMarkerClickListener(callback: (data: MarkerClickData) => void): Promise<void>;
   getMapBounds(): Promise<ProviderBounds>;
   setCamera(config: { coordinate?: LatLng; zoom?: number }): Promise<void>;
+  /** Frame the camera to enclose every coordinate. `padding` is an edge inset in pixels. */
+  fitBounds(coordinates: LatLng[], padding?: number): Promise<void>;
+  /** Match the map's appearance to a light/dark scheme. No-op where the provider has no such control (Google). */
+  setColorScheme(scheme: 'light' | 'dark'): Promise<void>;
   addMarkers(markers: ProviderMarker[]): Promise<string[]>;
   removeMarkers(ids: string[]): Promise<void>;
   enableClustering(): Promise<void>;
   disableClustering(): Promise<void>;
   destroy(): Promise<void>;
+}
+
+/**
+ * Bounding box of a set of coordinates, in the {southwest, center, northeast}
+ * shape Google's `fitBounds` wants. Apple's `fitBounds` takes the raw `LatLng[]`
+ * and computes this itself, so this is only needed on the Google branch.
+ */
+function boundsOf(coordinates: LatLng[]): ProviderBounds {
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+  let minLng = Infinity;
+  let maxLng = -Infinity;
+  for (const { lat, lng } of coordinates) {
+    minLat = Math.min(minLat, lat);
+    maxLat = Math.max(maxLat, lat);
+    minLng = Math.min(minLng, lng);
+    maxLng = Math.max(maxLng, lng);
+  }
+  return {
+    southwest: { lat: minLat, lng: minLng },
+    northeast: { lat: maxLat, lng: maxLng },
+    center: { lat: (minLat + maxLat) / 2, lng: (minLng + maxLng) / 2 }
+  };
 }
 
 /** Normalise either provider's bounds object into {center, southwest, northeast}. */
@@ -104,9 +138,14 @@ export async function createMap(options: CreateMapOptions): Promise<MapHandle> {
     });
     return {
       setOnCameraIdleListener: (cb) => map.setOnCameraIdleListener((d) => cb({ latitude: d.latitude, longitude: d.longitude, zoom: d.zoom, bounds: normaliseBounds(d.bounds) })),
+      setOnCameraMoveStartedListener: (cb) => map.setOnCameraMoveStartedListener((d) => cb(d.isGesture)),
       setOnMarkerClickListener: (cb) => map.setOnMarkerClickListener((d) => cb({ markerId: d.markerId })),
       getMapBounds: async () => normaliseBounds(await map.getMapBounds()),
       setCamera: (config) => map.setCamera(config),
+      // Apple's fitBounds takes the raw coordinates and frames them to the real
+      // viewport aspect ratio (setVisibleMapRect(_:edgePadding:)).
+      fitBounds: (coordinates, padding) => map.fitBounds(coordinates, padding),
+      setColorScheme: (scheme) => map.setColorScheme(scheme),
       // MapKit sizes the annotation image; without a size the raw PNG pixels are
       // used, which is tiny on a hi-DPI screen. 60×72 keeps the pin art's ~0.83
       // aspect (the source is 83×100) and matches the marker size in the
@@ -130,9 +169,15 @@ export async function createMap(options: CreateMapOptions): Promise<MapHandle> {
   return {
     setOnCameraIdleListener: (cb) =>
       map.setOnCameraIdleListener((d) => cb({ latitude: d.latitude, longitude: d.longitude, zoom: d.zoom, bounds: normaliseBounds(d.bounds as unknown as ProviderBounds) })),
+    setOnCameraMoveStartedListener: (cb) => map.setOnCameraMoveStartedListener((d) => cb(d.isGesture)),
     setOnMarkerClickListener: (cb) => map.setOnMarkerClickListener((d) => cb({ markerId: d.markerId })),
     getMapBounds: async () => normaliseBounds((await map.getMapBounds()) as unknown as ProviderBounds),
     setCamera: (config) => map.setCamera(config),
+    // Google's fitBounds wants a LatLngBounds; build it from the pins' box.
+    fitBounds: (coordinates, padding) => map.fitBounds(new LatLngBounds(boundsOf(coordinates)), padding),
+    // Google Maps has no runtime light/dark toggle here; the app follows the
+    // system scheme via CSS on the web/Android paths.
+    setColorScheme: () => Promise.resolve(),
     // The Google pin art is anchored by its tip: half its width across, its full
     // height down — the value the route used before this abstraction existed.
     addMarkers: (markers) => map.addMarkers(markers.map((m) => ({ coordinate: m.coordinate, iconUrl: m.iconUrl, iconAnchor: { x: 15, y: 45 } }))),

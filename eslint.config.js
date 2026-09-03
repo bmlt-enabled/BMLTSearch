@@ -15,11 +15,13 @@ export default ts.config(
       globals: {
         ...globals.browser,
         ...globals.node,
-        // The Maps SDK namespace, from @types/google.maps. Declared here because
-        // `no-undef` cannot see a TypeScript type annotation as anything other
-        // than an undefined identifier, and it is a genuine runtime global once
-        // the SDK has loaded.
-        google: 'readonly'
+        // `google` is the ambient Google Maps namespace from @types/google.maps. It
+        // is used in type positions only, but ESLint cannot tell those apart.
+        // `__GIT_SHA__` is substituted by Vite's `define` at build time, so it is a
+        // real global at runtime but exists in no file for ESLint to find.
+        google: 'readonly',
+        __GIT_SHA__: 'readonly',
+        __APP_VERSION__: 'readonly'
       }
     }
   },
