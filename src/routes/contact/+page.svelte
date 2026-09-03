@@ -62,3 +62,5 @@
     </section>
   {/each}
 </div>
+
+<p class="text-11 text-center font-mono text-[var(--text-faint)] select-text">v{__APP_VERSION__} ({__GIT_SHA__})</p>

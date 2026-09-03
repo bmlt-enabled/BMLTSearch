@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.1.1 (UNRELEASED)
+
+- Reader pan: Native gesture detection across Apple + Google Maps.
+- Fit bounds: Jump searches now frame result pins; area searches stay in place.
+- Theme sync: Maps now follow the app/system light/dark theme.
+
 ## 6.1.0 (August 31, 2026)
 
 - Meetings now use Apple Maps on iPhone and iPad.
