@@ -63,9 +63,9 @@ jobs:
           fi
           echo "name=$NAME" >> "$GITHUB_OUTPUT"
           # Offset because this build publishes to the *transferred* listing, whose
-          # 5.x releases already used five-digit codes (the Ionic app's last was
-          # 50500) and Play permanently refuses a code it has already seen. A bare
-          # run number — currently double digits — is rejected outright.
+          # existing releases have already consumed codes in the 60000 range, and
+          # Play permanently refuses a code it has already seen. A bare run number
+          # — currently double digits — is rejected outright.
           #
           # Done in shell rather than in an Actions expression: those have no
           # arithmetic operators, and an invalid expression fails the whole file
@@ -74,7 +74,7 @@ jobs:
           # shell comment, so one cannot be quoted in prose here either — writing
           # the broken form into this comment is what failed the file the first
           # time it was fixed.
-          CODE=$(( 60000 + GITHUB_RUN_NUMBER ))
+          CODE=$(( 100000 + GITHUB_RUN_NUMBER ))
           echo "code=$CODE" >> "$GITHUB_OUTPUT"
           echo "Version $NAME (code $CODE)" >> "$GITHUB_STEP_SUMMARY"
           # Recorded here because `secrets` is not available in a step-level
