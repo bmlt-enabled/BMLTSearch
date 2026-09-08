@@ -17,7 +17,8 @@
    * already existed. This route is its own chunk, so importing here costs
    * nothing elsewhere.
    */
-  import { createMap as createNativeMap, mapElementTag, usesAppleMaps, type MapHandle, type MarkerClickData } from '$lib/maps/provider';
+  import { createMap as createNativeMap, mapElementTag, usesAppleMaps, usesMapKitJs, type MapHandle, type MarkerClickData } from '$lib/maps/provider';
+  import { mapKitConfigured, onMapsAuthFailure } from '$lib/maps/mapkit';
   import { RotateCw, Search, X } from '@lucide/svelte';
   import { onMount } from 'svelte';
   import { meetingsByIds, meetingsWithinRadius } from '$lib/api/bmlt';
@@ -164,10 +165,18 @@
     const needsUnderlay = platform() === 'android';
     if (needsUnderlay) document.documentElement.classList.add('map-underlay');
 
+    // MapKit (web) reports an auth failure out of band — it paints its own error
+    // into the container and tells the app nothing — so surface an honest message
+    // instead of a map that silently never appears. Native maps never reach this.
+    const stopAuthWatch = onMapsAuthFailure(() => {
+      error = 'MapKit rejected this app’s token. It may have expired, or this origin is not on its allowed list — regenerate the MapKit JS token and include this origin.';
+    });
+
     void start();
 
     return () => {
       if (needsUnderlay) document.documentElement.classList.remove('map-underlay');
+      stopAuthWatch();
       clearTimeout(idleTimer);
       void teardown();
     };
@@ -190,16 +199,16 @@
   }
 
   async function start() {
-    // Apple Maps (iOS) needs no key; Google (Android/web) does.
-    if (!usesAppleMaps() && !mapKey()) {
-      error = 'Google Maps is not configured. See .env.example for the three keys this needs.';
+    // iOS uses native Apple Maps (no key); web uses a MapKit token; Android a Google key.
+    if (usesMapKitJs() ? !mapKitConfigured() : !usesAppleMaps() && !mapKey()) {
+      error = usesMapKitJs() ? 'The map is not configured: PUBLIC_MAPKIT_TOKEN is missing. See .env.example.' : 'Google Maps is not configured. See .env.example for the keys this needs.';
       return;
     }
 
     try {
       // Places is only needed for the search box, so a failure there must not
       // stop the map itself from rendering.
-      void newSessionToken(i18n.locale).then((token) => (sessionToken = token));
+      void newSessionToken().then((token) => (sessionToken = token));
 
       // Open immediately at the last known position, or the fallback. Waiting on
       // a device fix first meant the very first visit showed nothing at all until
@@ -271,7 +280,8 @@
     // compositing pass to actually build the child scroll view the native side
     // matches against. Two frames after upgrade is enough; creating in the same
     // turn is not.
-    await customElements.whenDefined(mapElementTag);
+    // Web MapKit mounts into a plain div — there is no custom element to await.
+    if (!usesMapKitJs()) await customElements.whenDefined(mapElementTag);
     await nextFrame();
     await nextFrame();
 
@@ -565,7 +575,7 @@
 
       // A new session token per completed search is what keeps Places billing
       // on the per-session rate rather than per-keystroke.
-      sessionToken = await newSessionToken(i18n.locale);
+      sessionToken = await newSessionToken();
     });
   }
 
@@ -660,12 +670,17 @@
     {/if}
 
     <!--
-    The plugin's own element — `capacitor-apple-map` on iOS, `capacitor-google-map`
-    on Android/web (see provider.ts). On the native platforms it is a transparent
-    hole punched through the webview with the platform map view rendered behind
-    it; on the web the Google plugin mounts a normal JS map inside.
+    The map container. On the native platforms it is the plugin's own custom
+    element — `capacitor-apple-map` on iOS, `capacitor-google-map` on Android (see
+    provider.ts) — a transparent hole punched through the webview with the
+    platform map view rendered behind it. On the web it is a plain div that Apple
+    MapKit JS renders into directly.
   -->
-    <svelte:element this={mapElementTag} bind:this={mapElement} class="block h-full w-full"></svelte:element>
+    {#if usesMapKitJs()}
+      <div bind:this={mapElement} class="block h-full w-full"></div>
+    {:else}
+      <svelte:element this={mapElementTag} bind:this={mapElement} class="block h-full w-full"></svelte:element>
+    {/if}
   </div>
 </div>
 

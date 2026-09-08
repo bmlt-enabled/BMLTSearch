@@ -94,29 +94,38 @@ the search box. That is right, but it means misconfiguration is invisible. When
 something "just does nothing", suspect a swallowed error before suspecting the
 logic, and probe the API directly with `curl`.
 
-## Google Maps: three keys, two code paths
+## Maps: three providers, one Google platform
 
-Google allows a key exactly one _application_ restriction, so there is one key
-per platform (`src/lib/maps/keys.ts`), and — less obviously — **a native session
-uses two of them at once**.
+Each platform authenticates its own way (`src/lib/maps/keys.ts`,
+`src/lib/maps/mapkit.ts`). **Only Android still uses a Google key** — web moved to
+Apple MapKit JS and iOS uses native Apple Maps, neither of which touches Google.
 
-|               | Map view                     | Autocomplete + geocoding |
-| ------------- | ---------------------------- | ------------------------ |
-| Web           | JS SDK, web key              | JS SDK, web key          |
-| iOS / Android | **native SDK, platform key** | **REST, platform key**   |
+|         | Map view                           | Autocomplete + geocoding            | Credential       |
+| ------- | ---------------------------------- | ----------------------------------- | ---------------- |
+| Web     | **MapKit JS** (`mapkit.Map`)       | **MapKit JS** (`Search`/`Geocoder`) | MapKit token     |
+| iOS     | native Apple Maps (plugin)         | native `MKLocalSearch` (plugin)     | none             |
+| Android | **native Google SDK, Android key** | **Google Places REST, Android key** | Google (+ SHA-1) |
 
-On device the map is a native view authenticated by bundle ID / package + SHA-1,
-while Places and geocoding go over REST with an app-identity header
-(`src/lib/maps/rest.ts`, `identity.ts`). They do **not** use the JS SDK, because
-a Capacitor webview cannot satisfy an HTTP-referrer restriction — Google states
-website restrictions are "not guaranteed to work correctly" unless the page is
-served from a site you control, and `localhost` is not that.
+All three sit behind one `MapHandle` in `src/lib/maps/provider.ts` (web =
+`createMapKitWebMap`); the route drives them identically and only picks the DOM
+element — a custom element on native, a plain `<div>` on web. Place search is the
+same story in `src/lib/maps/places.ts` (iOS → Apple plugin, web → MapKit JS,
+Android → Google REST) and geocoding in `src/lib/api/geocode.ts` (web → MapKit JS
+Geocoder, native → REST). On Android, Places/geocoding still go over REST with an
+app-identity header (`rest.ts`, `identity.ts`) because a Capacitor webview cannot
+satisfy an HTTP-referrer restriction; there is no native Places plugin
+([capacitor-community/proposals#111], [ionic-team/capacitor-google-maps#111]).
 
-There is no native Places plugin for Capacitor. `@capacitor/google-maps` wraps
-the Maps SDK only; the community proposal
-([capacitor-community/proposals#111], 2021) was closed unimplemented and the
-request against the Maps plugin ([ionic-team/capacitor-google-maps#111], 2022) is
-still open. Places API (New) _is_ the REST API — the SDKs are clients for it.
+**MapKit JS auth (web).** The token is minted in the Apple portal (Maps token),
+baked in as `PUBLIC_MAPKIT_TOKEN`, and — like the Google key — exposed to the
+browser; the restriction is the token's **origin allowlist**, which must include
+`app.bmlt.app` plus `localhost:5173`/`4173`. On **Cloudflare Pages set it as a
+plaintext build variable, not a Secret** — CF secrets are runtime-only and are
+not injected into `vite build`, so a Secret bakes an empty string and the map
+shows unconfigured. Auth failures arrive out of band (a MapKit `error` event);
+`onMapsAuthFailure()` surfaces them. `@types/google.maps` stays a devDep even
+though web no longer uses the JS SDK — `@capacitor/google-maps`'s config types
+and the `PlacesSession` union reference the `google.maps` namespace.
 
 **The Android SHA-1 is a trap.** `X-Android-Cert` is baked in at build time from
 `PUBLIC_GOOGLE_MAPS_ANDROID_CERT_SHA1` and must be a fingerprint registered on

@@ -73,14 +73,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # The map screen needs the key baked in at build time; everything else
-      # works without it, so an absent secret degrades rather than fails.
+      # The iOS shell renders native Apple Maps and searches with the Apple plugin
+      # — no key, and the web MapKit path never runs here — so the iOS build needs
+      # no map credentials at all.
       - name: Build web bundle
-        env:
-          PUBLIC_GOOGLE_MAPS_KEY_WEB: ${{ secrets.GOOGLE_MAPS_KEY_WEB }}
-          PUBLIC_GOOGLE_MAPS_KEY_IOS: ${{ secrets.GOOGLE_MAPS_KEY_IOS }}
-          PUBLIC_GOOGLE_MAPS_KEY_ANDROID: ${{ secrets.GOOGLE_MAPS_KEY_ANDROID }}
-          PUBLIC_GOOGLE_MAPS_ANDROID_CERT_SHA1: ${{ secrets.GOOGLE_MAPS_ANDROID_CERT_SHA1 }}
         run: npm run build
 
       - name: Sync Capacitor iOS

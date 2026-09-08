@@ -38,8 +38,9 @@ declare global {
    * All three are optional on purpose — a checkout with no keys must still build.
    */
   interface ImportMetaEnv {
-    readonly PUBLIC_GOOGLE_MAPS_KEY_WEB?: string;
-    readonly PUBLIC_GOOGLE_MAPS_KEY_IOS?: string;
+    /** Apple MapKit JS token — web map + place search + geocoding. See maps/mapkit.ts. */
+    readonly PUBLIC_MAPKIT_TOKEN?: string;
+    /** Google Maps key — Android only (native map + Places/Geocoding REST). */
     readonly PUBLIC_GOOGLE_MAPS_KEY_ANDROID?: string;
     readonly PUBLIC_GOOGLE_MAPS_ANDROID_CERT_SHA1?: string;
   }

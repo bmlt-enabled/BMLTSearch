@@ -124,9 +124,10 @@ export default defineConfig({
         runtimeCaching: [
           {
             // Meeting data must never come from a cache: a stale meeting sends
-            // someone to a room that isn't open. Both BMLT roots and the Google
-            // APIs are network-only.
-            urlPattern: ({ url }: { url: URL }) => url.hostname === 'aggregator.bmltenabled.org' || url.hostname === 'bmlt.virtual-na.org' || url.hostname.endsWith('googleapis.com'),
+            // someone to a room that isn't open. The BMLT roots and the map
+            // service hosts (Google APIs, Apple MapKit) are network-only.
+            urlPattern: ({ url }: { url: URL }) =>
+              url.hostname === 'aggregator.bmltenabled.org' || url.hostname === 'bmlt.virtual-na.org' || url.hostname.endsWith('googleapis.com') || url.hostname.endsWith('apple-mapkit.com'),
             handler: 'NetworkOnly'
           }
         ]

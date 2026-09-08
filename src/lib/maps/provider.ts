@@ -2,29 +2,44 @@ import { GoogleMap, LatLngBounds } from '@capacitor/google-maps';
 import { AppleMap } from 'capacitor-plugin-apple-maps';
 import { platform } from '../native';
 import { mapKey } from './keys';
+import { loadMapKit } from './mapkit';
 import type { LatLng } from '../geo';
 
 // ---------------------------------------------------------------------------
-// Cross-platform native map abstraction
+// Cross-platform map abstraction
 // ---------------------------------------------------------------------------
 //
-// The map screen renders a native map on device: Apple Maps (MapKit) on iOS,
-// Google Maps on Android and the web. Both plugins — `@capacitor/google-maps`
-// and `capacitor-plugin-apple-maps` — expose the same method names and payload
-// shapes (the Apple plugin was written to mirror the Google one), so this module
-// is a thin adapter that normalises the handful of fields the route uses and
-// hides the provider choice behind one `MapHandle`.
+// The map screen renders behind one `MapHandle`, chosen by platform:
+//   - iOS     → Apple Maps (MapKit) native, via capacitor-plugin-apple-maps
+//   - Android → Google Maps native, via @capacitor/google-maps
+//   - Web     → Apple MapKit JS (mapkit.Map), in the browser
 //
-// Why Apple Maps on iOS: MapKit needs no API key and no per-platform key
-// restriction, and it is the map users expect inside an iOS app. Android and web
-// keep Google, which is what their keys are provisioned for (see keys.ts).
+// The two Capacitor plugins expose the same method names and payload shapes (the
+// Apple plugin was written to mirror the Google one); the web MapKit-JS adapter
+// is written to present the *same* `MapHandle`, so the route drives all three
+// identically and only picks a different DOM element (native → a custom element,
+// web → a plain div).
+//
+// Why Apple on iOS and web: MapKit needs no API key restriction and, on the web,
+// no Google key at all — the browser build authenticates with a signed MapKit
+// token instead (see mapkit.ts). Android keeps Google, which is what its key is
+// provisioned for (see keys.ts).
 
-/** True when this platform renders Apple Maps (iOS); false for Google (Android/web). */
+/** True when this platform renders Apple Maps natively (iOS). */
 export function usesAppleMaps(): boolean {
   return platform() === 'ios';
 }
 
-/** The DOM custom-element tag the current platform's native map mounts into. */
+/** True when this platform renders Apple MapKit JS in the browser (web). */
+export function usesMapKitJs(): boolean {
+  return platform() === 'web';
+}
+
+/**
+ * The DOM custom-element tag a *native* map mounts into. Only meaningful on
+ * iOS/Android; the web MapKit map mounts into a plain `<div>` (the route branches
+ * on `usesMapKitJs()`), so this is left as the Google tag there and unused.
+ */
 export const mapElementTag = usesAppleMaps() ? 'capacitor-apple-map' : 'capacitor-google-map';
 
 export interface ProviderBounds {
@@ -122,6 +137,7 @@ function normaliseBounds(bounds: ProviderBounds): ProviderBounds {
  * take the same `{ id, element, config }`; only Google needs an API key.
  */
 export async function createMap(options: CreateMapOptions): Promise<MapHandle> {
+  if (usesMapKitJs()) return createMapKitWebMap(options);
   if (usesAppleMaps()) {
     // `clustering: true` starts the map clustered (capacitor-plugin-apple-maps
     // ≥0.3.4), so markers cluster on their first render instead of flashing as
@@ -185,5 +201,172 @@ export async function createMap(options: CreateMapOptions): Promise<MapHandle> {
     enableClustering: () => map.enableClustering(),
     disableClustering: () => map.disableClustering(),
     destroy: () => map.destroy()
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Web: Apple MapKit JS
+// ---------------------------------------------------------------------------
+
+/*
+  MapKit JS has no zoom levels — the camera is a CoordinateRegion (centre plus a
+  latitude/longitude span). These convert between a Google-style zoom and a span
+  for the element's pixel size, using the standard web-mercator metres-per-pixel,
+  so the web map opens and reports zoom at a scale comparable to the native maps.
+  The map reports its true region back, so the route never depends on the zoom
+  being exact — only on it crossing MIN_SEARCH_ZOOM sensibly.
+*/
+const TILE_SIZE = 256;
+const EARTH_CIRCUMFERENCE_M = 40075016.686;
+const METRES_PER_DEGREE_LAT = 111320;
+
+function regionForZoom(center: LatLng, zoom: number, element: HTMLElement): mapkit.CoordinateRegion {
+  const width = element.clientWidth || TILE_SIZE;
+  const height = element.clientHeight || TILE_SIZE;
+  const metresPerPx = (EARTH_CIRCUMFERENCE_M * Math.cos((center.lat * Math.PI) / 180)) / (TILE_SIZE * 2 ** zoom);
+  const latitudeDelta = (metresPerPx * height) / METRES_PER_DEGREE_LAT;
+  const longitudeDelta = (360 * width) / (TILE_SIZE * 2 ** zoom);
+  return new mapkit.CoordinateRegion(new mapkit.Coordinate(center.lat, center.lng), new mapkit.CoordinateSpan(latitudeDelta, longitudeDelta));
+}
+
+function zoomFromRegion(region: mapkit.CoordinateRegion, element: HTMLElement): number {
+  const width = element.clientWidth || TILE_SIZE;
+  return Math.log2((360 * width) / (TILE_SIZE * region.span.longitudeDelta));
+}
+
+function boundsFromRegion(region: mapkit.CoordinateRegion): ProviderBounds {
+  const { latitude, longitude } = region.center;
+  const halfLat = region.span.latitudeDelta / 2;
+  const halfLng = region.span.longitudeDelta / 2;
+  return {
+    center: { lat: latitude, lng: longitude },
+    southwest: { lat: latitude - halfLat, lng: longitude - halfLng },
+    northeast: { lat: latitude + halfLat, lng: longitude + halfLng }
+  };
+}
+
+/*
+  The pin art lives in static/ as bare filenames (marker-blue.png / marker-red.png)
+  so the native plugins can load them as bundled assets. MapKit's ImageAnnotation
+  resolves its url relative to the document, so a bare name would resolve against
+  the current route path — anchor it to the origin root instead.
+*/
+function markerUrl(iconUrl: string): string {
+  return /^(https?:|blob:|data:|\/)/.test(iconUrl) ? iconUrl : `/${iconUrl}`;
+}
+
+// One identifier so co-located pins cluster natively, mirroring the Apple plugin.
+const WEB_CLUSTER_ID = 'bmlt';
+const WEB_MARKER_SIZE = { width: 30, height: 45 };
+
+async function createMapKitWebMap(options: CreateMapOptions): Promise<MapHandle> {
+  await loadMapKit();
+
+  const element = options.element;
+  const map = new mapkit.Map(element, {
+    region: regionForZoom(options.config.center, options.config.zoom, element),
+    colorScheme: options.config.colorScheme === 'dark' ? mapkit.Map.ColorSchemes.Dark : mapkit.Map.ColorSchemes.Light,
+    showsUserLocation: false,
+    showsUserLocationControl: false,
+    showsCompass: mapkit.FeatureVisibility.Hidden,
+    showsScale: mapkit.FeatureVisibility.Hidden,
+    showsMapTypeControl: false,
+    showsZoomControl: true,
+    isRotationEnabled: false
+  });
+
+  let onMoveStarted: ((isGesture: boolean) => void) | null = null;
+  let onIdle: ((data: CameraIdleData) => void) | null = null;
+  let onMarkerClick: ((data: MarkerClickData) => void) | null = null;
+  // MapKit gives no gesture flag, so a move we made is fenced off here: set before
+  // our own setRegion/fitBounds, read by region-change-start to report the move as
+  // non-gesture, then cleared when the region settles.
+  let suppressPan = false;
+  const annotationsById = new Map<string, mapkit.Annotation>();
+  let counter = 0;
+
+  map.addEventListener('region-change-start', () => onMoveStarted?.(!suppressPan));
+  map.addEventListener('region-change-end', () => {
+    const region = map.region;
+    onIdle?.({ latitude: region.center.latitude, longitude: region.center.longitude, zoom: zoomFromRegion(region, element), bounds: boundsFromRegion(region) });
+    suppressPan = false;
+  });
+  map.addEventListener('select', (event) => {
+    const id = event.annotation?.data;
+    if (typeof id === 'string') onMarkerClick?.({ markerId: id });
+  });
+
+  function move(run: () => void) {
+    suppressPan = true;
+    run();
+  }
+
+  return {
+    setOnCameraIdleListener: (cb) => {
+      onIdle = cb;
+      return Promise.resolve();
+    },
+    setOnCameraMoveStartedListener: (cb) => {
+      onMoveStarted = cb;
+      return Promise.resolve();
+    },
+    setOnMarkerClickListener: (cb) => {
+      onMarkerClick = cb;
+      return Promise.resolve();
+    },
+    getMapBounds: () => Promise.resolve(boundsFromRegion(map.region)),
+    setCamera: (config) => {
+      const center = config.coordinate ?? { lat: map.region.center.latitude, lng: map.region.center.longitude };
+      move(() => {
+        if (config.zoom == null) map.setCenterAnimated(new mapkit.Coordinate(center.lat, center.lng), true);
+        else map.setRegionAnimated(regionForZoom(center, config.zoom, element), true);
+      });
+      return Promise.resolve();
+    },
+    fitBounds: (coordinates, padding = 0) => {
+      const box = boundsOf(coordinates);
+      const width = element.clientWidth || TILE_SIZE;
+      const height = element.clientHeight || TILE_SIZE;
+      const latSpan = Math.max((box.northeast.lat - box.southwest.lat) * (1 + (2 * padding) / height), 0.01);
+      const lngSpan = Math.max((box.northeast.lng - box.southwest.lng) * (1 + (2 * padding) / width), 0.01);
+      move(() => map.setRegionAnimated(new mapkit.CoordinateRegion(new mapkit.Coordinate(box.center.lat, box.center.lng), new mapkit.CoordinateSpan(latSpan, lngSpan)), true));
+      return Promise.resolve();
+    },
+    setColorScheme: (scheme) => {
+      map.colorScheme = scheme === 'dark' ? mapkit.Map.ColorSchemes.Dark : mapkit.Map.ColorSchemes.Light;
+      return Promise.resolve();
+    },
+    addMarkers: (markers) => {
+      const annotations = markers.map((marker) => {
+        const id = `w${counter++}`;
+        const url = marker.iconUrl ? markerUrl(marker.iconUrl) : '';
+        const annotation = new mapkit.ImageAnnotation(new mapkit.Coordinate(marker.coordinate.lat, marker.coordinate.lng), {
+          url: { 1: url, 2: url },
+          size: WEB_MARKER_SIZE,
+          // Anchor the pin's tip (bottom-centre) to the coordinate.
+          anchorOffset: new DOMPoint(0, -WEB_MARKER_SIZE.height / 2),
+          clusteringIdentifier: WEB_CLUSTER_ID,
+          data: id
+        });
+        annotationsById.set(id, annotation);
+        return annotation;
+      });
+      map.addAnnotations(annotations);
+      return Promise.resolve(annotations.map((annotation) => annotation.data as string));
+    },
+    removeMarkers: (ids) => {
+      const annotations = ids.map((id) => annotationsById.get(id)).filter((annotation): annotation is mapkit.Annotation => Boolean(annotation));
+      if (annotations.length) map.removeAnnotations(annotations);
+      for (const id of ids) annotationsById.delete(id);
+      return Promise.resolve();
+    },
+    // MapKit clusters natively via each annotation's clusteringIdentifier, so
+    // there is no map-level toggle to drive — both are no-ops, matching Apple.
+    enableClustering: () => Promise.resolve(),
+    disableClustering: () => Promise.resolve(),
+    destroy: () => {
+      map.destroy();
+      return Promise.resolve();
+    }
   };
 }

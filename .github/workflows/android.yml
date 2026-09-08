@@ -82,12 +82,11 @@ jobs:
           # normal; it just does not publish.
           echo "publish=${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}" >> "$GITHUB_OUTPUT"
 
-      # The Maps keys are inlined into the web bundle at build time. All three
-      # are passed even when empty; an unset key degrades to an empty string.
+      # The Android Maps key is inlined into the web bundle at build time (Places
+      # REST). No MapKit token here: the web MapKit path never runs in the Android
+      # shell. An unset key degrades to an empty string.
       - name: Build web bundle
         env:
-          PUBLIC_GOOGLE_MAPS_KEY_WEB: ${{ secrets.GOOGLE_MAPS_KEY_WEB }}
-          PUBLIC_GOOGLE_MAPS_KEY_IOS: ${{ secrets.GOOGLE_MAPS_KEY_IOS }}
           PUBLIC_GOOGLE_MAPS_KEY_ANDROID: ${{ secrets.GOOGLE_MAPS_KEY_ANDROID }}
           PUBLIC_GOOGLE_MAPS_ANDROID_CERT_SHA1: ${{ secrets.GOOGLE_MAPS_ANDROID_CERT_SHA1 }}
         run: npm run build

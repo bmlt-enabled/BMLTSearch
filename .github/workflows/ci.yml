@@ -36,16 +36,16 @@ jobs:
 
       # Built here too, so a PR that type-checks but cannot build still fails.
       # Deployment is not this workflow's job — Cloudflare Pages builds from the
-      # repository itself (see the README) and holds its own copy of these keys
-      # as project environment variables. This build only proves it compiles.
+      # repository itself (see the README) and holds its own copy of these
+      # credentials as project environment variables. This build only proves it
+      # compiles.
       #
       # On a fork's pull request these secrets resolve to empty, which is fine:
-      # an unset key degrades to an empty string and only the map screen depends
-      # on them. See src/lib/maps/keys.ts.
+      # an unset credential degrades to an empty string and only the map screen
+      # depends on them. See src/lib/maps/keys.ts and src/lib/maps/mapkit.ts.
       - name: Build
         env:
-          PUBLIC_GOOGLE_MAPS_KEY_WEB: ${{ secrets.GOOGLE_MAPS_KEY_WEB }}
-          PUBLIC_GOOGLE_MAPS_KEY_IOS: ${{ secrets.GOOGLE_MAPS_KEY_IOS }}
+          PUBLIC_MAPKIT_TOKEN: ${{ secrets.MAPKIT_TOKEN }}
           PUBLIC_GOOGLE_MAPS_KEY_ANDROID: ${{ secrets.GOOGLE_MAPS_KEY_ANDROID }}
           PUBLIC_GOOGLE_MAPS_ANDROID_CERT_SHA1: ${{ secrets.GOOGLE_MAPS_ANDROID_CERT_SHA1 }}
         run: npm run build
