@@ -2,8 +2,11 @@ import { CapacitorHttp } from '@capacitor/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { serviceBodyHasOwnMeetings, AGGREGATOR_ROOT } from '$lib/api/bmlt';
 
+// `Capacitor` is needed because http.ts reaches native.ts for the platform (the
+// custom User-Agent). `false` keeps these tests in web mode.
 vi.mock('@capacitor/core', () => ({
-  CapacitorHttp: { get: vi.fn() }
+  CapacitorHttp: { get: vi.fn() },
+  Capacitor: { isNativePlatform: () => false, getPlatform: () => 'web' }
 }));
 
 const get = vi.mocked(CapacitorHttp.get);

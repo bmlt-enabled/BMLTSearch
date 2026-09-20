@@ -1,5 +1,7 @@
 import { CapacitorHttp } from '@capacitor/core';
 
+import { isNative, platform } from '../native';
+
 /**
  * The one way this app talks to a BMLT root server.
  *
@@ -23,6 +25,26 @@ export class BmltError extends Error {
   }
 }
 
+/*
+  A custom User-Agent, sent to the root server on native only.
+
+  On the web `User-Agent` is a forbidden header — `fetch` drops it — so there is
+  nothing to set there and no reason to try. On a device the request goes
+  through the native HTTP stack, which honors it, and it is the one place a root
+  server would otherwise see only a stock `CFNetwork`/`Dalvik` string. This names
+  the app, its release version and the OS, so a server's operators can tell this
+  traffic apart from a browser's. `__APP_VERSION__` is the git tag the build
+  shipped under — see vite.config.ts.
+*/
+export function userAgent(os: 'ios' | 'android' | 'web'): string {
+  const name = os === 'ios' ? 'iOS' : os === 'android' ? 'Android' : 'native';
+  return `BMLTSearch/${__APP_VERSION__} (${name})`;
+}
+
+function headers(): Record<string, string> {
+  return isNative() ? { Accept: 'application/json', 'User-Agent': userAgent(platform()) } : { Accept: 'application/json' };
+}
+
 /**
  * GET a BMLT endpoint and hand back a parsed array.
  *
@@ -37,7 +59,7 @@ export class BmltError extends Error {
 export async function getJsonArray<T>(url: string): Promise<T[]> {
   let response;
   try {
-    response = await CapacitorHttp.get({ url, headers: { Accept: 'application/json' } });
+    response = await CapacitorHttp.get({ url, headers: headers() });
   } catch (cause) {
     throw new BmltError(`Request failed: ${String(cause)}`, 0, url);
   }

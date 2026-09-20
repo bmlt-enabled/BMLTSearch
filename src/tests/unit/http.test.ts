@@ -1,9 +1,13 @@
 import { CapacitorHttp } from '@capacitor/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { BmltError, getJsonArray, query } from '$lib/api/http';
+import { BmltError, getJsonArray, query, userAgent } from '$lib/api/http';
 
+// `Capacitor` is needed because http.ts reaches native.ts for the platform (the
+// custom User-Agent). `false` keeps these tests in web mode, where the header is
+// absent — exactly as a browser build behaves.
 vi.mock('@capacitor/core', () => ({
-  CapacitorHttp: { get: vi.fn() }
+  CapacitorHttp: { get: vi.fn() },
+  Capacitor: { isNativePlatform: () => false, getPlatform: () => 'web' }
 }));
 
 const get = vi.mocked(CapacitorHttp.get);
@@ -25,7 +29,20 @@ describe('query', () => {
   });
 });
 
+describe('userAgent', () => {
+  it('names the app, its version and the OS', () => {
+    expect(userAgent('ios')).toBe(`BMLTSearch/${__APP_VERSION__} (iOS)`);
+    expect(userAgent('android')).toBe(`BMLTSearch/${__APP_VERSION__} (Android)`);
+  });
+});
+
 describe('getJsonArray', () => {
+  it('sends no User-Agent on the web, where fetch would drop it', async () => {
+    respond([]);
+    await getJsonArray('https://example.test');
+    expect(get).toHaveBeenCalledWith({ url: 'https://example.test', headers: { Accept: 'application/json' } });
+  });
+
   it('returns the array as sent', async () => {
     respond([{ id_bigint: '1' }]);
     await expect(getJsonArray('https://example.test')).resolves.toEqual([{ id_bigint: '1' }]);
