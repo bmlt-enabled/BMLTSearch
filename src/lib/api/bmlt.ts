@@ -29,10 +29,22 @@ function aggregator(params: Record<string, string | number | undefined>): string
  * is not merely inelegant — the aggregator accepts `venue_types=1,3` and then
  * filters on `1` alone, silently dropping every hybrid meeting. This is the only
  * form that filters on all the values given.
+ *
+ * The brackets are written `%5B%5D`, and that is load-bearing on iOS. A literal
+ * `[` is not a legal query character, and since iOS 17 `URL(string:)` — which
+ * is what CapacitorHttp hands our URL to — no longer rejects such a string: it
+ * percent-encodes the *whole* thing, `%` included. One `venue_types[]=1`
+ * therefore turned every `%2C` elsewhere in the URL into `%252C`, the
+ * aggregator saw `data_field_key` and `sort_keys` naming one unknown field
+ * each, ignored them, and sent full unsorted records to every iPhone. The
+ * request still "worked", so nothing in the app revealed it. PHP decodes the
+ * key, so the server sees the same `venue_types[]` either way.
+ * `shouldEncodeUrlParams: false` does not help: it only governs a separate
+ * `params` object, which is never passed here.
  */
 function venueTypesQuery(values: readonly string[] | undefined): string {
   if (!values?.length) return '';
-  return values.map((value) => `&venue_types[]=${encodeURIComponent(value)}`).join('');
+  return values.map((value) => `&venue_types%5B%5D=${encodeURIComponent(value)}`).join('');
 }
 
 /**
@@ -93,8 +105,9 @@ export function singleNearestMeeting(lat: number, lng: number): Promise<RawMeeti
 export function meetingsByIds(ids: string[]): Promise<RawMeeting[]> {
   if (ids.length === 0) return Promise.resolve([]);
   // `meeting_ids[]` repeats once per id; `query()` cannot express a repeated key,
-  // so this one parameter is assembled by hand.
-  const repeated = ids.map((id) => `meeting_ids[]=${encodeURIComponent(id)}`).join('&');
+  // so this one parameter is assembled by hand. Brackets encoded for the same
+  // reason as `venueTypesQuery()`: a literal `[` makes iOS re-encode the whole URL.
+  const repeated = ids.map((id) => `meeting_ids%5B%5D=${encodeURIComponent(id)}`).join('&');
   return getJsonArray<RawMeeting>(`${AGGREGATOR_ROOT}?switcher=GetSearchResults&${repeated}&callingApp=${CALLING_APP}`);
 }
 

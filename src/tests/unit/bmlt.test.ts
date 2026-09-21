@@ -1,6 +1,6 @@
 import { CapacitorHttp } from '@capacitor/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { serviceBodyHasOwnMeetings, AGGREGATOR_ROOT } from '$lib/api/bmlt';
+import { serviceBodyHasOwnMeetings, nearestMeetings, meetingsWithinRadius, meetingsByIds, AGGREGATOR_ROOT } from '$lib/api/bmlt';
 
 // `Capacitor` is needed because http.ts reaches native.ts for the platform (the
 // custom User-Agent). `false` keeps these tests in web mode.
@@ -68,5 +68,39 @@ describe('serviceBodyHasOwnMeetings', () => {
     return serviceBodyHasOwnMeetings('1').then(() => {
       expect(requestedUrl().startsWith(AGGREGATOR_ROOT)).toBe(true);
     });
+  });
+});
+
+describe('repeated keys', () => {
+  /*
+    Since iOS 17, `URL(string:)` — which CapacitorHttp hands the URL to — answers
+    one illegal character by percent-encoding the whole string, `%` included. A
+    literal `[` in `venue_types[]=1` therefore turned `sort_keys=a%2Cb` into
+    `a%252Cb` on every iPhone, and the aggregator silently ignored the parameter.
+  */
+  const ILLEGAL_IN_A_QUERY = /[^A-Za-z0-9\-._~%&=]/;
+
+  function requestedQuery(): string {
+    return requestedUrl().split('?')[1] ?? '';
+  }
+
+  it('encodes the brackets on venue_types', async () => {
+    respond([]);
+    await nearestMeetings(32.78, -79.93, 25, ['1', '3']);
+    expect(requestedUrl()).toContain('venue_types%5B%5D=1&venue_types%5B%5D=3');
+    expect(requestedQuery()).not.toMatch(ILLEGAL_IN_A_QUERY);
+  });
+
+  it('keeps a radius search legal too', async () => {
+    respond([]);
+    await meetingsWithinRadius(32.78, -79.93, 10, ['1', '3']);
+    expect(requestedQuery()).not.toMatch(ILLEGAL_IN_A_QUERY);
+  });
+
+  it('encodes the brackets on meeting_ids', async () => {
+    respond([]);
+    await meetingsByIds(['1', '2']);
+    expect(requestedUrl()).toContain('meeting_ids%5B%5D=1&meeting_ids%5B%5D=2');
+    expect(requestedQuery()).not.toMatch(ILLEGAL_IN_A_QUERY);
   });
 });
