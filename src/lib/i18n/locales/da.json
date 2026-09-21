@@ -48,6 +48,7 @@
   "MILES": "miles",
   "KMS": "km",
   "MEETINGS_NEAREST": "nærmeste møder ",
+  "MEETINGS_NEAREST_YOU": "møder nærmest dig",
   "MARKER_INSTR": "Træk markør for at indstille position",
   "NOTHING_FOUND": "Intet fundet",
   "BUS": "Bus",

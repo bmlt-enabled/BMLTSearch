@@ -49,6 +49,7 @@
   "MILES": "mi",
   "KMS": "km",
   "MEETINGS_NEAREST": "najbliższe mityngi",
+  "MEETINGS_NEAREST_YOU": "mityngi najbliżej Ciebie",
   "MARKER_INSTR": "Przeciągnij znacznik by ustawić pozycję",
   "NOTHING_FOUND": "Nie znaleziono",
   "BUS": "Autobus",

@@ -1,6 +1,6 @@
 import { Geolocation } from '@capacitor/geolocation';
 import { reverseGeocode } from './api/geocode';
-import type { LatLng } from './geo';
+import { distanceKm, type LatLng } from './geo';
 import { i18n } from './i18n/index.svelte';
 import { settings, type SavedLocation } from './stores/settings.svelte';
 
@@ -15,6 +15,26 @@ import { settings, type SavedLocation } from './stores/settings.svelte';
  * geocoding failure produced "Location not found" and no meetings, even though
  * the device fix had succeeded and the search could have run.
  */
+
+/**
+ * How far a fix has to move before its address is worth asking for again.
+ *
+ * A phone refines its position for a few seconds after "locate": the same tap
+ * was seen producing four fixes within twenty seconds, metres apart. Each one
+ * used to blank the address and ask the geocoder again, and Apple's `CLGeocoder`
+ * throttles exactly that pattern — after which the address stays blank. An
+ * address does not change within 50 m, so inside that radius the one we have is
+ * kept and nothing is asked.
+ */
+const SAME_PLACE_KM = 0.05;
+/** A failed or in-flight lookup for the same place is not repeated sooner than this. */
+const RETRY_AFTER_MS = 30_000;
+
+let lastAttempt: { point: LatLng; at: number } | null = null;
+
+function samePlace(a: LatLng, b: LatLng): boolean {
+  return distanceKm(a, b) < SAME_PLACE_KM;
+}
 
 export class LocationError extends Error {
   constructor(readonly reason: 'denied' | 'unavailable' | 'timeout') {
@@ -58,8 +78,13 @@ export async function resolveSearchOrigin(forceRefresh = false): Promise<SavedLo
   }
 
   const point = await currentPosition();
-  const saved: SavedLocation = { ...point, address: '' };
+  // A refined fix of the same place keeps the address it already has, rather
+  // than blanking it and asking again.
+  const previous = settings.location;
+  const address = previous?.address && samePlace(previous, point) ? previous.address : '';
+  const saved: SavedLocation = { ...point, address };
   settings.setLocation(saved);
+  if (address) return saved;
 
   // Deliberately not awaited: the caller can start searching on the coordinates
   // while the address fills in behind it.
@@ -70,6 +95,20 @@ export async function resolveSearchOrigin(forceRefresh = false): Promise<SavedLo
 
 /** Reverse-geocode in the background and store whatever comes back. */
 export async function describe(point: LatLng): Promise<void> {
+  const now = Date.now();
+  // Covers both a lookup still in flight and one that just failed: every search
+  // calls this while the address is blank, and they come in bursts.
+  if (lastAttempt && samePlace(lastAttempt.point, point) && now - lastAttempt.at < RETRY_AFTER_MS) return;
+  lastAttempt = { point: { lat: point.lat, lng: point.lng }, at: now };
+
   const address = await reverseGeocode(point.lat, point.lng, i18n.locale);
-  if (address) settings.setAddress(address);
+  // The reader may have moved the search somewhere else while this was out; an
+  // address must never be attached to a place it does not describe.
+  const current = settings.location;
+  if (address && current && samePlace(current, point)) settings.setAddress(address);
+}
+
+/** Test seam — forgets the last lookup. */
+export function resetDescribe(): void {
+  lastAttempt = null;
 }

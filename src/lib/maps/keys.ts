@@ -6,13 +6,13 @@ import { platform } from '../native';
  *              | Map view                     | Autocomplete + geocoding
  *   -----------|------------------------------|--------------------------
  *   Web        | MapKit JS (token)            | MapKit JS (token)
- *   iOS        | native Apple Maps (no key)   | native MapKit (no key)
+ *   iOS        | native Apple Maps (no key)   | native MapKit + CLGeocoder (no key)
  *   Android    | native SDK, Android key      | REST, Android key + SHA-1
  *
  * Web moved off Google entirely: the map is a `mapkit.Map` and search is
  * `mapkit.Search`, both authenticated by the MapKit token baked in as
  * `PUBLIC_MAPKIT_TOKEN` (see mapkit.ts). iOS renders native Apple Maps and
- * searches with `MKLocalSearchCompleter`, neither of which needs a key. That
+ * searches with `MKLocalSearchCompleter` and geocodes with `CLGeocoder` (api/geocode.ts), none of which needs a key. That
  * leaves Android as the one platform holding a Google key — a native map view
  * authenticated by package + signing SHA-1, with Places and geocoding over REST
  * with an app-identity header (a Capacitor webview cannot satisfy an HTTP

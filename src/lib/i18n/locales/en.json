@@ -58,6 +58,7 @@
   "MILES": "miles",
   "KMS": "kms",
   "MEETINGS_NEAREST": "meetings nearest",
+  "MEETINGS_NEAREST_YOU": "meetings nearest you",
   "MARKER_INSTR": "Drag marker to set position",
   "NOTHING_FOUND": "Nothing Found",
   "BUS": "Bus",

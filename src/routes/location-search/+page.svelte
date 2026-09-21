@@ -83,9 +83,13 @@
 <div class="border-border bg-surface-raised border-b px-4 py-3">
   <p class="text-text text-sm">
     <span class="font-semibold">{range}</span>
-    {t('MEETINGS_NEAREST')}
+    <!-- The address is decoration that arrives late, or never (offline, a geocoder outage, a rate limit), so the
+         sentence has to read whole without it. -->
     {#if settings.location?.address}
+      {t('MEETINGS_NEAREST')}
       <span class="font-semibold">“{settings.location.address}”</span>
+    {:else}
+      {t('MEETINGS_NEAREST_YOU')}
     {/if}
   </p>
   <RangeSlider bind:value={range} min={MIN_SEARCH_RANGE} max={MAX_SEARCH_RANGE} label={t('SEARCHRANGESETTING')} oncommit={onRangeCommit} class="mt-2" />

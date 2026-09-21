@@ -1,5 +1,6 @@
+import { geocode as appleGeocode, reverseGeocode as appleReverseGeocode } from 'capacitor-plugin-apple-maps';
 import type { LatLng } from '../geo';
-import { isNative } from '../native';
+import { isNative, platform } from '../native';
 import { loadMapKit, mapKitConfigured } from '../maps/mapkit';
 import { mapKey } from '../maps/keys';
 import * as rest from '../maps/rest';
@@ -9,9 +10,13 @@ import * as rest from '../maps/rest';
  * to show the reader where they are searching from, and turning typed text into
  * coordinates when place autocomplete cannot resolve a suggestion.
  *
- * Two paths, because only one can authenticate on each platform:
+ * Three paths, because only one can authenticate on each platform:
  *
- *  - **Native** → the Google REST endpoint with the platform key and an
+ *  - **iOS** → native `CLGeocoder`, through `capacitor-plugin-apple-maps`. No key.
+ *    iOS holds no Google key at all (see maps/keys.ts), so without this branch
+ *    every lookup there silently resolved `null`: the locate button searched
+ *    correctly and never showed an address. That shipped once.
+ *  - **Android** → the Google REST endpoint with the platform key and an
  *    app-identity header (see maps/rest.ts). A Capacitor webview cannot satisfy
  *    an HTTP referrer restriction, and Google states website restrictions are
  *    "not guaranteed to work correctly" unless the page is served from a site you
@@ -26,11 +31,20 @@ import * as rest from '../maps/rest';
 
 /** `true` when geocoding can authenticate on this platform. */
 export function geocodingAvailable(): boolean {
+  if (platform() === 'ios') return true; // CLGeocoder needs no credentials
   return isNative() ? Boolean(mapKey()) : mapKitConfigured();
 }
 
 /** Coordinates → a human-readable address, or `null` if none could be resolved. */
 export async function reverseGeocode(lat: number, lng: number, language = 'en'): Promise<string | null> {
+  if (platform() === 'ios') {
+    try {
+      // Resolves an empty object when nothing was found, offline, or rate-limited by Apple.
+      return (await appleReverseGeocode({ latitude: lat, longitude: lng, language })).address ?? null;
+    } catch {
+      return null;
+    }
+  }
   if (isNative()) return rest.reverseGeocode(lat, lng, language);
   try {
     await loadMapKit();
@@ -49,6 +63,14 @@ export async function reverseGeocode(lat: number, lng: number, language = 'en'):
 /** An address → coordinates, or `null` if it could not be resolved. */
 export async function forwardGeocode(address: string, language = 'en'): Promise<LatLng | null> {
   if (!address.trim()) return null;
+  if (platform() === 'ios') {
+    try {
+      const place = await appleGeocode({ address, language });
+      return place.latitude != null && place.longitude != null ? { lat: place.latitude, lng: place.longitude } : null;
+    } catch {
+      return null;
+    }
+  }
   if (isNative()) return rest.forwardGeocode(address, language);
   try {
     await loadMapKit();

@@ -49,6 +49,7 @@
   "MILES": "miles",
   "KMS": "kms",
   "MEETINGS_NEAREST": "réunions les plus proches",
+  "MEETINGS_NEAREST_YOU": "réunions les plus proches de vous",
   "MARKER_INSTR": "Faites glisser le marqueur pour définir la position",
   "NOTHING_FOUND": "rien n'a été trouvé",
   "BUS": "Autobus",
