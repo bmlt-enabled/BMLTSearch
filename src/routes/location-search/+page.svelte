@@ -4,6 +4,7 @@
   import { nearestMeetings } from '$lib/api/bmlt';
   import VenueFilter from '$lib/components/VenueFilter.svelte';
   import { Monitor } from '@lucide/svelte';
+  import { recallNearest, rememberNearest } from '$lib/meetings/nearest-cache';
   import { venueTypesParam, type MeetingMode } from '$lib/meetings/venue';
   import { openExternal } from '$lib/native';
   import AppBar from '$lib/components/AppBar.svelte';
@@ -24,19 +25,27 @@
 
   onMount(() => {
     range = settings.searchRange;
-    void search(false);
+    // Coming back from the map or a meeting is not a new question: reuse the
+    // answer we just had rather than downloading it again.
+    void search(false, true);
   });
 
   /**
    * `refreshLocation` forces a new device fix rather than reusing the stored
    * one — what the locate button asks for. A plain range change reuses it, so
    * nudging the slider does not re-prompt for GPS.
+   *
+   * `reuseRecent` is only set when the page opens. Everything the reader does on
+   * purpose — locate, the slider, the filter, retry — searches for real.
    */
-  async function search(refreshLocation: boolean) {
+  async function search(refreshLocation: boolean, reuseRecent = false) {
     error = '';
     try {
       const origin = await loading.during(t('LOCATING'), () => resolveSearchOrigin(refreshLocation));
-      meetings = await loading.during(t('FINDING_MTGS'), () => nearestMeetings(origin.lat, origin.lng, range, venueTypesParam(settings.modes)));
+      const venueTypes = venueTypesParam(settings.modes);
+      const recent = reuseRecent ? recallNearest(origin, range, venueTypes) : null;
+      meetings = recent ?? (await loading.during(t('FINDING_MTGS'), () => nearestMeetings(origin.lat, origin.lng, range, venueTypes)));
+      if (!recent) rememberNearest(origin, range, venueTypes, meetings);
       loaded = true;
     } catch (cause) {
       // A denied or unavailable fix is a different problem from a root server

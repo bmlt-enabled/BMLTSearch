@@ -22,6 +22,7 @@
   import { RotateCw, Search, X } from '@lucide/svelte';
   import { onMount } from 'svelte';
   import { meetingsByIds, meetingsWithinRadius } from '$lib/api/bmlt';
+  import { recallArea, recallPin, rememberArea, rememberPin } from '$lib/meetings/map-cache';
   import { forwardGeocode } from '$lib/api/geocode';
   import AppBar from '$lib/components/AppBar.svelte';
   import ErrorState from '$lib/components/ErrorState.svelte';
@@ -219,7 +220,8 @@
         // Search the opening view straight away — the map does not emit a
         // reliable idle for its initial region, so we cannot wait for one. Frame
         // the results: opening at the saved spot is itself a jump to a location.
-        await searchCurrentView(11, true);
+        // Reopening the map is not a new question, so the last answer is reused.
+        await searchCurrentView(11, true, true);
       } else {
         // No stored location: refine to the device fix without blocking the map
         // appearing, and let that path run the first search where the reader is.
@@ -393,7 +395,7 @@
     // The first settle after load searches on its own, so the screen is never
     // just an empty map with a button on it.
     if (!searchedCentre) {
-      await runSearch(event);
+      await runSearch(event, false, true);
       return;
     }
 
@@ -411,13 +413,13 @@
    * reliably send for non-gesture region changes. `getMapBounds()` returns the
    * real visible rectangle, so the search covers exactly what is on screen.
    */
-  async function searchCurrentView(zoom = 11, frame = false) {
+  async function searchCurrentView(zoom = 11, frame = false, reuseRecent = false) {
     if (!map) return;
     try {
       const bounds = await map.getMapBounds();
       const event: CameraEvent = { zoom, bounds: { center: bounds.center, southwest: bounds.southwest } };
       updateSearchBias(event.bounds.center, event.bounds.southwest);
-      await runSearch(event, frame);
+      await runSearch(event, frame, reuseRecent);
     } catch {
       // The view can be torn down mid-flight; a failed bounds read is not fatal.
     }
@@ -428,8 +430,12 @@
    * "jump" searches (place pick, locate, initial load) where the reader has just
    * teleported and framing the results beats the fixed opening zoom. It is left
    * off for "Search this area", so refining in place keeps the reader's view.
+   *
+   * `reuseRecent` is set only by the searches the map runs by itself when it
+   * opens. "Search this area", locate and a place pick are the reader asking,
+   * and always go to the server.
    */
-  async function runSearch(event: CameraEvent, frame = false) {
+  async function runSearch(event: CameraEvent, frame = false, reuseRecent = false) {
     if (!map) return;
 
     const radiusKm = Math.ceil(distanceKm(event.bounds.center, event.bounds.southwest));
@@ -439,9 +445,12 @@
     const sequence = ++searchSequence;
     error = '';
 
-    const release = loading.begin(t('FINDING_MTGS'));
+    const recent = reuseRecent ? recallArea(event.bounds.center, radiusKm, MAP_VENUE_TYPES) : null;
+    // No overlay for an answer we already have: there is nothing to wait for.
+    const release = recent ? () => {} : loading.begin(t('FINDING_MTGS'));
     try {
-      const meetings = await meetingsWithinRadius(event.bounds.center.lat, event.bounds.center.lng, radiusKm, MAP_VENUE_TYPES);
+      const meetings = recent ?? (await meetingsWithinRadius(event.bounds.center.lat, event.bounds.center.lng, radiusKm, MAP_VENUE_TYPES));
+      if (!recent) rememberArea(event.bounds.center, radiusKm, MAP_VENUE_TYPES, meetings);
       if (sequence !== searchSequence || !map) return;
       const coords = await drawMarkers(meetings);
       searchedCentre = event.bounds.center;
@@ -536,11 +545,21 @@
     // app-wide overlay. Loading a pin's meetings is not an area search, and
     // borrowing that overlay — and its "Finding Meetings…" wording — made a tap
     // look like it had kicked off the very search the button is there to defer.
+    // A pin opened in the last few minutes opens again at once, with no request.
+    const recent = recallPin(ids);
+    if (recent) {
+      sheetMeetings = recent;
+      sheetLoading = false;
+      sheetOpen = true;
+      return;
+    }
+
     sheetMeetings = [];
     sheetLoading = true;
     sheetOpen = true;
     try {
       sheetMeetings = await meetingsByIds(ids);
+      rememberPin(ids, sheetMeetings);
     } catch {
       sheetMeetings = [];
     } finally {
