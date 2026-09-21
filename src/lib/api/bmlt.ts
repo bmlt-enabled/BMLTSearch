@@ -1,5 +1,6 @@
 import type { RawFormat, RawMeeting, RawServiceBody } from '../types';
-import { getJsonArray, query } from './http';
+import { rememberFormats } from './format-cache';
+import { getJsonArray, getMeetingsWithFormats, query } from './http';
 
 /**
  * The BMLT root server this app searches.
@@ -20,6 +21,32 @@ const CALLING_APP = 'bmlt_search_svelte';
 
 function aggregator(params: Record<string, string | number | undefined>): string {
   return `${AGGREGATOR_ROOT}?${query({ ...params, callingApp: CALLING_APP })}`;
+}
+
+/**
+ * Run a `GetSearchResults` query whose results will be listed, and learn the
+ * formats its meetings use.
+ *
+ * `get_used_formats=1` makes the server send those formats alongside the
+ * meetings. It costs the server nothing — it loads them for every search anyway,
+ * to fill in each meeting's format fields — and it replaces the separate
+ * `GetFormats` request that used to follow every list.
+ *
+ * `lang_enum` is pinned to `en`, which is also the server's default, and must
+ * stay that way whatever language the reader uses: on a search, `lang_enum` also
+ * filters each meeting's own `format_shared_id_list` down to the formats that
+ * have a row in that language. Measured on the live aggregator, a US meeting
+ * keeps all its format ids in `en` and none at all in `ja`. English is the widest
+ * single choice (94% of format ids); translated names are layered on afterwards
+ * by `aggregatorFormatNames`.
+ *
+ * Only for searches that draw a list. The map search stays trimmed to
+ * coordinates and ids, and the one-meeting probes show no formats.
+ */
+async function searchMeetings(url: string): Promise<RawMeeting[]> {
+  const { meetings, formats } = await getMeetingsWithFormats<RawMeeting, RawFormat>(`${url}&get_used_formats=1&lang_enum=en`);
+  rememberFormats(formats, 'en');
+  return meetings;
 }
 
 /**
@@ -57,7 +84,7 @@ function venueTypesQuery(values: readonly string[] | undefined): string {
  * read as a distance in every call site that touched it.
  */
 export function nearestMeetings(lat: number, lng: number, count: number, venueTypes?: readonly string[]): Promise<RawMeeting[]> {
-  return getJsonArray<RawMeeting>(
+  return searchMeetings(
     aggregator({
       switcher: 'GetSearchResults',
       geo_width_km: -Math.abs(count),
@@ -108,12 +135,12 @@ export function meetingsByIds(ids: string[]): Promise<RawMeeting[]> {
   // so this one parameter is assembled by hand. Brackets encoded for the same
   // reason as `venueTypesQuery()`: a literal `[` makes iOS re-encode the whole URL.
   const repeated = ids.map((id) => `meeting_ids%5B%5D=${encodeURIComponent(id)}`).join('&');
-  return getJsonArray<RawMeeting>(`${AGGREGATOR_ROOT}?switcher=GetSearchResults&${repeated}&callingApp=${CALLING_APP}`);
+  return searchMeetings(`${AGGREGATOR_ROOT}?switcher=GetSearchResults&${repeated}&callingApp=${CALLING_APP}`);
 }
 
 /** Every meeting belonging to one service body, on the aggregator. */
 export function meetingsByServiceBody(serviceBodyId: string): Promise<RawMeeting[]> {
-  return getJsonArray<RawMeeting>(
+  return searchMeetings(
     aggregator({
       switcher: 'GetSearchResults',
       services: serviceBodyId,

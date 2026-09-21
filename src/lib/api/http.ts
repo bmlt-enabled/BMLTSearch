@@ -57,6 +57,34 @@ function headers(): Record<string, string> {
  *    back the raw body as a string instead of parsed JSON.
  */
 export async function getJsonArray<T>(url: string): Promise<T[]> {
+  const data = await getJson(url);
+  if (Array.isArray(data)) return data as T[];
+  // `{}` — BMLT's empty result set. Anything else non-array is a shape we do not
+  // understand, and an empty list is a safer answer than a crash mid-search.
+  return [];
+}
+
+/**
+ * GET a `GetSearchResults&get_used_formats=1` envelope: the meetings, plus the
+ * formats those meetings use.
+ *
+ * The envelope is `{ meetings, formats }` even when nothing matched. A bare array
+ * is accepted as meetings with no formats — a root server older than the
+ * envelope answers that way — and anything else is an empty result, in keeping
+ * with `getJsonArray`.
+ */
+export async function getMeetingsWithFormats<M, F>(url: string): Promise<{ meetings: M[]; formats: F[] }> {
+  const data = await getJson(url);
+  if (Array.isArray(data)) return { meetings: data as M[], formats: [] };
+  if (data && typeof data === 'object') {
+    const { meetings, formats } = data as { meetings?: unknown; formats?: unknown };
+    return { meetings: Array.isArray(meetings) ? (meetings as M[]) : [], formats: Array.isArray(formats) ? (formats as F[]) : [] };
+  }
+  return { meetings: [], formats: [] };
+}
+
+/** The request and the body parsing both shapes share. An empty body parses as `[]`. */
+async function getJson(url: string): Promise<unknown> {
   let response;
   try {
     response = await CapacitorHttp.get({ url, headers: headers() });
@@ -79,10 +107,7 @@ export async function getJsonArray<T>(url: string): Promise<T[]> {
     }
   }
 
-  if (Array.isArray(data)) return data as T[];
-  // `{}` — BMLT's empty result set. Anything else non-array is a shape we do not
-  // understand, and an empty list is a safer answer than a crash mid-search.
-  return [];
+  return data;
 }
 
 /** Build a query string, dropping empty values and encoding the rest. */

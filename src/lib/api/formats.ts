@@ -1,32 +1,32 @@
 import type { RawMeeting } from '../types';
 import { aggregatorFormats } from './bmlt';
+import { clearFormats, formatName, rememberFormats } from './format-cache';
 
 /**
  * Resolving format ids to readable names.
  *
  * Meetings arrive carrying format *codes* — "O", "VM", "WC" — which mean nothing
- * to a reader. The names live behind a separate `GetFormats` call, so every
- * meeting list needs a second request before it can be shown in full.
- *
- * Names are cached for the process lifetime. They are effectively static (the
- * world format list changes a few times a decade), and without a cache every
- * radius tweak on the search screen refetches the same few dozen strings.
+ * to a reader. Every list search brings the English names of its formats back
+ * with it (`get_used_formats`, see `searchMeetings` in bmlt.ts), and the names are
+ * kept between launches (format-cache.ts), so an English reader costs no
+ * `GetFormats` request at all. Another language costs one, for ids it has not
+ * asked about before.
  */
 
-/** Cache key is language-scoped: the same id has a different name per language. */
-const aggregatorCache = new Map<string, string>();
-
-function cacheKey(language: string, id: string): string {
-  return `${language}:${id}`;
-}
+/** `language:id` pairs already asked for, so an id with no translation is not asked about again this session. */
+const asked = new Set<string>();
 
 /**
  * Names for every format id used by the given meetings.
  *
- * English is always fetched, and the requested language is then layered over the
- * top. That ordering is deliberate: the translated format lists are incomplete
- * for most languages, and a reader is far better served by an English format
- * name than by a bare numeric id.
+ * English is the base and the requested language is layered over the top. That
+ * ordering is deliberate: the translated format lists are incomplete for most
+ * languages, and a reader is far better served by an English format name than by
+ * a bare numeric id.
+ *
+ * English normally arrived with the search. It is fetched here only for ids no
+ * search has described. A failed fetch is not remembered as asked, so a later
+ * list retries; the rejection still reaches the caller, as it always has.
  */
 export async function aggregatorFormatNames(meetings: RawMeeting[], language: string): Promise<Map<string, string>> {
   const wanted = new Set<string>();
@@ -38,27 +38,17 @@ export async function aggregatorFormatNames(meetings: RawMeeting[], language: st
   }
   if (wanted.size === 0) return new Map();
 
-  const missing = [...wanted].filter((id) => !aggregatorCache.has(cacheKey(language, id)));
-
-  if (missing.length > 0) {
-    // English first so it is in place as a fallback, then the target language
-    // over it. Both are fetched for the missing ids only.
-    const english = await aggregatorFormats(missing, 'en');
-    for (const format of english) {
-      if (format?.id && format.name_string) aggregatorCache.set(cacheKey(language, format.id), format.name_string);
-    }
-
-    if (language !== 'en') {
-      const translated = await aggregatorFormats(missing, language);
-      for (const format of translated) {
-        if (format?.id && format.name_string) aggregatorCache.set(cacheKey(language, format.id), format.name_string);
-      }
-    }
+  // English first so it is in place as a fallback, then the target language.
+  for (const lang of language === 'en' ? ['en'] : ['en', language]) {
+    const missing = [...wanted].filter((id) => !formatName(id, lang) && !asked.has(`${lang}:${id}`));
+    if (missing.length === 0) continue;
+    rememberFormats(await aggregatorFormats(missing, lang), lang);
+    for (const id of missing) asked.add(`${lang}:${id}`);
   }
 
   const names = new Map<string, string>();
   for (const id of wanted) {
-    const name = aggregatorCache.get(cacheKey(language, id));
+    const name = formatName(id, language) ?? formatName(id, 'en');
     if (name) names.set(id, name);
   }
   return names;
@@ -66,5 +56,6 @@ export async function aggregatorFormatNames(meetings: RawMeeting[], language: st
 
 /** Test seam — drops the cache. */
 export function resetFormatCaches(): void {
-  aggregatorCache.clear();
+  clearFormats();
+  asked.clear();
 }
