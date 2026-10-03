@@ -1,9 +1,7 @@
 <script lang="ts">
   import { X } from '@lucide/svelte';
-  import { onMount } from 'svelte';
   import { t } from '$lib/i18n/index.svelte';
   import { openNamnmListing } from '$lib/native';
-  import { readPromoState, recordDismissal, shouldShowBanner } from '$lib/promo';
 
   interface Props {
     class?: string;
@@ -11,22 +9,14 @@
 
   let { class: className = '' }: Props = $props();
 
-  // Decided on mount, not during SSR/prerender: the answer lives in localStorage.
-  let visible = $state(false);
-
-  onMount(() => {
-    visible = shouldShowBanner(readPromoState('banner'), Date.now());
-  });
-
-  function dismiss(): void {
-    recordDismissal('banner');
-    visible = false;
-  }
+  // Shown on every visit. Closing it lasts until the reader leaves the screen;
+  // nothing is remembered.
+  let visible = $state(true);
 </script>
 
 <!--
   Not a modal, and never in the way of a search: it sits beside the results and
-  takes no for an answer (see $lib/promo.ts).
+  closes with one tap, until the next visit.
 -->
 {#if visible}
   <aside class="border-border bg-surface-raised flex items-center gap-3 rounded-xl border p-3 {className}" aria-label={t('NAMNM_TITLE')}>
@@ -38,7 +28,7 @@
         {t('NAMNM_GET')}
       </button>
     </div>
-    <button type="button" class="focusable text-text-muted hover:bg-surface-sunken -me-1 self-start rounded-lg p-2.5 transition-colors" onclick={dismiss} aria-label={t('CLOSE')}>
+    <button type="button" class="focusable text-text-muted hover:bg-surface-sunken -me-1 self-start rounded-lg p-2.5 transition-colors" onclick={() => (visible = false)} aria-label={t('CLOSE')}>
       <X size={18} aria-hidden="true" />
     </button>
   </aside>

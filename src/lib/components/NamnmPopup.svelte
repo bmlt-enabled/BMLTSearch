@@ -1,20 +1,27 @@
+<script lang="ts" module>
+  /**
+   * Once per launch. Module state lives exactly as long as the JavaScript does,
+   * which is one launch of the app (or one page load on the web), so returning
+   * to the home screen later in the same session does not reopen it.
+   */
+  let shownThisLaunch = false;
+</script>
+
 <script lang="ts">
   import { onMount } from 'svelte';
   import Modal from '$lib/components/Modal.svelte';
   import { t } from '$lib/i18n/index.svelte';
   import { openNamnmListing } from '$lib/native';
-  import { readPromoState, recordDismissal, shouldShowPopup } from '$lib/promo';
 
-  // Decided on mount, not during SSR/prerender: the answer lives in localStorage.
   let open = $state(false);
 
   onMount(() => {
-    open = shouldShowPopup(readPromoState('popup'), Date.now());
+    if (shownThisLaunch) return;
+    shownThisLaunch = true;
+    open = true;
   });
 
-  /** Closing it, tapping outside it, and tapping through all snooze it alike. */
   function close(): void {
-    recordDismissal('popup');
     open = false;
   }
 
@@ -26,8 +33,7 @@
 
 <!--
   Only ever mounted on the home screen — never over results or the map, so it
-  does not stand between someone and a meeting. It returns every few days
-  (see $lib/promo.ts).
+  does not stand between someone and a meeting. It opens on every launch.
 -->
 <Modal {open} title={t('NAMNM_TITLE')} onclose={close}>
   <div class="flex flex-col items-center gap-4 px-6 pt-6 pb-8 text-center">
