@@ -15,7 +15,18 @@ declare global {
     // interface Error {}
     // interface Locals {}
     // interface PageData {}
-    // interface PageState {}
+    /**
+     * Shallow-routing state (`pushState` from `$app/navigation`). Steps within
+     * a screen that the reader expects Back to undo get a history entry, so the
+     * Android back button, the app bar's arrow and the browser's back all step
+     * back one level instead of leaving the screen.
+     */
+    interface PageState {
+      /** Service Body List: the body whose meetings are open. */
+      serviceBody?: string;
+      /** Map Search: the meeting sheet is open. */
+      meetingSheet?: boolean;
+    }
     // interface Platform {}
   }
 

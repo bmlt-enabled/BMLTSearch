@@ -21,6 +21,8 @@
   import { mapKitConfigured, onMapsAuthFailure } from '$lib/maps/mapkit';
   import { RotateCw, Search, X } from '@lucide/svelte';
   import { onMount } from 'svelte';
+  import { pushState } from '$app/navigation';
+  import { page } from '$app/state';
   import { meetingsByIds, meetingsWithinRadius } from '$lib/api/bmlt';
   import { recallArea, recallPin, rememberArea, rememberPin } from '$lib/meetings/map-cache';
   import { forwardGeocode } from '$lib/api/geocode';
@@ -110,7 +112,12 @@
     };
   }
 
-  let sheetOpen = $state(false);
+  /*
+    The sheet is a history entry, so Android's back button closes it rather
+    than leaving the map. Closing it any other way goes back through history
+    too, so the entry never outlives the sheet.
+  */
+  const sheetOpen = $derived(page.state.meetingSheet === true);
   let sheetLoading = $state(false);
   let sheetMeetings = $state<RawMeeting[]>([]);
 
@@ -533,6 +540,11 @@
     return markers.map((marker) => marker.coordinate);
   }
 
+  /** Tapping a second pin while the sheet is open reuses its history entry. */
+  function showSheet() {
+    if (!sheetOpen) pushState('', { meetingSheet: true });
+  }
+
   async function onMarkerClick(markerId: string) {
     const ids = markerIds.get(markerId);
     if (!ids?.length) return;
@@ -550,13 +562,13 @@
     if (recent) {
       sheetMeetings = recent;
       sheetLoading = false;
-      sheetOpen = true;
+      showSheet();
       return;
     }
 
     sheetMeetings = [];
     sheetLoading = true;
-    sheetOpen = true;
+    showSheet();
     try {
       sheetMeetings = await meetingsByIds(ids);
       rememberPin(ids, sheetMeetings);
@@ -703,7 +715,7 @@
   </div>
 </div>
 
-<Modal open={sheetOpen} title={t('MEETING_DETAILS')} onclose={() => (sheetOpen = false)}>
+<Modal open={sheetOpen} title={t('MEETING_DETAILS')} onclose={() => history.back()}>
   {#if sheetLoading}
     <div class="text-bmlt flex items-center justify-center gap-3 py-12">
       <Spinner size={22} label={t('FINDING_MTGS')} />

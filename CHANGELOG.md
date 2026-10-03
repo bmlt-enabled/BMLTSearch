@@ -1,7 +1,8 @@
 # Changelog
 
-## 6.1.2 October 3, 2026)
+## 6.1.3 October 3, 2026)
 
+- Fix back button.
 - Add banner.
 
 ## 6.1.1 (September, 2026)

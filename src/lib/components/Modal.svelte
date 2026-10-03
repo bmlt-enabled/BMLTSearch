@@ -42,7 +42,7 @@
     transition:fly={{ y: 400, duration: 220 }}
   >
     <header class="border-border bg-surface-raised flex items-center gap-2 rounded-t-2xl border-b px-4 py-3">
-      <h2 class="min-w-0 flex-1 truncate text-base font-semibold">{title}</h2>
+      <h2 class="min-w-0 flex-1 text-base font-semibold">{title}</h2>
       <button type="button" class="focusable text-text-muted hover:bg-surface-sunken rounded-lg p-2" onclick={onclose} aria-label={t('CLOSE')}>
         <X size={20} aria-hidden="true" />
       </button>
