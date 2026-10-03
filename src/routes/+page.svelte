@@ -1,5 +1,6 @@
 <script lang="ts">
   import AppBar from '$lib/components/AppBar.svelte';
+  import NamnmPopup from '$lib/components/NamnmPopup.svelte';
   import { t } from '$lib/i18n/index.svelte';
   import { BOTTOM_NAV } from '$lib/nav';
   import { drawer } from '$lib/stores/ui.svelte';
@@ -30,3 +31,5 @@
     </a>
   {/each}
 </nav>
+
+<NamnmPopup />

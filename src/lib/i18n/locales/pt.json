@@ -74,5 +74,9 @@
   "PHONE_MEETING": "Phone Meeting Dial-in",
   "TEMP_CLOSED": "Fechado temporariamente",
   "WEEKDAYS": "Dias da semana",
-  "TEMPCLOSED": "Local temporariamente fechado"
+  "TEMPCLOSED": "Local temporariamente fechado",
+  "NAMNM_TITLE": "Experimente o NA Meetings Near Me",
+  "NAMNM_MESSAGE": "Nosso novo app: as reuniões que começam perto de você, assim que você o abre.",
+  "NAMNM_GET": "Baixar o app",
+  "NAMNM_NOT_NOW": "Agora não"
 }

@@ -73,5 +73,9 @@
   "PHONE_MEETING": "Phone Meeting Dial-in",
   "TEMP_CLOSED": "Midlertidigt lukket",
   "WEEKDAYS": "Hverdage",
-  "TEMPCLOSED": "Placeringen er midlertidigt lukket"
+  "TEMPCLOSED": "Placeringen er midlertidigt lukket",
+  "NAMNM_TITLE": "Prøv NA Meetings Near Me",
+  "NAMNM_MESSAGE": "Vores nye app: møderne, der starter nær dig, så snart du åbner den.",
+  "NAMNM_GET": "Hent appen",
+  "NAMNM_NOT_NOW": "Ikke nu"
 }

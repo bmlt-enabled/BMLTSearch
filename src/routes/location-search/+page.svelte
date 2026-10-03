@@ -10,6 +10,7 @@
   import AppBar from '$lib/components/AppBar.svelte';
   import ErrorState from '$lib/components/ErrorState.svelte';
   import MeetingList from '$lib/components/MeetingList.svelte';
+  import NamnmBanner from '$lib/components/NamnmBanner.svelte';
   import RangeSlider from '$lib/components/RangeSlider.svelte';
   import { t } from '$lib/i18n/index.svelte';
   import { LocationError, resolveSearchOrigin } from '$lib/location';
@@ -108,6 +109,7 @@
 {#if error}
   <ErrorState message={error} onretry={() => search(true)} />
 {:else if loaded}
+  <NamnmBanner class="mx-4 mt-3" />
   <MeetingList {meetings} />
   {#if onlineOnlyAndEmpty}
     <div class="px-4 pb-6">

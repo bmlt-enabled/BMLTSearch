@@ -1,6 +1,10 @@
 # Changelog
 
-## 6.1.1 (UNRELEASED)
+## 6.1.2 October 3, 2026)
+
+- Add banner.
+
+## 6.1.1 (September, 2026)
 
 - Reader pan: Native gesture detection across Apple + Google Maps.
 - Fit bounds: Jump searches now frame result pins; area searches stay in place.

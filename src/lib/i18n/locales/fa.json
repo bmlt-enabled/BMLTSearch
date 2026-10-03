@@ -74,5 +74,9 @@
   "PHONE_MEETING": "شماره آدرس جلسه",
   "TEMP_CLOSED": "موقتا بسته شده",
   "WEEKDAYS": "ایام هفتخ",
-  "TEMPCLOSED": "مکان موقتاً بسته است"
+  "TEMPCLOSED": "مکان موقتاً بسته است",
+  "NAMNM_TITLE": "NA Meetings Near Me را امتحان کنید",
+  "NAMNM_MESSAGE": "برنامهٔ جدید ما: جلساتی که نزدیک شما شروع می‌شوند، به محض باز کردن آن.",
+  "NAMNM_GET": "دریافت برنامه",
+  "NAMNM_NOT_NOW": "الان نه"
 }

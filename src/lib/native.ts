@@ -134,3 +134,17 @@ export async function share(payload: { title: string; text: string; url: string 
     await navigator.share(payload.url ? payload : { title: payload.title, text: payload.text });
   }
 }
+
+/**
+ * Open NA Meetings Near Me's store listing (the website, on the web).
+ *
+ * On native this goes to the system, not the in-app browser: an App Store or
+ * Play URL handed to the OS opens the store app itself at the listing, with its
+ * install button, where the in-app browser would only render the store's web
+ * page.
+ */
+export async function openNamnmListing(): Promise<void> {
+  const { promoUrl } = await import('./promo');
+  const target = platform();
+  await openExternal(promoUrl(target), { system: target !== 'web' });
+}
