@@ -84,17 +84,17 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
-    "@capacitor/android": "^8.5.0",
-    "@capacitor/app": "^8.1.1",
-    "@capacitor/browser": "^8.0.4",
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/browser": "^8.0.5",
     "@capacitor/core": "^8.5.0",
-    "@capacitor/geolocation": "^8.2.2",
+    "@capacitor/geolocation": "^8.2.4",
     "@capacitor/google-maps": "^8.0.1",
-    "@capacitor/ios": "^8.5.0",
-    "@capacitor/share": "^8.0.1",
+    "@capacitor/ios": "^8.6.0",
+    "@capacitor/share": "^8.0.3",
     "@capacitor/splash-screen": "^8.0.2",
-    "@capacitor/status-bar": "^8.0.3",
-    "@lucide/svelte": "^1.37.0",
-    "capacitor-plugin-apple-maps": "^0.5.4"
+    "@capacitor/status-bar": "^8.0.4",
+    "@lucide/svelte": "^1.64.0",
+    "capacitor-plugin-apple-maps": "^0.8.2"
   }
 }
